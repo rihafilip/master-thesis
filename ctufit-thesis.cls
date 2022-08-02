@@ -356,7 +356,7 @@
 % declaration page END
 
 % abstract page
-\newenvironment{abstractpage}{\frontchapternotprinted{Abstrakt}
+\newenvironment{abstractpage}{\frontchapternotprinted{\if\@ctufitlang E{Abstract}\else{Abstrakt}\fi}
 }{}
 % abstract page END
 
@@ -445,23 +445,39 @@
 
 \DeclareRobustCommand{\printabstractpage}{%
 \begin{abstractpage}
-\begin{abstrakt}% Enter abstract in CZECH.
-\thectufitabstrakt
-\end{abstrakt}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}
-
-\vskip 1cm
-
-\begin{abstract}% Enter abstract in ENGLISH.
+\if\@ctufitlang E{%
+\begin{abstract}%
 \thectufitabstract
 \end{abstract}
 
 \vskip 0.5cm
 
-{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}
+{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}}\else{%
+\begin{abstrakt}%
+\thectufitabstrakt
+\end{abstrakt}
+
+\vskip 0.5cm
+
+{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}}\fi
+
+\vskip 1cm
+
+\if\@ctufitlang E{%
+\begin{abstrakt}%
+\thectufitabstrakt
+\end{abstrakt}
+
+\vskip 0.5cm
+
+{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}}\else{
+\begin{abstract}%
+\thectufitabstract
+\end{abstract}
+
+\vskip 0.5cm
+
+{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}}\fi
 \end{abstractpage}
 }
 
