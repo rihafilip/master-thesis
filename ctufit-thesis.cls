@@ -322,7 +322,7 @@
   \noindent\ignorespaces}
 
 \newenvironment{abstract}{%
-  \vskip\bigskipamount
+  \vspace*{18mm}
   \noindent
   {{\frontchapterfont\begin{flushleft}{\color{heading}Abstract}\end{flushleft}}}%
   \bigskip
