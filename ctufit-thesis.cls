@@ -118,7 +118,7 @@
 \DeclareRobustCommand{\ctufitkeywordsENG}[1]{
 	\def\thectufitkeywords{#1}
 }
-\DeclareRobustCommand{\thectufitthesistype}{
+\DeclareRobustCommand{\thectufitthesistype}{%
 	\if\@ctufitthesistype B{%
 		\if\@ctufitlang C{Bakal{\' a}{\v r}sk{\' a} pr{\' a}ce}\else\if\@ctufitlang S{Bakal{\' a}rska pr{\' a}ca}\else{Bachelor's thesis}\fi\fi
 	}\else\if\@ctufitthesistype M{%
