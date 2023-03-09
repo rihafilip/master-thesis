@@ -35,6 +35,7 @@
 \DeclareOption{bachelor}{\def\@ctufitthesistype{B}}
 \DeclareOption{master}{\def\@ctufitthesistype{M}}
 \DeclareOption{dissertation}{\def\@ctufitthesistype{D}}
+\DeclareOption{bw}{\def\@ctufitthesisblackandwhite}
 \DeclareOption{czech}{
 	\AtBeginDocument{\selectlanguage{czech}}
 	\PassOptionsToPackage{english,main=czech}{babel}
@@ -65,13 +66,21 @@
 \RequirePackage{multicol}[2019/12/09] % summary page
 \RequirePackage{titlesec}[2019/10/16]
 
-% colors
+\ifdefined\@ctufitthesisblackandwhite
+\definecolor{decoration}{RGB}{0, 0, 0} %CTU blue
+\definecolor{heading}{RGB}{0, 0, 0}
+\definecolor{headbackgroundgray}{RGB}{208, 208, 208} %light blue
+\definecolor{backgroundgray}{RGB}{240, 240, 240} %CTU light blue
+\definecolor{headgray}{rgb}{0.50,0.50,0.50}
+\definecolor{enumgray}{RGB}{0, 0, 0} %CTU blue
+\else
  \definecolor{decoration}{RGB}{0, 122, 195} %CTU blue
  \definecolor{heading}{RGB}{0, 122, 195}
  \definecolor{headbackgroundgray}{RGB}{199, 219, 241} %light blue
  \definecolor{backgroundgray}{RGB}{199, 219, 241} %CTU light blue
  \definecolor{headgray}{rgb}{0.50,0.50,0.51}
  \definecolor{enumgray}{RGB}{0, 122, 195} %CTU blue
+\fi
 % colors end
 
 \DeclareRobustCommand{\ctufittitle}[1]{
