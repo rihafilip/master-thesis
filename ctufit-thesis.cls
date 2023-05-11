@@ -361,7 +361,7 @@
   \noindent\ignorespaces
 }{\vskip 1cm
 \noindent
-\if\@ctufitlang E{In}\else{V}\fi~\thectufitdeclarationplace{} \if\@ctufitlang C{dne}\else\if\@ctufitlang S{dňa}\else{on}\fi\fi~\thectufitdeclarationdate{} \hspace{.3\textwidth} \dotfill}
+\if\@ctufitlang E{In}\else{V}\fi~\thectufitdeclarationplace{} \if\@ctufitlang C{dne}\else\if\@ctufitlang S{dňa}\else{on}\fi\fi~\thectufitdeclarationdate{}}
 % declaration page END
 
 % abstract page
