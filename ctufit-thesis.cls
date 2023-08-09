@@ -51,11 +51,11 @@
 	\PassOptionsToPackage{english,main=slovak}{babel}
 	\def\@ctufitlang{S}
 }
-\ExecuteOptions{unicode,twoside}
-\ProcessOptions
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
+\ExecuteOptions{unicode}
+\ProcessOptions\relax
 
 % main declarations, loading files
-
 \LoadClass[a4paper]{book}[2020/04/10]
 \RequirePackage{babel}[2021/03/03]
 \RequirePackage[bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
@@ -67,19 +67,19 @@
 \RequirePackage{titlesec}[2019/10/16]
 
 \ifdefined\@ctufitthesisblackandwhite
-\definecolor{decoration}{RGB}{0, 0, 0} %CTU blue
-\definecolor{heading}{RGB}{0, 0, 0}
-\definecolor{headbackgroundgray}{RGB}{208, 208, 208} %light blue
-\definecolor{backgroundgray}{RGB}{240, 240, 240} %CTU light blue
-\definecolor{headgray}{rgb}{0.50,0.50,0.50}
-\definecolor{enumgray}{RGB}{0, 0, 0} %CTU blue
+	\definecolor{decoration}{RGB}{0, 0, 0} %CTU blue
+	\definecolor{heading}{RGB}{0, 0, 0}
+	\definecolor{headbackgroundgray}{RGB}{208, 208, 208} %light blue
+	\definecolor{backgroundgray}{RGB}{240, 240, 240} %CTU light blue
+	\definecolor{headgray}{rgb}{0.50,0.50,0.50}
+	\definecolor{enumgray}{RGB}{0, 0, 0} %CTU blue
 \else
- \definecolor{decoration}{RGB}{0, 122, 195} %CTU blue
- \definecolor{heading}{RGB}{0, 122, 195}
- \definecolor{headbackgroundgray}{RGB}{199, 219, 241} %light blue
- \definecolor{backgroundgray}{RGB}{199, 219, 241} %CTU light blue
- \definecolor{headgray}{rgb}{0.50,0.50,0.51}
- \definecolor{enumgray}{RGB}{0, 122, 195} %CTU blue
+	\definecolor{decoration}{RGB}{0, 122, 195} %CTU blue
+	\definecolor{heading}{RGB}{0, 122, 195}
+	\definecolor{headbackgroundgray}{RGB}{199, 219, 241} %light blue
+	\definecolor{backgroundgray}{RGB}{199, 219, 241} %CTU light blue
+	\definecolor{headgray}{rgb}{0.50,0.50,0.51}
+	\definecolor{enumgray}{RGB}{0, 122, 195} %CTU blue
 \fi
 % colors end
 
