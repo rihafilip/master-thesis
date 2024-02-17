@@ -315,8 +315,13 @@
 \renewcommand{\sectionmark}[1]{\markright{#1}}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{4em}}}}
-\fancyhead[RE]{\color{headgray}\bfseries\nouppercase{\leftmark}}
+\if@twoside
+    \fancyhead[LE]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{4em}}}}
+    \fancyhead[RE]{\color{headgray}\bfseries\nouppercase{\leftmark}}
+\else
+    \fancyhead[L]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{4em}}}}
+    \fancyhead[R]{\color{headgray}\bfseries\nouppercase{\leftmark}}
+\fi
 \fancyhead[RO]{\leavevmode\smash{\rlap{\hspace*{4em}\color{headgray}\bfseries\thepage}}}
 \fancyhead[LO]{\color{headgray}\bfseries\nouppercase{\rightmark}}
 \renewcommand{\headrulewidth}{0pt}
