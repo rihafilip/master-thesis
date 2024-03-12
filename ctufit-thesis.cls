@@ -508,8 +508,10 @@
 	\@ifpackageloaded{minted}{%
 		\DeclareRobustCommand{\listingscaption}{\thectufitlistinglabel}%
 		\DeclareRobustCommand{\listoflistingscaption}{\thectufitlollabel}%
-		\usemintedstyle{bw}%
-		\setminted{bgcolor=backgroundgray}%
+		\ifdefined\@ctufitthesisblackandwhite
+ 			\usemintedstyle{bw}%
+			\setminted{bgcolor=backgroundgray}%
+		\fi
 		\setmintedinline{bgcolor={}}
 	}{}%
 }
