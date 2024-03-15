@@ -15,8 +15,12 @@ Bugs and support
 
 Please submit bug reports using [issues](https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX/issues).
 
-
 Current maintainers
+-------------------
+
+* [Tomáš Nováček](https://usermap.cvut.cz/profile/novacto3)
+
+Previous maintainers
 -------------------
 
 * [Ondřej Guth](https://usermap.cvut.cz/profile/guthondr)
