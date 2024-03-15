@@ -5,6 +5,7 @@
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
 %%
 %%
+%% Copyright 2024, Tomas Novacek
 %% Copyright 2021, Eliska Sestakova and Ondrej Guth
 %%
 %% This work may be distributed and/or modified under the
@@ -17,8 +18,7 @@
 %%
 %% This work has the LPPL maintenance status `maintained'.
 %%
-%% The current maintainer of this work is Ondrej Guth.
-%% Contact ondrej.guth@fit.cvut.cz for bug reports.
+%% The current maintainer of this work is Tomas Novacek.
 %% Alternatively, submit bug reports into the tracker at
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX/issues
 %%
