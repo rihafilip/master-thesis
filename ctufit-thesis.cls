@@ -9,7 +9,7 @@
 %% Copyright 2021, Eliska Sestakova and Ondrej Guth
 %%
 %% This work may be distributed and/or modified under the
-%% conditions of the LaTeX Project Public Licenese, either version 1.3
+%% conditions of the LaTeX Project Public License, either version 1.3
 %% of this license or (at your option) any later version.
 %% The latest version of this license is in
 %%  https://www.latex-project.org/lppl.txt
@@ -19,7 +19,7 @@
 %% This work has the LPPL maintenance status `maintained'.
 %%
 %% The current maintainer of this work is Tomas Novacek.
-%% Alternatively, submit bug reports into the tracker at
+%% Alternatively, submit bug reports to the tracker at
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX/issues
 %%
 %%
@@ -83,7 +83,7 @@
 	\definecolor{headgray}{rgb}{0.50,0.50,0.51}
 	\definecolor{enumgray}{RGB}{0, 122, 195} %CTU blue
 \fi
-% colors end
+% colours end
 
 \DeclareRobustCommand{\ctufittitle}[1]{
 	\def\thectufittitle{#1}
@@ -298,7 +298,7 @@
 % \makeatother
 % frontmatter pseudochapters end
 
-% table of contents colored chapters
+% table of contents coloured chapters
 % \makeatletter
 \let\stdl@chapter\l@chapter
 \renewcommand*{\l@chapter}[2]{%
@@ -347,7 +347,7 @@
   
 \newenvironment{declaration}{}
 
-% acknowledgment page
+% acknowledgement page
 \newenvironment{acknowledgmentpage}{\frontchapternotprinted{\if\@ctufitlang C{Poděkování}\else\if\@ctufitlang E{Acknowledgments}\else{Poďakovanie}\fi\fi}
 ~
 \vfill
@@ -458,6 +458,20 @@
 }{%
   \popQED\endtrivlist%\@endpefalse
 }
+\theoremstyle{plain}
+\newtheorem{theorem}{\if\@ctufitlang C{Věta}\else\if\@ctufitlang E{Theorem}\else{Veta}\fi\fi}
+\newtheorem{lemma}[theorem]{\if\@ctufitlang C{Tvrzení}\else\if\@ctufitlang E{Lemma}\else{Tvrdenie}\fi\fi}
+\newtheorem{corollary}[theorem]{\if\@ctufitlang C{Důsledek}\else\if\@ctufitlang E{Corollary}\else{Dôsledok}\fi\fi}
+\newtheorem{proposition}[theorem]{\if\@ctufitlang C{Návrh}\else\if\@ctufitlang E{Proposition}\else{Návrh}\fi\fi}
+\newtheorem{definition}[theorem]{\if\@ctufitlang C{Definice}\else\if\@ctufitlang E{Definiton}\else{Definícia}\fi\fi}
+\theoremstyle{definition}
+\newtheorem{example}[theorem]{\if\@ctufitlang C{Příklad}\else\if\@ctufitlang E{Example}\else{Príklad}\fi\fi}
+\theoremstyle{remark}
+\newtheorem{note}[theorem]{\if\@ctufitlang C{Poznámka}\else\if\@ctufitlang E{Note}\else{Poznámka}\fi\fi}
+\newtheorem*{note*}{\if\@ctufitlang C{Poznámka}\else\if\@ctufitlang E{Note}\else{Poznámka}\fi\fi}
+\newtheorem{remark}[theorem]{\if\@ctufitlang C{Pozorování}\else\if\@ctufitlang E{Remark}\else{Pozorovanie}\fi\fi}
+\newtheorem*{remark*}{\if\@ctufitlang C{Pozorování}\else\if\@ctufitlang E{Remark}\else{Pozorovanie}\fi\fi}
+\numberwithin{theorem}{chapter}
 % theorems, proofs, definitions, etc. end
 
 \DeclareRobustCommand{\printabstractpage}{%
