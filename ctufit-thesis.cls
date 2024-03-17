@@ -58,9 +58,13 @@
 \ProcessOptions\relax
 
 % main declarations, loading files
-\LoadClass[a4paper]{book}[2020/04/10]
+\LoadClass[a4paper,11pt]{book}[2020/04/10]
 \RequirePackage{babel}[2021/03/03]
-\RequirePackage[bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
+\if@twoside
+    \RequirePackage[bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
+\else
+    \RequirePackage[left=3.95cm,right=4.0cm,top=4.6cm,bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
+\fi
 \RequirePackage{setspace}[2011/12/19] %line spacing in title page
 \RequirePackage{xcolor}[2016/05/11]
 \RequirePackage[labelsep=space,singlelinecheck=false,font={up,small},labelfont={sf,bf}]{caption}[2020/05/30]
@@ -319,13 +323,13 @@
 \pagestyle{fancy}
 \fancyhf{}
 \if@twoside
-    \fancyhead[LE]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{4em}}}}
+    \fancyhead[LE]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{0em}}}}
     \fancyhead[RE]{\color{headgray}\bfseries\nouppercase{\leftmark}}
 \else
     \fancyhead[L]{\leavevmode\smash{\llap{\color{headgray} \bfseries \thepage \hspace*{4em}}}}
     \fancyhead[R]{\color{headgray}\bfseries\nouppercase{\leftmark}}
 \fi
-\fancyhead[RO]{\leavevmode\smash{\rlap{\hspace*{4em}\color{headgray}\bfseries\thepage}}}
+\fancyhead[RO]{\leavevmode\smash{\rlap{\hspace*{0em}\color{headgray}\bfseries\thepage}}}
 \fancyhead[LO]{\color{headgray}\bfseries\nouppercase{\rightmark}}
 \renewcommand{\headrulewidth}{0pt}
 % headers and footers end
