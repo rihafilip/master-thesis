@@ -525,6 +525,7 @@
 	}{}%
 	\@ifpackageloaded{minted}{%
 		\DeclareRobustCommand{\listingscaption}{\thectufitlistinglabel}%
+        		\SetupFloatingEnvironment{listing}{name=\listingscaption}
 		\DeclareRobustCommand{\listoflistingscaption}{\thectufitlollabel}%
 		\DeclareRobustCommand{\listlistingname}{\thectufitlollabel}%
 		\DeclareRobustCommand{\thectufitlistingscommand}{\listoflistings}%
