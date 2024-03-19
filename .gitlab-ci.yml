@@ -7,6 +7,11 @@ LuaLaTeX:
         - latexmk -pdflua ctufit-thesis.tex
         - latexmk -pdflua ctufit-thesis-en.tex
         - latexmk -pdflua ctufit-thesis-sk.tex
+    artifacts:
+        paths:
+            - ctufit-thesis.pdf
+            - ctufit-thesis-en.pdf
+            - ctufit-thesis-sk.pdf
 
 XeLaTeX:
     script: 
@@ -15,6 +20,11 @@ XeLaTeX:
         - latexmk -pdfxe ctufit-thesis.tex
         - latexmk -pdfxe ctufit-thesis-en.tex
         - latexmk -pdfxe ctufit-thesis-sk.tex
+    artifacts:
+        paths:
+            - ctufit-thesis.pdf
+            - ctufit-thesis-en.pdf
+            - ctufit-thesis-sk.pdf
 
 pdfLaTeX:
     script: 
