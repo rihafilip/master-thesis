@@ -1,4 +1,4 @@
-image: texlive/texlive
+image: texlive/texlive:latest
 
 LuaLaTeX:
     script: 
