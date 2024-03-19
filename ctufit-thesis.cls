@@ -267,13 +267,6 @@
 {}
 {}
 
-  
-% \titleformat{\subsection}
-%   {\frontsubsectionfont\color{heading}}{{{\color{black}\thesubsection}}}{1em}{}[\vskip -1em]
-  
-% \titleformat{\subsubsection}
-%   {\frontsubsubsectionfont\color{heading}}{{{\color{black}\thesubsubsection}}}{1em}{}[\vskip -1em]
-
 % \makeatletter
 \@openrightfalse
 % \makeatother
@@ -288,6 +281,9 @@
 \def\frontsectionfont{\large\bfseries}
 \def\frontsubsectionfont{\large}
 \def\frontsubsubsectionfont{\bfseries}
+
+\setcounter{secnumdepth}{4} % numbering sections; 4: subsubsection
+\setcounter{tocdepth}{4} % table of content depth; 4: subsubsection
 % frontmatter headings end
 
 % frontmatter pseudochapters: named part without printing actual chapter heading
@@ -308,7 +304,7 @@
 \renewcommand*{\l@chapter}[2]{%
   \stdl@chapter{\textcolor{heading}{#1}}{\textcolor{heading}{#2}}}
 % \makeatother
-% table of contents colored chapters end
+% table of contents coloured chapters end
 
 % headers and footers
 % \makeatletter
@@ -529,6 +525,7 @@
 	}{}%
 	\@ifpackageloaded{minted}{%
 		\DeclareRobustCommand{\listingscaption}{\thectufitlistinglabel}%
+        		\SetupFloatingEnvironment{listing}{name=\listingscaption}
 		\DeclareRobustCommand{\listoflistingscaption}{\thectufitlollabel}%
 		\DeclareRobustCommand{\listlistingname}{\thectufitlollabel}%
 		\DeclareRobustCommand{\thectufitlistingscommand}{\listoflistings}%
