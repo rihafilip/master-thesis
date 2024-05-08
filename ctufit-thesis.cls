@@ -210,7 +210,6 @@
   \kern0.05em{\color{decoration}\rule{0.73em}{0.73em}}%
   \hspace*{0.67em}\bothIfFirst{#1}{~}#2}
 \captionsetup{labelformat=boxed}
-\captionsetup[table]{position=top}
 % captions settings end
 
 % lists settings
@@ -231,13 +230,13 @@
 % \makeatletter
 \renewcommand\labelitemi{%
   \textcolor{enumgray}{\ifnum\@listdepth=\@ne
-                                  \rule{0.67em}{0.33em}%
+                                  \rule[0.3ex]{0.67em}{0.33em}%
                                 \else
-                                  \rule{0.45em}{0.225em}%
+                                  \rule[0.4ex]{0.45em}{0.225em}%
                                 \fi}}
 % \makeatother
 \renewcommand\labelitemii{%
-  \textcolor{enumgray}{\rule{0.45em}{0.225em}}}
+  \textcolor{enumgray}{\rule[0.4ex]{0.45em}{0.225em}}}
 \renewcommand\labelitemiii{%
   \textcolor{enumgray}{\bfseries\textasteriskcentered}}
 \renewcommand\labelitemiv{%
