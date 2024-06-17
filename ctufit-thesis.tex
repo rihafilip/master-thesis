@@ -1,7 +1,7 @@
 %% This is the ctufit-thesis example file. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
-%% This is version 1.2.2. build on 17. 6. 2024.
+%% This is version 1.2.3, built 17. 6. 2024.
 %% 
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
@@ -69,8 +69,7 @@
 \iftutex % XeLaTeX and LuaLaTeX
     \RequirePackage{ellipsis}[2020/05/22] %ellipsis workaround for XeLaTeX
 \else
-    \RequirePackage[utf8]{inputenc}[2018/08/11] %this file encoding
-    \RequirePackage{lmodern}[2009/10/30] % vector flavor of Computer Modern font
+    \errmessage{Only compilation with XeLaTeX or LuaLaTeX is allowed}
 \fi
 
 % hyperlinks
