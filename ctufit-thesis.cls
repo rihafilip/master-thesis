@@ -61,7 +61,7 @@
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
-    \RequirePackage[bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
+    \RequirePackage[top=4.6cm,bottom=4cm,footskip=4em,inner=4.7cm,outer=3.25cm]{geometry}[2020/01/02] %page layout
 \else
     \RequirePackage[left=3.95cm,right=4.0cm,top=4.6cm,bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
 \fi
