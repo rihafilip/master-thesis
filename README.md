@@ -7,12 +7,12 @@ LaTeX template for theses at FIT CTU
 About
 -----
 
-Recommended template for theses submitted at [Faculty of Information Technology](https://fit.cvut.cz) at [Czech Technical University in Prague](https://cvut.cz). For use with XeLaTeX.
+Recommended template for theses submitted at [Faculty of Information Technology](https://fit.cvut.cz) at [Czech Technical University in Prague](https://cvut.cz). For use with XeLaTeX or LuaLaTeX.
 
 
 Version
 --------
-1.2.2 (17. 6. 2024). The whole changelog can be found in the [Changelog file](changelog.md).
+1.3.0, built 17. 6. 2024. The whole changelog can be found in the [Changelog file](changelog.md).
 
 
 Bugs and support
