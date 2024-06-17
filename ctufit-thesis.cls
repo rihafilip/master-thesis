@@ -326,6 +326,8 @@
 \fi
 \fancyhead[RO]{\leavevmode\smash{\rlap{\hspace*{0em}\color{headgray}\bfseries\thepage}}}
 \fancyhead[LO]{\color{headgray}\bfseries\nouppercase{\rightmark}}
+\setlength{\headheight}{14.05pt}
+\addtolength{\topmargin}{-2.05pt}
 \renewcommand{\headrulewidth}{0pt}
 % headers and footers end
 
