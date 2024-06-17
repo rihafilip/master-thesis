@@ -10,6 +10,11 @@ About
 Recommended template for theses submitted at [Faculty of Information Technology](https://fit.cvut.cz) at [Czech Technical University in Prague](https://cvut.cz). For use with XeLaTeX.
 
 
+Version
+--------
+1.2.0 (17. 6. 2024). The whole changelog can be found in the [Changelog file](changelog.md)
+
+
 Bugs and support
 --------
 
