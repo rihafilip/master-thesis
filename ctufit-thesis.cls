@@ -281,10 +281,16 @@
 \def\frontsubsectionfont{\large}
 \def\frontsubsubsectionfont{\bfseries}
 
-\setcounter{secnumdepth}{4} % numbering sections; 4: subsubsection
-\setcounter{tocdepth}{4} % table of content depth; 4: subsubsection
-% frontmatter headings end
+\setcounter{secnumdepth}{3} % numbering sections; 3: subsubsection
 
+\newcommand{\stopTOCentries}{
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{-1}}
+}
+
+\newcommand{\resumeTOCentries}{
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{3}} % table of content depth; 3: subsubsection
+}
+% frontmatter headings end
 % frontmatter pseudochapters: named part without printing actual chapter heading
 % \makeatletter
 \newcommand{\frontchapternotprinted}[1]{%

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.1] - 17. 6. 2024
+  
+Improvements of frontmatter, table of contents entries and sectioning.
+ 
+### Changed
+- Changed order of front matter entries (acknowledgements, dedications, etc.) to match standard sectioning.
+- Excluding frontmatter entries from table of contents.
+
+### Fixed
+- Fixed missing empty page after titlepage.
+- Fixed numbering/toc of subsubsection.
+
+
 ## [1.3.0] - 17. 6. 2024
   
 Dropped older compilers that do not support computer-read PDFs (e.g., the text could not be copy-pasted). Now, only XeLaTeX and LuaLaTeX can be used.
