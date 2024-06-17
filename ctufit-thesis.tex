@@ -1,6 +1,8 @@
 %% This is the ctufit-thesis example file. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
+%% This is version 1.3.1, built 17. 6. 2024.
+%% 
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
 %%
@@ -67,8 +69,7 @@
 \iftutex % XeLaTeX and LuaLaTeX
     \RequirePackage{ellipsis}[2020/05/22] %ellipsis workaround for XeLaTeX
 \else
-    \RequirePackage[utf8]{inputenc}[2018/08/11] %this file encoding
-    \RequirePackage{lmodern}[2009/10/30] % vector flavor of Computer Modern font
+    \errmessage{Only compilation with XeLaTeX or LuaLaTeX is allowed}
 \fi
 
 % hyperlinks
@@ -107,23 +108,12 @@
 \begin{document} 
 \frontmatter\frontmatterinit % do not remove these two commands
 
-\includepdf[pages={1-}]{assignment-include.pdf} % replace that file with your thesis assignment provided by study office
+\thispagestyle{empty}\maketitle\thispagestyle{empty}\cleardoublepage % do not remove these four commands
 
-\thispagestyle{empty}\cleardoublepage\maketitle % do not remove these three commands
+\includepdf[pages={1-}]{assignment-include.pdf} % replace this file with your thesis assignment generated from ProjectsFIT
 
 \imprintpage % do not remove this command
-
-\tableofcontents % do not remove this command
-%%%%%%%%%%%%%%%%%%%%%%
-% list of other contents: figures, tables, code listings, algorithms, etc.
-% add/remove commands accordingly
-%%%%%%%%%%%%%%%%%%%%%%
-\listoffigures % list of figures
-\begingroup
-\let\clearpage\relax
-\listoftables % list of tables
-\thectufitlistingscommand
-\endgroup
+\stopTOCentries
 %%%%%%%%%%%%%%%%%%%%%%
 % list of other contents END
 %%%%%%%%%%%%%%%%%%%%%%
@@ -190,6 +180,18 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hen
 % SUMMARY END
 %%%%%%%%%%%%%%%%%%%
 
+\tableofcontents % do not remove this command
+%%%%%%%%%%%%%%%%%%%%%%
+% list of other contents: figures, tables, code listings, algorithms, etc.
+% add/remove commands accordingly
+%%%%%%%%%%%%%%%%%%%%%%
+\listoffigures % list of figures
+\begingroup
+\let\clearpage\relax
+\listoftables % list of tables
+\thectufitlistingscommand
+\endgroup
+
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS
 % FILL IN / MODIFY
@@ -212,9 +214,8 @@ W3C & World Wide Web Consortium
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS END
 %%%%%%%%%%%%%%%%%%%
-
+\resumeTOCentries
 \mainmatter\mainmatterinit % do not remove these two commands
-
 %%%%%%%%%%%%%%%%%%%
 % THE THESIS
 % MODIFY ANYTHING BELOW THIS LINE

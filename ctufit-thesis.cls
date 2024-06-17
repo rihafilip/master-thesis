@@ -61,7 +61,7 @@
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
-    \RequirePackage[bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
+    \RequirePackage[top=4.6cm,bottom=4cm,footskip=4em,inner=4.7cm,outer=3.25cm]{geometry}[2020/01/02] %page layout
 \else
     \RequirePackage[left=3.95cm,right=4.0cm,top=4.6cm,bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
 \fi
@@ -281,10 +281,15 @@
 \def\frontsubsectionfont{\large}
 \def\frontsubsubsectionfont{\bfseries}
 
-\setcounter{secnumdepth}{5} % numbering sections; 5: paragraph
-\setcounter{tocdepth}{5} % table of content depth; 5: paragraph
-% frontmatter headings end
+\setcounter{secnumdepth}{4} % numbering sections; 4: paragraph
+\newcommand{\stopTOCentries}{
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{-1}}
+}
 
+\newcommand{\resumeTOCentries}{
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{4}} % table of content depth; 3: paragraph
+}
+% frontmatter headings end
 % frontmatter pseudochapters: named part without printing actual chapter heading
 % \makeatletter
 \newcommand{\frontchapternotprinted}[1]{%
