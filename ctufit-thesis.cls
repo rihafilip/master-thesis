@@ -59,6 +59,7 @@
 
 % main declarations, loading files
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
+\RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
     \RequirePackage[top=4.6cm,bottom=4cm,footskip=4em,inner=4.7cm,outer=3.25cm]{geometry}[2020/01/02] %page layout
@@ -88,6 +89,8 @@
 	\definecolor{enumgray}{RGB}{0, 122, 195} %CTU blue
 \fi
 % colours end
+
+\RequirePackage{hyperref}[2020-05-15]
 
 \DeclareRobustCommand{\ctufittitle}[1]{
 	\def\thectufittitle{#1}
@@ -203,9 +206,6 @@
 % IMPRINT END
 
 % captions settings
-\@ifpackagelater{hyperref}{2009/12/09}
-  {\captionsetup{compatibility=false}}%cf. http://groups.google.de/group/comp.text.tex/browse_thread/thread/db9310eb540fbbd8/42e30f3b7b3aa17a?lnk=raot
-  {}
 \DeclareCaptionLabelFormat{boxed}{%0.61,0.61,0.61
   \kern0.05em{\color{decoration}\rule{0.73em}{0.73em}}%
   \hspace*{0.67em}\bothIfFirst{#1}{~}#2}

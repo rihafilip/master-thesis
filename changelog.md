@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.2-a] - 18. 6. 2024
+  
+The generated PDF now complies to the PDF/A-1B standard.
+ 
+### Added
+- Added support code for PDF/A generation. WARNING! This will not compile with texlive 2024, at least until new version of pdfx package is released.
+
 ## [1.3.1] - 17. 6. 2024
   
 Improvements of frontmatter, table of contents entries and sectioning.
