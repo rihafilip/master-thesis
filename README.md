@@ -52,7 +52,3 @@ Previous maintainers
 
 * [Ondřej Guth](https://usermap.cvut.cz/profile/guthondr)
 * [Eliška Šestáková](https://usermap.cvut.cz/profile/sestaeli)
-
-
-
-
