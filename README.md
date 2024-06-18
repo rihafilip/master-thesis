@@ -12,7 +12,29 @@ Recommended template for theses submitted at [Faculty of Information Technology]
 
 Version
 --------
-1.3.1, built 17. 6. 2024. The whole changelog can be found in the [Changelog file](changelog.md).
+1.3.3, built 18. 6. 2024. The whole changelog can be found in the [Changelog file](changelog.md).
+
+
+Bugs and support
+--------
+
+Please submit bug reports using [issues](https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX/issues).
+
+Current maintainers
+-------------------
+
+* [Tomáš Nováček](https://usermap.cvut.cz/profile/novacto3)
+
+Previous maintainers
+-------------------
+
+* [Ondřej Guth](https://usermap.cvut.cz/profile/guthondr)
+* [Eliška Šestáková](https://usermap.cvut.cz/profile/sestaeli)
+
+
+
+
+
 
 
 Bugs and support
