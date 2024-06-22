@@ -12,7 +12,7 @@ Recommended template for theses submitted at [Faculty of Information Technology]
 
 Version
 --------
-1.3.2, built 18. 6. 2024. The whole changelog can be found in the [Changelog file](changelog.md).
+1.3.3, built 22. 6. 2024. The whole changelog can be found in the [Changelog file](changelog.md).
 
 
 Bugs and support
@@ -30,7 +30,3 @@ Previous maintainers
 
 * [Ondřej Guth](https://usermap.cvut.cz/profile/guthondr)
 * [Eliška Šestáková](https://usermap.cvut.cz/profile/sestaeli)
-
-
-
-
