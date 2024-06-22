@@ -5,12 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# [1.3.3] - 18. 6. 2024
+# [1.3.3] - 22. 6. 2024
   
-Fixed warning about header height.
+Fixed warning about header height. Update of arara compilation settings.
  
 ### Fixed
 - Fixed "Package fancyhdr Warning: \headheight..." warning.
+
+### Changed
+- Changed arara settings to properly match the new default compiler.
+
 
 ## [1.3.2] - 18. 6. 2024
   
