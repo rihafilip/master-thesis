@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.3.3] - 22. 6. 2024
+  
+Fixed warning about header height. Update of arara compilation settings.
+ 
+### Fixed
+- Fixed "Package fancyhdr Warning: \headheight..." warning.
+
+### Changed
+- Changed arara settings to properly match the new default compiler.
+
+
+## [1.3.2] - 18. 6. 2024
+  
+Improvements of captions in the example.
+ 
+### Changed
+- All captions are now at the bottom of the object (figure, listing, table, etc.).
+- The trailing spaces have been removed from the caption
+
+
 ## [1.3.1] - 17. 6. 2024
   
 Improvements of frontmatter, table of contents entries and sectioning.
