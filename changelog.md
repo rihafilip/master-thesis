@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.3.4] - 25. 6. 2024
+  
+Added support for paragraphs as the deepest level of headings.
+ 
+### Added
+- Added "paragraph" option for document class. If passed, it styles the paragraph command as another level of heading, adds number to it and shows it in ToC. Use with care! Normally, it is considered unwise to use it, since its too deep.
+
+
 # [1.3.3] - 22. 6. 2024
   
 Fixed warning about header height. Update of arara compilation settings.
