@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# [1.3.5] - 25. 6. 2024
+
+Making .gitignore less strict when handling PDF files.
+ 
+### Changed
+- The .gitignore was made less strict, so it does not ignore every .pdf file, but just the example/output ones.
+
+
 # [1.3.4] - 25. 6. 2024
   
 Added support for paragraphs as the deepest level of headings via documentclass option.
