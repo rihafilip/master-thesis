@@ -66,7 +66,7 @@
 
 % main declarations, loading files
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
-\RequirePackage{xcolor}[2023/11/16]
+\RequirePackage{xcolor}[2023/11/15]
 \RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
@@ -97,7 +97,7 @@
 \fi
 % colours end
 
-\RequirePackage{hyperref}[2020-05-15]
+\RequirePackage{hyperref}[2020/05/15]
 
 \DeclareRobustCommand{\ctufittitle}[1]{
 	\def\thectufittitle{#1}
