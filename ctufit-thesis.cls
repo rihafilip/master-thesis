@@ -66,6 +66,7 @@
 
 % main declarations, loading files
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
+\RequirePackage{xcolor}[2023/11/16]
 \RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
@@ -74,7 +75,6 @@
     \RequirePackage[left=3.95cm,right=4.0cm,top=4.6cm,bottom=4cm,footskip=4em]{geometry}[2020/01/02] %page layout
 \fi
 \RequirePackage{setspace}[2011/12/19] %line spacing in title page
-\RequirePackage{xcolor}[2016/05/11]
 \RequirePackage[labelsep=space,singlelinecheck=false,font={up,small},labelfont={sf,bf}]{caption}[2020/05/30]
 \RequirePackage{fancyhdr}[2019/01/31]
 \RequirePackage{multicol}[2019/12/09] % summary page
