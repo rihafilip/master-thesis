@@ -92,7 +92,7 @@
 \path (v) -- (w) node [midway] {$\Leftrightarrow$};
 \path (r) -- (c) node [midway] {$\cdots$};
 \end{tikzpicture}}
-\caption{~Lorem ipsum dolor sit amet}\label{img:index}
+\caption{Lorem ipsum dolor sit amet}\label{img:index}
 \end{figure}
 
 %---------------------------------------------------------------
@@ -158,7 +158,7 @@ Curabitur ligula sapien, pulvinar a vestibulum quis, facilisis vel sapien. Duis 
 
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nulla non arcu lacinia neque faucibus fringilla. Vestibulum erat nulla, ullamcorper nec, rutrum non, nonummy ac, erat. Aliquam erat volutpat. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo.\footnote{Ut enim ad minim veniam, quis nostrud exercitation.} Etiam dictum tincidunt diam. In laoreet, magna id viverra tincidunt, sem odio bibendum justo, vel imperdiet sapien wisi sed libero. Nulla est. Maecenas fermentum, sem in pharetra pellentesque, velit turpis volutpat ante, in pharetra metus odio a lectus. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
 
-\begin{lstlisting}[caption={~Zbytečný kód},label=list:8-6,captionpos=t,float,abovecaptionskip=-\medskipamount,belowcaptionskip=\medskipamount,language=C]
+\begin{lstlisting}[caption={Zbytečný kód},label=list:8-6,captionpos=b,float,abovecaptionskip=-\medskipamount,abovecaptionskip=\medskipamount,language=C]
     #include<stdio.h>
     #include<iostream>
     // A comment
@@ -174,7 +174,6 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 % package minted requires execution with `-shell-escape'
 % e.g., `xelatex -shell-escape ctufit-thesis.tex'
 % \begin{listing}
-% \caption{Zbytečný kód}\label{list:8-6}
 % \begin{minted}{C}
 %     #include<stdio.h>
 %     #include<iostream>
@@ -185,6 +184,7 @@ Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliqu
 %         return 0;
 %     }
 % \end{minted}
+% \caption{Zbytečný kód}\label{list:8-6}
 % \end{listing}
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Nullam feugiat, turpis at pulvinar vulputate, erat libero tristique tellus, nec bibendum odio risus sit amet ante. Aenean id metus id velit ullamcorper pulvinar. Fusce wisi. Integer lacinia. Aliquam id dolor. Pellentesque pretium lectus id turpis. Suspendisse sagittis ultrices augue. In laoreet, magna id viverra tincidunt, sem odio bibendum justo, vel imperdiet sapien wisi sed libero. Sed ac dolor sit amet purus malesuada congue. \cite{Crochemore2002}
@@ -198,12 +198,13 @@ Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Nulla non arcu lacinia neque faucibus fringilla. Vestibulum erat nulla, ullamcorper nec, rutrum non, nonummy ac, erat. Aliquam erat volutpat. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo. Etiam dictum tincidunt diam. In laoreet, magna id viverra tincidunt, sem odio bibendum justo. \cite{Sestakova2018} 
 
 \begin{table}\centering
-\caption[Příklad tabulky]{~Zadávání matematiky}\label{tab:matematika}
 \begin{tabular}{l|l|c|c}
 	Typ		& Prostředí		& \LaTeX{}ovská zkratka	& \TeX{}ovská zkratka	\tabularnewline \hline 
  	Text		& \verb|math|		& \verb|\(...\)|	& \verb|$...$|	\tabularnewline \hline
  	Displayed	& \verb|displaymath|	& \verb|\[...\]|	& \verb|$$...$$|	\tabularnewline 
 \end{tabular}
+\caption[Příklad tabulky]{Zadávání matematiky}
+\label{tab:matematika}
 \end{table}
 
 
@@ -219,6 +220,8 @@ Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
 Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
 \end{example}
 
+\paragraph{Nadpis 5. úrovně}
+
 \begin{theorem}
 Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
 \end{theorem}
@@ -226,6 +229,8 @@ Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos
 \begin{proof}
 Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.
 \end{proof}
+
+\paragraph{Level 5 heading}
 
 \begin{corollary}
 Fusce suscipit libero eget elit. Etiam dui sem, fermentum vitae, sagittis id, malesuada in, quam. Aliquam id dolor. Curabitur bibendum justo non orci.

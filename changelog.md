@@ -5,12 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.3.2-a] - 18. 6. 2024
+## [1.3.6] - 4. 7. 2024
   
 The generated PDF now complies to the PDF/A-1B standard.
- 
+
 ### Added
 - Added support code for PDF/A generation. WARNING! This will not compile with texlive 2024, at least until new version of pdfx package is released.
+
+
+# [1.3.5] - 25. 6. 2024
+
+Making .gitignore less strict when handling PDF files.
+ 
+### Changed
+- The .gitignore was made less strict, so it does not ignore every .pdf file, but just the example/output ones.
+
+
+# [1.3.4] - 25. 6. 2024
+  
+Added support for paragraphs as the deepest level of headings via documentclass option.
+ 
+### Added
+- Added "paragraph" option for document class. If passed, it styles the paragraph command as another level of heading, adds number to it and shows it in ToC. Use with care! Normally, it is considered unwise to use it, since its too deep.
+
+
+# [1.3.3] - 22. 6. 2024
+  
+Fixed warning about header height. Update of arara compilation settings.
+ 
+### Fixed
+- Fixed "Package fancyhdr Warning: \headheight..." warning.
+
+### Changed
+- Changed arara settings to properly match the new default compiler.
+
+
+## [1.3.2] - 18. 6. 2024
+  
+Improvements of captions in the example.
+ 
+### Changed
+- All captions are now at the bottom of the object (figure, listing, table, etc.).
+- The trailing spaces have been removed from the caption
+
 
 ## [1.3.1] - 17. 6. 2024
   

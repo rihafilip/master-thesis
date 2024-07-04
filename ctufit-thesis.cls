@@ -51,10 +51,17 @@
 	\PassOptionsToPackage{english,main=slovak}{babel}
 	\def\@ctufitlang{S}
 }
+\DeclareOption{subsubsection}{
+	\def\@ctufitsecdepth{3}
+}
+\DeclareOption{paragraph}{
+	\def\@ctufitsecdepth{4}
+}
 \PassOptionsToPackage{svgnames}{xcolor}
 \PassOptionsToPackage{newfloat}{minted}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
 \ExecuteOptions{unicode}
+\ExecuteOptions{subsubsection}
 \ProcessOptions\relax
 
 % main declarations, loading files
@@ -281,14 +288,13 @@
 \def\frontsubsectionfont{\large}
 \def\frontsubsubsectionfont{\bfseries}
 
-\setcounter{secnumdepth}{3} % numbering sections; 3: subsubsection
-
+\setcounter{secnumdepth}{\@ctufitsecdepth} % numbering sections
 \newcommand{\stopTOCentries}{
   \addtocontents{toc}{\protect\setcounter{tocdepth}{-1}}
 }
 
 \newcommand{\resumeTOCentries}{
-  \addtocontents{toc}{\protect\setcounter{tocdepth}{3}} % table of content depth; 3: subsubsection
+  \addtocontents{toc}{\protect\setcounter{tocdepth}{\@ctufitsecdepth}} % table of content depth
 }
 % frontmatter headings end
 % frontmatter pseudochapters: named part without printing actual chapter heading
@@ -332,6 +338,8 @@
 \fi
 \fancyhead[RO]{\leavevmode\smash{\rlap{\hspace*{0em}\color{headgray}\bfseries\thepage}}}
 \fancyhead[LO]{\color{headgray}\bfseries\nouppercase{\rightmark}}
+\setlength{\headheight}{14.05pt}
+\addtolength{\topmargin}{-2.05pt}
 \renewcommand{\headrulewidth}{0pt}
 % headers and footers end
 
@@ -414,6 +422,11 @@
   
 \titleformat{\subsubsection}
   {\large\bfseries\color{heading}}{{{\color{black}\thesubsubsection}}}{1em}{}%[\vskip -1em]
+
+\ifnum\@ctufitsecdepth=4%if paragraph should be also styled
+  \titleformat{\paragraph}
+    {\bfseries\color{heading}}{{{\color{black}\theparagraph}}}{1em}{}%[\vskip -1em]
+\fi
 }
 %%%%%%%%%%%%%%%%%%%%
 % MAINMATTER SETTINGS END
