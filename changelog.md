@@ -20,7 +20,6 @@ Improved the example text.
 - Added image with white mode/dark mode settings to show the contrast.
 
 
-
 # [1.3.5] - 25. 6. 2024
 
 Making .gitignore less strict when handling PDF files.
