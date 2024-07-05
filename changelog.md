@@ -5,12 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.3.6] - 4. 7. 2024
+## [1.3.7] - 5. 7. 2024
   
 The generated PDF now complies to the PDF/A-1B standard.
 
 ### Added
-- Added support code for PDF/A generation. WARNING! This will not compile with texlive 2024, at least until new version of pdfx package is released.
+- Added support code for PDF/A generation.
+
+# [1.3.6] - 5. 7. 2024
+
+Improved the example text.
+ 
+### Added
+- Added image with white mode/dark mode settings to show the contrast.
+
 
 
 # [1.3.5] - 25. 6. 2024
