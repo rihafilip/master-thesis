@@ -14,6 +14,7 @@ The generated PDF now complies to the PDF/A-1B standard.
 
 # [1.3.6] - 5. 7. 2024
 
+
 Improved the example text.
  
 ### Added
