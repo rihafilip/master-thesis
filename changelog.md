@@ -12,8 +12,8 @@ The generated PDF now complies to the PDF/A-1B standard.
 ### Added
 - Added support code for PDF/A generation.
 
-# [1.3.6] - 5. 7. 2024
 
+# [1.3.6] - 5. 7. 2024
 
 Improved the example text.
  
