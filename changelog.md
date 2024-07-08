@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.7] - 5. 7. 2024
+  
+The generated PDF now complies to the PDF/A-1B standard.
+
+### Added
+- Added support code for PDF/A generation.
+
+
 # [1.3.6] - 5. 7. 2024
 
 Improved the example text.
