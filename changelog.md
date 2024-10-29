@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.8] - 29. 10. 2024
+
+Gitignore improvement and attachment list improvement.
+
+### Changed
+- Add root folder to attachments list to comply with standard.
+- Add pdfa.xmpi to gitignore.
+
+
 ## [1.3.7] - 5. 7. 2024
   
 The generated PDF now complies to the PDF/A-1B standard.
