@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.9] - 7. 1. 2025
+
+Cleaning the bibliography.
+
+### Changed
+- Removed unused bibliography items, only example of different entries remained.
+- Improved bibliography item for website citation.
+- Added non-breaking spaces before citations.
+
+
 ## [1.3.8] - 29. 10. 2024
 
 Gitignore improvement and attachment list improvement.
