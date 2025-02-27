@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.3.10] - 27. 2. 2025
+
+Darkmode image example improved.
+
+### Changed
+- New darkmode example image.
+- Added citation for darkmode example image.
+
+
 ## [1.3.9] - 7. 1. 2025
 
 Cleaning the bibliography.
