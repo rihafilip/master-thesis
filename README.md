@@ -12,7 +12,7 @@ Recommended template for theses submitted at [Faculty of Information Technology]
 
 Version
 --------
-1.3.10, built 27. 2. 2025. The whole changelog can be found in the [Changelog file](changelog.md).
+1.4.0, built 19. 3. 2025. The whole changelog can be found in the [Changelog file](changelog.md).
 
 
 Bugs and support

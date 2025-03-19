@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 19. 3. 2025
+
+PDF metadata.
+
+### Added
+- Added code for generating file with PDF metadata for PDF/A.
+- Added Czech and Slovak name for dissertation thesis.
+
+### Changed
+- Updated hyperref package.
+
 ## [1.3.10] - 27. 2. 2025
 
 Darkmode image example improved.

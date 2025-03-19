@@ -13,8 +13,9 @@ _minted-ctufit-thesis/
 *.out
 *.ps
 *.run.xml
-*.synctex.gz
+*.synctex*
 *.toc
 example-asssignment-include.pdf
 ctufit-thesis.pdf
 pdfa.xmpi
+*.xmpdata
