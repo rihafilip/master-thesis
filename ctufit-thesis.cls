@@ -84,7 +84,6 @@
 \PassOptionsToPackage{svgnames}{xcolor}
 \PassOptionsToPackage{newfloat}{minted}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
-\ExecuteOptions{unicode}
 \ExecuteOptions{subsubsection}
 \ProcessOptions\relax
 
