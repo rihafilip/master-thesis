@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.1] - 19. 3. 2025
+
+Removed obsolete option Unicode.
+
+### Changed
+- Removed Unicode option from the CTU FIT thesis class, since it was not used anymore.
+
+
 ## [1.4.0] - 19. 3. 2025
 
 PDF metadata.
@@ -15,6 +23,7 @@ PDF metadata.
 
 ### Changed
 - Updated hyperref package.
+
 
 ## [1.3.10] - 27. 2. 2025
 
