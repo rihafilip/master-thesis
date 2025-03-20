@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.2] - 20. 3. 2025
+
+Handle pdfx package warning about RGB.
+
+### Added
+- Added suppression for pdfx package warning about changing color model until they fix it.
+
+
 ## [1.4.1] - 19. 3. 2025
 
 Removed obsolete option Unicode.
