@@ -90,6 +90,8 @@
 % main declarations, loading files
 \LoadClass[a4paper,11pt]{book}[2020/04/10]
 \RequirePackage{xcolor}[2023/11/15]
+\usepackage{silence}
+\WarningFilter{pdfx}{Setting all color commands to rgb}
 \RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
