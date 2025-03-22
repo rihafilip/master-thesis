@@ -2,7 +2,7 @@
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
 %% This is version 1.4.2, built 20. 3. 2025.
-%% 
+%%
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
 %%
@@ -39,33 +39,32 @@
 % electronic (oneside) or printed (twoside), twoside is default
 % paragraph - if passed, this optional argument sets paragraphs as the deepest level of headers, styles it, numbers it and adds it to Table of Content. Use with care! Normally, it is considered unwise to use it, since its too deep.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass[czech,bachelor,oneside]{ctufit-thesis}
+\documentclass[english,master,twoside]{ctufit-thesis}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FILL IN THIS INFORMATION
+% BASIC INFORMATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\ctufittitle{Název příkladné závěrečné práce} % replace with the title of your thesis
-\ctufitauthorfull{Bc. Jiří Nebozíz} % replace with your full name (first name(s) and then family name(s) / surname(s)) including academic degrees
-\ctufitauthorsurnames{Nebozíz} % replace with your surname(s) / family name(s)
-\ctufitauthorgivennames{Jiří} % replace with your first name(s) / given name(s)
-\ctufitsupervisor{doc.\,Ing.\,Damien Zlo,\,Ph.D.} % replace with name of your supervisor/advisor (include academic degrees)
-\ctufitdepartment{Katedra teoretické informatiky} % replace with the department of your defence
-\ctufityear{2021} % replace with the year of your defence
-\ctufitdeclarationplace{Praze} % replace with the place where you sign the declaration
-\ctufitdeclarationdate{\today} % replace with the date of signature of the declaration
-\ctufitabstractCZE{Fill in the abstract of this thesis in Czech. Lorem ipsum dolor sit amet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue.}
-\ctufitabstractENG{Fill in the abstract of this thesis in English. Lorem ipsum dolor sit amet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue.}
-\ctufitkeywordsCZE{enter, comma, separated, list, of, keywords, in, CZECH}
-\ctufitkeywordsENG{enter, comma, separated, list, of, keywords, in, ENGLISH}
+\ctufittitle{Understanding Feedback Pollution in the R Programming Language}
+\ctufitauthorfull{Bc. Filip Říha}
+\ctufitauthorsurnames{Říha}
+\ctufitauthorgivennames{Filip}
+\ctufitsupervisor{doc. Ing. Filip Křikava\, Ph.D.}
+\ctufitdepartment{Department of Theoretical Computer Science}
+\ctufityear{2025}
+\ctufitdeclarationplace{Prague}
+\ctufitdeclarationdate{\today} % TODO:
+
+\ctufitabstractCZE{TODO}
+\ctufitabstractENG{TODO}
+\ctufitkeywordsCZE{TODO}
+\ctufitkeywordsENG{TODO}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% END FILL IN
+% END BASIC INFORMATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CUSTOMIZATION of this template
-% Skip this part or alter it if you know what you are doing.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \RequirePackage{iftex}[2020/03/06]
 \iftutex % XeLaTeX and LuaLaTeX
     \RequirePackage{ellipsis}[2020/05/22] %ellipsis workaround for XeLaTeX
@@ -82,11 +81,8 @@
     pdfborder={0 0 0.1}
 }
 
-% uncomment the following to hide all hyperlinks
-%\hypersetup{hidelinks}
-
-% uncomment the following to change the colour of all hyperlinks to CTU blue
-%\hypersetup{allbordercolors=decoration}
+% change the colour of all hyperlinks to CTU blue
+\hypersetup{allbordercolors=decoration}
 
 \RequirePackage{pdfpages}[2020/01/28]
 
@@ -97,27 +93,31 @@
 
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS
-% You may choose to modify this part.
 %%%%%%%%%%%%%%%%%%%%%%
 \usepackage{dirtree}
-\usepackage{lipsum,tikz}
+\usepackage{tikz}
 \usepackage[style=iso-numeric]{biblatex}
 \addbibresource{text/bib-database.bib}
 \usepackage{xurl}
-\usepackage{listings} % typesetting of sources
-%\usepackage{minted}
 \usepackage{csquotes}
+
+\usepackage[newfloat]{minted}
+\SetupFloatingEnvironment{listing}{name=Code listing}
+\DeclareCaptionSubType*[arabic]{listing}
+
+\newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
+\newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
 
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS END
 %%%%%%%%%%%%%%%%%%%%%%
 
-\begin{document} 
+\begin{document}
 \frontmatter\frontmatterinit % do not remove these two commands
 
 \thispagestyle{empty}\maketitle\thispagestyle{empty}\cleardoublepage % do not remove these four commands
 
-\includepdf[pages={1-}]{example-assignment-include.pdf} % replace this file with your thesis assignment generated from ProjectsFIT
+\includepdf[pages={1-}]{rihafili-assignment.pdf}
 
 \imprintpage % do not remove this command
 \stopTOCentries
@@ -127,12 +127,10 @@
 
 %%%%%%%%%%%%%%%%%%%
 % ACKNOWLEDGMENT
-% FILL IN / MODIFY
-% This is a place to thank people for helping you. It is common to thank your supervisor.
 %%%%%%%%%%%%%%%%%%%
 \begin{acknowledgmentpage}
-	Chtěl bych poděkovat především sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue.
-\end{acknowledgmentpage} 
+    TODO
+\end{acknowledgmentpage}
 %%%%%%%%%%%%%%%%%%%
 % ACKNOWLEDGMENT END
 %%%%%%%%%%%%%%%%%%%
@@ -144,100 +142,66 @@
 %%%%%%%%%%%%%%%%%%%
 % INSTRUCTIONS
 % ENG: choose one of approved texts of the declaration. DO NOT CREATE YOUR OWN. Find the approved texts at https://courses.fit.cvut.cz/SFE/download/index.html#_documents (document Declaration for FT in English)
-% CZE/SLO: Vyberte jedno z fakultou schvalenych prohlaseni. NEVKLADEJTE VLASTNI TEXT. Schvalena prohlaseni najdete zde: https://courses.fit.cvut.cz/SZZ/dokumenty/index.html#_dokumenty (prohlášení do ZP)
 \begin{declarationpage}
-FILL IN ACCORDING TO THE INSTRUCTIONS. VYPLŇTE V SOULADU S POKYNY. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
-
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
+    TODO
 \end{declarationpage}
 %%%%%%%%%%%%%%%%%%%
 % DECLARATION END
 %%%%%%%%%%%%%%%%%%%
 
-\printabstractpage % do not remove this command
+\printabstractpage
 
 %%%%%%%%%%%%%%%%%%%
 % SUMMARY
-% FILL IN / MODIFY
-% OR REMOVE ENTIRELY (upon agreement with your supervisor)
-% (appropriate to remove in most theses)
 %%%%%%%%%%%%%%%%%%%
-% \begin{summarypage}
-% \section*{Summary section}
-% 
-% \lipsum[1][1-8]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[2][1-6]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[3]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[2]
-% 
-% \section*{Summary section}
-% 
-% \lipsum[1][1-8] Lorem lorem lorem.
-% \end{summarypage}
+\begin{summarypage}
+    TODO
+\end{summarypage}
 %%%%%%%%%%%%%%%%%%%
 % SUMMARY END
 %%%%%%%%%%%%%%%%%%%
 
-\tableofcontents % do not remove this command
 %%%%%%%%%%%%%%%%%%%%%%
-% list of other contents: figures, tables, code listings, algorithms, etc.
-% add/remove commands accordingly
+% list of contents
 %%%%%%%%%%%%%%%%%%%%%%
-\listoffigures % list of figures
+\tableofcontents
+
+\listoffigures
 \begingroup
 \let\clearpage\relax
-\listoftables % list of tables. Remove if you do not have any.
-\thectufitlistingscommand % list of code listings. Remove if you do not have any.
+\listoftables
+\thectufitlistingscommand
 \endgroup
+%%%%%%%%%%%%%%%%%%%%%%
+% list of contents END
+%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS
-% FILL IN / MODIFY
-% OR REMOVE ENTIRELY
 % List the abbreviations in lexicography order.
 %%%%%%%%%%%%%%%%%%%
 \chapter{\thectufitabbreviationlabel}
-	
+
 \begin{tabular}{rl}
-DFA & Deterministic Finite Automaton\\
-FA & Finite Automaton\\
-LPS & Labelled Prüfer Sequence\\
-NFA & Nondeterministic Finite Automaton\\
-NPS & Numbered Prüfer Sequence\\
-XML & Extensible Markup Language\\
-XPath & XML Path Language\\
-XSLT & eXtensible Stylesheet Language Transformations\\
-W3C & World Wide Web Consortium
+TODO & definition \\
 \end{tabular}
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS END
 %%%%%%%%%%%%%%%%%%%
-\resumeTOCentries
-\mainmatter\mainmatterinit % do not remove these two commands
+
 %%%%%%%%%%%%%%%%%%%
 % THE THESIS
-% MODIFY ANYTHING BELOW THIS LINE
 %%%%%%%%%%%%%%%%%%%
 
-\include{text/text} % include `text.tex' from `text/' subdirectory
+\resumeTOCentries
+\mainmatter\mainmatterinit % do not remove these two commands
+
+\include{text/0_introduction.tex}
 
 \appendix\appendixinit % do not remove these two commands
-
-\include{text/appendix} % include `appendix.tex' from `text/' subdirectory
 
 \backmatter % do not remove this command
 
 \printbibliography % print out the BibLaTeX-generated bibliography list
-
-\include{text/medium} % include `medium.tex' from `text/' subdirectory
 
 \end{document}

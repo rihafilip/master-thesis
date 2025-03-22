@@ -234,19 +234,19 @@
 \DeclareRobustCommand{\imprintpage}{
 	\clearpage
 	\thispagestyle{empty}
-	
+
 
 		~
 	\vfill
-	
+
 	{\small
 			\noindent \thectufituniversity \\
 		\noindent \thectufitfaculty \\
 	\noindent \textcopyright{} \thectufityear{} \thectufitauthorfull. \thectufitallrightsreservedlabel\\
 		\noindent \textit{\thectufitcopyrighttext}
-	
+
 	\vspace{1em}
-	
+
 	\noindent \thectufitcitationlabel: \thectufitauthorsurnames{} \thectufitauthorgivennames. \textit{\thectufittitle}. \thectufitthesistype. \thectufituniversity, \thectufitfaculty, \thectufityear.
    }
 }
@@ -397,7 +397,7 @@
   {{\frontchapterfont\begin{flushleft}{\color{heading}Abstract}\end{flushleft}}}%
   \bigskip
   \noindent\ignorespaces}
-  
+
 \newenvironment{declaration}{}
 
 % acknowledgement page
@@ -456,10 +456,10 @@
 %vzhled nadpisů sekcí
 \titleformat{\section}
   {\Large\bfseries\color{heading}}{\colorbox{headbackgroundgray}{{\color{black}\thesection}}}{1em}{}%[\vskip -1em]
-  
+
 \titleformat{\subsection}
   {\Large\bfseries\color{heading}}{{{\color{black}\thesubsection}}}{1em}{}%[\vskip -1em]
-  
+
 \titleformat{\subsubsection}
   {\large\bfseries\color{heading}}{{{\color{black}\thesubsubsection}}}{1em}{}%[\vskip -1em]
 
@@ -473,7 +473,7 @@
 %%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%
-% APPENDIX SETTINGS 
+% APPENDIX SETTINGS
 % no need to modify this part
 %%%%%%%%%%%%%%%%%%%%
 \DeclareRobustCommand{\appendixinit}{
@@ -587,8 +587,9 @@
 		\DeclareRobustCommand{\listlistingname}{\thectufitlollabel}%
 		\DeclareRobustCommand{\thectufitlistingscommand}{\listoflistings}%
 		\ifdefined\@ctufitthesisblackandwhite
- 			\usemintedstyle{bw}%
-			\setminted{bgcolor=backgroundgray}%
+ 			\usemintedstyle{trac}%
+			\setminted{linenos}%
+			\setmintedinline{linenos=false}%
 		\fi
 		\setmintedinline{bgcolor={}}
 	}{}%
