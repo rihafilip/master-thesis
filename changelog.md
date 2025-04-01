@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.3] - 1. 4. 2025
+
+Fix of definition English version.
+
+### Changed
+- Fix of typo in "definition".
+- Added some aux files to gitignore.
+
+
 ## [1.4.2] - 20. 3. 2025
 
 Handle pdfx package warning about RGB.
