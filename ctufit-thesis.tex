@@ -108,6 +108,11 @@
 \newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
 \newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
 
+\usepackage{todonotes}
+\newcommand{\todoo}[1]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red]{#1}}
+\newcommand{\todoi}[1]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,inline]{#1}}
+\newcommand{\makesure}[1]{\todo[linecolor=green,backgroundcolor=green!25,bordercolor=green,inline]{#1}}
+
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS END
 %%%%%%%%%%%%%%%%%%%%%%
@@ -188,6 +193,9 @@ TODO & definition \\
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS END
 %%%%%%%%%%%%%%%%%%%
+
+% TODOs
+\listoftodos
 
 %%%%%%%%%%%%%%%%%%%
 % THE THESIS
