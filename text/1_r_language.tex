@@ -2,7 +2,202 @@
 \chapter{The R Language}
 %---------------------------------------------------------------
 
+\begin{chapterabstract}
+\end{chapterabstract}
+
+\textit{R}\todocite is a programming language used for statistical computation and data visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language\todocite (a lot of S code can be run without changes in R). It is part of the GNU Project, licensed as a free software under GNU GPL.
+\todoi{expand}
+
+The language is high-level, dynamic, object-oriented, functional, interpreted, and lazy, with automatic memory management and reflection.
+
+%---------------------------------------------------------------
+\section{Language basics}
+%---------------------------------------------------------------
+
+
+Individual expressions in R can be separated with a newline or the semicolon. Multiple expressions can be grouped as one by being enclosed with curly braces (\texttt{\{} and \texttt{\}}). The \texttt{#} symbols starts a comment until the end of the line.
+
+R is dynamically typed, meaning that variables do not have a type, but values do.
+\todoi{expand?}
+
+The \textit{atomic types} in R are \texit{numeric type} (\textit{integer}, \textit{double} and \textit{complex}), \textit{character type} (strings surrounded by either single or double quotes), and \texit{logical type} (with two constants \texttt{TRUE} and \texttt{FALSE}, which can also be abbreviated as \texttt{T} and \texttt{F}) and \textit{raw type} (used for holding raw bytes). Examples can be seen in \ref{lst:rtypes}.
+
+% complex ?
+
+\begin{listing}[ht!]
+	\centering
+	\begin{minted}{R}
+12.3    # double
+42L     # integer
+1 + 3i  # complex
+"Hello" # character
+'World' # character
+TRUE    # logical
+F       # logical
+    \end{minted}
+	\caption{Basic R types}\label{lst:rtypes}
+\end{listing}
+
+R has no concept of scalars. Instead, all values are represented as \textit{vectors}. To create an \textit{atomic vector} (a homogenous continuous container), the function \texttt{c} (standing for combine \todoo{is correct?}) can be used. The operator \texttt{:} can also be used to create an inclusive range, meaning \mintinline{R}{1:10} is a numeric vector of length 10 with element from 1 to 10. All the traditional mathematical operators are also vectorized, as demonstrated in listing \ref{lst:vectorized}.
+
+\begin{listing}[h!]
+	\centering
+	\begin{minted}{R}
+c(1, 2, 3) == 1:3     # comparison is done element-wise, result is vector of three TRUE values
+1:3 + 1               # c(2, 3, 4)
+15:10 - 1:5           # c(14, 12, 10, 8, 6)
+c(1, 2, 3) * c(1, 10) # c(1, 20, 3)
+# warns about length of shorter vector not being a multiple of longer
+    \end{minted}
+	\caption{Example of R vectorized operations}\label{lst:vectorized}
+\end{listing}
+
+To store objects of different types, a \textit{list} can be used.
+
+%---------------------------------------------------------------
+\subsection{Environments}
+%---------------------------------------------------------------
+
+Different scopes in R are separated using objects named \textit{environments}. An environment consists of a \textit{frame}, which is the collection of named objects (or variables), and a pointer to \textit{enclosing environment} (also called a \textit{parent}).
+
+The operator \texttt{<-} assigns a value on the right side to a variable on the left side in the currently evaluated environment (\mintinline{R}{x <- 42} assigns the number 42 to the variable \texttt{x}). To instead reassign a variable in a parent, the \texttt{<<-} operator can be used. This operator searches for the variable in each enclosing environment, starting from the most enclosing one, and reassigns the value in the first environment where the name is defined. If none is found, the variable is assigned to the global environment.
+
+There also exists the equals assignment operator (\texttt{=}), which was added later to bring R more inline with other programming languages\footnote{\url{https://developer.r-project.org/equalAssign.html}}, but this assignment is more limited than other options (see \ref{lst:equals}) and generally it is discouraged from using.
+
+\begin{listing}[h!]
+	\centering
+	\begin{minted}{R}
+if (x = FALSE)  1 else 0 # invalid syntax
+if (x <- FALSE) 1 else 0 # valid syntax, returns 1
+    \end{minted}
+	\caption{Invalid equals assignment example}\label{lst:equals}
+\end{listing}
+
+When a variable or a function is accessed, it is first looked for in the current environment. If not found, it is searched for recursively in each enclosing environment. Only then if it is not found, it is an error.
+
+The assignment to a variable does not shadow a function of the same name. So the code
+\mintoneline{R}{c <- 42; c(c, c)}
+results in one vector with two numbers 42, because the definition of the variable \texttt{c} does not shadow the function of the same name.
+
+%---------------------------------------------------------------
+\subsection{Functions}
+%---------------------------------------------------------------
+
+Functions can be called in several ways
+
+When a function is called, a new environment is created with the parent set to the caller's environment.
+
+New functions are created with the \texttt{function} keyword followed by an expression. All created functions are automatically closures that capture the surrounding environment. An example of closure capture is \ref{lst:closure}, where the inner function assigned to \texttt{g}. The last expression in a function is the return value.
+
+\begin{listing}[h!]
+	\centering
+	\begin{minted}{R}
+f <- function() {
+  x <- 0
+  g <- function() {
+    x <<- x + 1
+    x
+  }
+
+  g
+}
+
+g2 <- f()
+
+g2() # results in 1
+g2() # results in 2
+  \end{minted}
+	\caption{Example of R closure capturing environment}\label{lst:closure}
+\end{listing}
+
+All of R code is compiled to an S-expression\todocite, representing a tree. So the expression \mintinline{R}{x <- 2 + 1} is equivalent to \mintinline{R}{`<-`(x, `+`(2, 1))} or \mintinline{R}{if (TRUE) 1 else 0} is equivalent to \mintinline{R}{`if`(TRUE, 1, 0)}. The backticks \mintinline{R}{`} allow built-in operators and non-alphanumerical characters to be used as an identifier. Even syntactical constructs like a curly braces or surrounding of an expression in parenthesis are translated to a function call.
+
+% \begin{listing}[h!]
+% 	\centering
+% 	\begin{minted}{R}
+% fibonacci <- function(x) {
+%     if (x == 0 || x == 1) {
+%         return(0)
+%     }
+%     return fibonacci(x - 1) + fibonacci(x -  2)
+% }
+%     \end{minted}
+% 	\caption{Example R fibonacci code}\label{lst:fibonacci}
+% \end{listing}
+
+
+All of the values in R are immutable. (reference couting, attributes ?)
+
+R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a promise. Only when the parameter is first accessed, the promise is evaluated (also called a force) and the result of the promise is cached. This can be seen in example \ref{lst:example-lazy}. The call at line 11 first prints \enquote{Hello} and only then the parameter \texttt{x} is accessed and the text \enquote{world} is printed. The second call to the function \texttt{h} demonstrates a second behaviour - when a parameter is never accessed, it is not evaluated and thus the code of the promise is never executed.
+
+reflection, combined with the laziness
+
+R has automatic memory management in form of a non-moving garbage collector.
+
+attributes
+
+\begin{listing}
+	\centering
+	\begin{minted}{R}
+f <- function(x) {
+    print("world")
+    x
+}
+
+g <- function(x) {
+    print("Hello")
+    x
+}
+
+g(f(42))
+
+h <- function(x) 0
+
+h(f(42))
+    \end{minted}
+	\caption{Example of R laziness}\label{lst:example-lazy}
+\end{listing}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
 
 %---------------------------------------------------------------
 \section{The Ř compiler}
+%---------------------------------------------------------------
+
+\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language. It is built as an extension to GNU-R, althought several changes need to be made to the original codebase in order to use it. It bypasses the GNU-R bytecode interpreter, instead using a custom one. For the compilation to native code, the \textit{LLVM Project}\todocite is used. The project is freely available and hosted on GitHub.
+
+\todoi{picture, high-level overview of Ř}
+
+%---------------------------------------------------------------
+\subsection{RIR bytecode interpreter}
+%---------------------------------------------------------------
+
+The custom bytecode used by Ř is called \textit{RIR}. It is a simple stack-based interpreter, not unsimilar to the one in GNU-R. For this thesis, the important details are three bytecode instructions: \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These are executed after a callee load, variable load or a branch condition evaluation respectively, and the semantically the instructions observe the top value on the stack\todoo{which stack} and record the information to the  \texttt{TypeFeedback} structure. The name \texttt{TypeFeedback} is a bit misleading here - it observes the type of value only for \texttt{record\_type\_}, whereas the \texttt{record\_call\_} records the address of callee, and \texttt{record\_test\_} if the top value is true, false, or any other.
+
+Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
+
+%---------------------------------------------------------------
+\subsection{PIR compiler}
+%---------------------------------------------------------------
+When a function or a loop is determined to be hot, it is compiled to \textit{PIR}, an intermediate representation to be used by optimizations and then the final compiler.
+
+After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT compiler}, which is part of the LLVM project and which does the lowering itself.
+
+%---------------------------------------------------------------
+\subsection{Contextual dispatch}
 %---------------------------------------------------------------
