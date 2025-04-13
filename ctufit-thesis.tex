@@ -1,3 +1,4 @@
+%! TeX program = lualatex
 %% This is the ctufit-thesis example file. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
@@ -99,19 +100,23 @@
 \usepackage[style=iso-numeric]{biblatex}
 \addbibresource{text/bib-database.bib}
 \usepackage{xurl}
-\usepackage{csquotes}
 
 \usepackage[newfloat]{minted}
 \SetupFloatingEnvironment{listing}{name=Code listing}
 \DeclareCaptionSubType*[arabic]{listing}
-
-\newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
+\setminted{linenos}
 \newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
+
+\usepackage{calc}
+
+\usepackage{csquotes}
+\newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
 
 \usepackage{todonotes}
 \newcommand{\todoo}[1]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red]{#1}}
 \newcommand{\todoi}[1]{\todo[linecolor=red,backgroundcolor=red!25,bordercolor=red,inline]{#1}}
 \newcommand{\makesure}[1]{\todo[linecolor=green,backgroundcolor=green!25,bordercolor=green,inline]{#1}}
+\newcommand{\todocite}[0]{[\textbf{?}]}
 
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS END
@@ -194,9 +199,6 @@ TODO & definition \\
 % ABBREVIATIONS END
 %%%%%%%%%%%%%%%%%%%
 
-% TODOs
-\listoftodos
-
 %%%%%%%%%%%%%%%%%%%
 % THE THESIS
 %%%%%%%%%%%%%%%%%%%
@@ -211,6 +213,9 @@ TODO & definition \\
 \include{text/4_assesment}
 \include{text/5_related_work}
 \include{text/x_conclusion}
+
+% TODOs
+\listoftodos
 
 \appendix\appendixinit % do not remove these two commands
 
