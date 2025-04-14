@@ -5,26 +5,25 @@
 \begin{chapterabstract}
 \end{chapterabstract}
 
+\todo{reflection, combined with the laziness \\ R has automatic memory management in form of a non-moving garbage collector. \\ attributes}
+
 \textit{R}\todocite is a programming language used for statistical computation and data visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language\todocite (a lot of S code can be run without changes in R). It is part of the GNU Project, licensed as a free software under GNU GPL.
-\todoi{expand}
+\todo{expand}
 
 The language is high-level, dynamic, object-oriented, functional, interpreted, and lazy, with automatic memory management and reflection.
 
-%---------------------------------------------------------------
-\section{Language basics}
-%---------------------------------------------------------------
+Individual statements in R can be separated with a newline or the semicolon. Multiple statements can be grouped as one by being enclosed with curly braces (\texttt{\{} and \texttt{\}}). The \texttt{\#} symbols starts a comment until the end of the line.
 
-
-Individual expressions in R can be separated with a newline or the semicolon. Multiple expressions can be grouped as one by being enclosed with curly braces (\texttt{\{} and \texttt{\}}). The \texttt{#} symbols starts a comment until the end of the line.
+%---------------------------------------------------------------
+\section{Basic types}
+%---------------------------------------------------------------
 
 R is dynamically typed, meaning that variables do not have a type, but values do.
-\todoi{expand?}
+\todo{expand?}
 
-The \textit{atomic types} in R are \texit{numeric type} (\textit{integer}, \textit{double} and \textit{complex}), \textit{character type} (strings surrounded by either single or double quotes), and \texit{logical type} (with two constants \texttt{TRUE} and \texttt{FALSE}, which can also be abbreviated as \texttt{T} and \texttt{F}) and \textit{raw type} (used for holding raw bytes). Examples can be seen in \ref{lst:rtypes}.
+The \textit{atomic types} in R are \textit{numeric type} (\textit{integer}, \textit{double} and \textit{complex}), \textit{character type} (strings surrounded by either single or double quotes), and \textit{logical type} (with two constants \texttt{TRUE} and \texttt{FALSE}, which can also be abbreviated as \texttt{T} and \texttt{F}) and \textit{raw type} (used for holding raw bytes). Examples can be seen in \ref{lst:rtypes}.
 
-% complex ?
-
-\begin{listing}[ht!]
+\begin{listing}[h!]
 	\centering
 	\begin{minted}{R}
 12.3    # double
@@ -38,31 +37,64 @@ F       # logical
 	\caption{Basic R types}\label{lst:rtypes}
 \end{listing}
 
-R has no concept of scalars. Instead, all values are represented as \textit{vectors}. To create an \textit{atomic vector} (a homogenous continuous container), the function \texttt{c} (standing for combine \todoo{is correct?}) can be used. The operator \texttt{:} can also be used to create an inclusive range, meaning \mintinline{R}{1:10} is a numeric vector of length 10 with element from 1 to 10. All the traditional mathematical operators are also vectorized, as demonstrated in listing \ref{lst:vectorized}.
+R has no concept of scalars, instead, all values basic types are represented as \textit{vectors}. Atomic types are stored in \textit{atomic vectors}, a continuous container where all elements of the same type, which is one of the atomic. To create an atomic vector with multiple elements, the function \texttt{c} (standing for combine \todo{is correct?}) can be used. The operator \texttt{:} can also be used to create an inclusive range, meaning \mintinline{R}{1:10} is a numeric vector of length 10 with element from 1 to 10. All the traditional mathematical operators are also vectorized, as demonstrated in listing \ref{lst:vectorized}.
 
 \begin{listing}[h!]
 	\centering
 	\begin{minted}{R}
-c(1, 2, 3) == 1:3     # comparison is done element-wise, result is vector of three TRUE values
-1:3 + 1               # c(2, 3, 4)
-15:10 - 1:5           # c(14, 12, 10, 8, 6)
-c(1, 2, 3) * c(1, 10) # c(1, 20, 3)
-# warns about length of shorter vector not being a multiple of longer
+# The format of results is [1] el1 el2 ...
+# where [1] signifies that the result is one-dimensional vector
+# and follows by all the elements of the vector separated by a space
+
+c(1, 2, 0) == 1:3
+# [1] TRUE TRUE FALSE
+1:3 + 1
+# [1] 2 3 4
+15:11 - 1:5
+# [1] 14 12 10 8 6
+c(1, 2, 3) * c(1, 10)
+# [1] 1 20 3
+# Also produces a warning:
+#   longer object length is not a multiple of shorter object length
     \end{minted}
 	\caption{Example of R vectorized operations}\label{lst:vectorized}
 \end{listing}
 
-To store objects of different types, a \textit{list} can be used.
+To store objects of different types, a \textit{list} (also called a \textit{general vector}) can be used. Unlike vector, which stores all of its elements inline, a list stores only references to other objects. A list can also be \textit{named}, allowing for each of the elements to be referenced by a name and not only by an index.
+
+Other commonly used types built on top of atomic vectors and lists are \textit{matrix} (two-dimensional vector), \textit{array} (multi-dimensional vector) and \textit{data frame} (matrix-like structure whose columns can have different types).
+
+To index an object, we can use \texttt{x[i, j, ...]} (used for extracting multiple values), \texttt{x[[i]]} (used for extracting a single value), or \texttt{x\$name} (used for extracting a named field, usually equivalent to \texttt{x[["name"]]}), where \texttt{x} is the object we are extracting from, \texttt{i, j} are indices and \texttt{name} is an identifier. In R, all indices start at element 1, unlike C-like languages, whose arrays start at 0.
+
+R also has the \texttt{NULL} value, representing an undefined value, and a constant \texttt{NA} (\textit{not available}) representing a missing value.
 
 %---------------------------------------------------------------
-\subsection{Environments}
+\section{Control flow}
 %---------------------------------------------------------------
 
-Different scopes in R are separated using objects named \textit{environments}. An environment consists of a \textit{frame}, which is the collection of named objects (or variables), and a pointer to \textit{enclosing environment} (also called a \textit{parent}).
+The flow of an R program can be controlled with traditional imperative control structures.
 
-The operator \texttt{<-} assigns a value on the right side to a variable on the left side in the currently evaluated environment (\mintinline{R}{x <- 42} assigns the number 42 to the variable \texttt{x}). To instead reassign a variable in a parent, the \texttt{<<-} operator can be used. This operator searches for the variable in each enclosing environment, starting from the most enclosing one, and reassigns the value in the first environment where the name is defined. If none is found, the variable is assigned to the global environment.
+\textit{If statement} has the form \mintinline{R}{if (condition) consequence} or \\ \mintinline{R}{if (condition) consequence else alternative}, where it evaluates \texttt{consequence} if \texttt{condition} can be coerced to \texttt{TRUE}, otherwise it evaluates to \texttt{NULL} in the first form and to \texttt{alternative} in the second form.
 
-There also exists the equals assignment operator (\texttt{=}), which was added later to bring R more inline with other programming languages\footnote{\url{https://developer.r-project.org/equalAssign.html}}, but this assignment is more limited than other options (see \ref{lst:equals}) and generally it is discouraged from using.
+\textit{For loop} is written as \mintinline{R}{for (var in seq) expr}, where for each element in \texttt{seq}, the \texttt{var} is assigned it and the \texttt{expr} is executed. It evaluates to \texttt{NULL}.
+
+\textit{While loop}, which is used as \mintinline{R}{while(condition) expr}, evaluates the \texttt{expr} until the \texttt{condition} evaluates to \texttt{FALSE}. The whole loop evaluates to \texttt{NULL}.
+
+In the \texttt{expr} of while or for loop, the current iteration can be skipped to the next one with \texttt{break} statement, and the whole loop can be finished preemtively with \texttt{break}.
+
+%---------------------------------------------------------------
+\section{Environments}
+%---------------------------------------------------------------
+
+Different scopes in R are separated using objects named \textit{environments}. An environment consists of a \textit{frame}, which is the collection of named objects (or variables), and a pointer to \textit{enclosing environment} (also called a \textit{parent}). The topmost environment has a pointer to a special \textit{empty environment} (which can be accessed with \texttt{emptyenv()}), which has no other parent.
+
+These environments are also first-class values. We can create new environments (\texttt{new.env()}), access the value of the currently executed one (\texttt{environment()}), or even access and modify environments on the call stack (for example \texttt{sys.frame(-1)} accesses the environment of caller of current function).
+
+The operator \texttt{<-} assigns a value on the right side to a variable on the left side in the currently evaluated environment (\mintinline{R}{x <- 42} assigns the number 42 to the variable \texttt{x}).
+
+To instead reassign a variable in a parent environment, the \texttt{<<-} operator can be used. This operator searches for the variable in each enclosing environment, starting from the most enclosing one, and reassigns the value in the first environment where the name is defined. If none is found, the variable is assigned to the global environment.
+
+There also exists the equals assignment operator (\texttt{=}), which was added later to bring R more inline with other programming languages\footnote{\url{https://developer.r-project.org/equalAssign.html}}, but this assignment is more limited than other options (see \ref{lst:equals} for an example) and generally it is discouraged from using.
 
 \begin{listing}[h!]
 	\centering
@@ -73,70 +105,74 @@ if (x <- FALSE) 1 else 0 # valid syntax, returns 1
 	\caption{Invalid equals assignment example}\label{lst:equals}
 \end{listing}
 
+All variables and identifiers need to have a \textit{syntactic name}, which is composed of alphanumerical symbols, underscores (\texttt{\_}) and a period (\texttt{.}), but cannot start with a digit or underscore and cannot be a reserved word (like \texttt{function} or \texttt{NULL}). To use a non-syntactic identifier, it has to be surrounded by backticks (\texttt{`}). So \texttt{\_hell@} is not a valid identifier, but \texttt{`\_hell@`} is.
+
 When a variable or a function is accessed, it is first looked for in the current environment. If not found, it is searched for recursively in each enclosing environment. Only then if it is not found, it is an error.
 
-The assignment to a variable does not shadow a function of the same name. So the code
+The lookup for functions is separate from non-function lookup. An assignment of a variable in some environment does not shadow a function in its enclosing environment.
+So the code
 \mintoneline{R}{c <- 42; c(c, c)}
-results in one vector with two numbers 42, because the definition of the variable \texttt{c} does not shadow the function of the same name.
+results in one vector with two numbers 42, because the definition of the variable \texttt{c} does not shadow the function of the same name from the base environment.
 
 %---------------------------------------------------------------
-\subsection{Functions}
+\section{Functions}
 %---------------------------------------------------------------
 
-Functions can be called in several ways
-
-When a function is called, a new environment is created with the parent set to the caller's environment.
-
-New functions are created with the \texttt{function} keyword followed by an expression. All created functions are automatically closures that capture the surrounding environment. An example of closure capture is \ref{lst:closure}, where the inner function assigned to \texttt{g}. The last expression in a function is the return value.
+A \textit{function} is composed of three parts - \textit{formals}, which is the list of formal arguments and their default values, \textit{body}, which is the code of the function, and \textit{environment} defining the lexical scope of the function body. Each non-primitive function in R is also called a \textit{closure}, a name originating from Lisp, since it closes over the environment it is created in and can reference variables in it - this can be seen in listing \ref{lst:closure}, where the function \texttt{counter} references the variable \texttt{count} from an enclosing environment.
 
 \begin{listing}[h!]
 	\centering
 	\begin{minted}{R}
-f <- function() {
-  x <- 0
-  g <- function() {
-    x <<- x + 1
-    x
+create.counter <- function() {
+  count <- 0
+  counter <- function() {
+    tmp <- count
+    # Increment the outer variable count
+    count <<- count + 1
+    tmp
   }
-
-  g
+  counter
 }
 
-g2 <- f()
+my.counter <- create.counter()
 
-g2() # results in 1
-g2() # results in 2
+my.counter()
+# [1] 0
+my.counter()
+# [1] 1
+my.counter()
+# [1] 2
   \end{minted}
 	\caption{Example of R closure capturing environment}\label{lst:closure}
 \end{listing}
 
-All of R code is compiled to an S-expression\todocite, representing a tree. So the expression \mintinline{R}{x <- 2 + 1} is equivalent to \mintinline{R}{`<-`(x, `+`(2, 1))} or \mintinline{R}{if (TRUE) 1 else 0} is equivalent to \mintinline{R}{`if`(TRUE, 1, 0)}. The backticks \mintinline{R}{`} allow built-in operators and non-alphanumerical characters to be used as an identifier. Even syntactical constructs like a curly braces or surrounding of an expression in parenthesis are translated to a function call.
+New functions can be created with the syntax \texttt{function(arglist) expr}, where \texttt{arglist} is an optional comma separated list of formal arguments (default values are specified as \texttt{name = default\_value}) and \texttt{expr} is the body of the function. The environment field of the function is the environment in which it is created. To give a name to a function, it needs to be assigned to a variable.
 
-% \begin{listing}[h!]
-% 	\centering
-% 	\begin{minted}{R}
-% fibonacci <- function(x) {
-%     if (x == 0 || x == 1) {
-%         return(0)
-%     }
-%     return fibonacci(x - 1) + fibonacci(x -  2)
-% }
-%     \end{minted}
-% 	\caption{Example R fibonacci code}\label{lst:fibonacci}
-% \end{listing}
+%---------------------------------------------------------------
+\subsection{Function forms}
+%---------------------------------------------------------------
 
+Part of the R philosophy is that \quotecite{everything that happens is a function call}\todocite. This can be achieved thanks to different forms that a function definition and its call can have.
 
-All of the values in R are immutable. (reference couting, attributes ?)
+The most common forms that a function can have is a \textit{prefix function} \todo{official name?}, which is called as \texttt{name(arguments)}, where \texttt{name} is an identifier and \texttt{arguments} is a comma separated list of arguments. An argument is then either positional, or in the form \texttt{argname = expr}, where \texttt{argname} is the (partial) name of the formal argument and \texttt{expr} is the value assigned to this formal.
 
-R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a promise. Only when the parameter is first accessed, the promise is evaluated (also called a force) and the result of the promise is cached. This can be seen in example \ref{lst:example-lazy}. The call at line 11 first prints \enquote{Hello} and only then the parameter \texttt{x} is accessed and the text \enquote{world} is printed. The second call to the function \texttt{h} demonstrates a second behaviour - when a parameter is never accessed, it is not evaluated and thus the code of the promise is never executed.
+Another function form is the \textit{infix function}. These are either built-in symbols (like \texttt{+} and \texttt{-}), or any name surrounded by the percent sign (for example the base function \texttt{\%in\%}). These can be called as a binary infix operator (e.g. \mintinline{R}{1 + 2} or \mintinline{R}{1 %in% c(1, 2)}).
 
-reflection, combined with the laziness
+Next category is the \textit{replacement functions}. These are named as \texttt{name<-} and can be called as \texttt{name(args) <- expr}. This binds all \texttt{args} as arguments to the function and the \texttt{expr} as the last argument. This allows for a code which looks like it is working with mutable values, even though they are immutable (see section \todo{add section}).
 
-R has automatic memory management in form of a non-moving garbage collector.
+Last category of functions are the \texttt{special functions}. These represent the special built-in syntaxes like if statements, for loops or subscriptions (they correspond to calls to \texttt{`if`}, \texttt{`for`} and \texttt{`[`}, \texttt{`[[`]} respectively). They are cannot be user defined.
 
-attributes
+These different forms can be combined, so a function \texttt{`\%and\%<-`} can be called like \mintinline{R}{a %and% b <- c}.
 
-\begin{listing}
+Every non-prefix function can be called like a prefix function with backticks, so the code \texttt{a <- if (T) 1 else 2} is equivalent to the call \texttt{`<-`(a, `if`(T, 1, 2))}.
+
+%---------------------------------------------------------------
+\section{Laziness}
+%---------------------------------------------------------------
+
+R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a \textit{promise}. Only when the parameter is first accessed, the promise is evaluated (also called a force) and the result of the promise is cached. This can be seen in example \ref{lst:example-lazy}. The call at line 11 first prints \enquote{Hello} and only then the parameter \texttt{x} is accessed and the text \enquote{world} is printed. The second call to the function \texttt{h} demonstrates a second behavior - when a parameter is never accessed, it is not evaluated and thus the code of the promise is not executed and nothing is printed.
+
+\begin{listing}[h!]
 	\centering
 	\begin{minted}{R}
 f <- function(x) {
@@ -154,50 +190,70 @@ g(f(42))
 h <- function(x) 0
 
 h(f(42))
-    \end{minted}
+  \end{minted}
 	\caption{Example of R laziness}\label{lst:example-lazy}
 \end{listing}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\newpage
-
 %---------------------------------------------------------------
-\section{The Ř compiler}
+\section{Immutability}
 %---------------------------------------------------------------
 
-\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language. It is built as an extension to GNU-R, althought several changes need to be made to the original codebase in order to use it. It bypasses the GNU-R bytecode interpreter, instead using a custom one. For the compilation to native code, the \textit{LLVM Project}\todocite is used. The project is freely available and hosted on GitHub.
+All R values are \textit{semantically immutable}, with the exception of environments. This means that when a variable holds a value, this value never changes unless the variable is reassigned. We say that non-environment values have a \textit{copy-on-modify behavior} - when we modify the value, we create a new copy of it with the modified bits. R employs an optimization in this regard - if there exists only one reference to a given value, we can modify it in place to reduce a redundant copy.
 
-\todoi{picture, high-level overview of Ř}
+Thanks to the syntax of R, it is possible to write code that looks like it is using mutable object, but keep the copy-on-modify behavior. In the example \ref{lst:imm}, the statement \mintinline{R}{y[1] <- 42} looks like it is mutating the vector in place, but the semantics of the \texttt{[<-} replacement function are that a new vector is created, an element is replaced, and then it is reassigned to the variable.
+
+\begin{listing}[h!]
+	\centering
+	\begin{minted}{R}
+x <- c(1, 2, 3)
+y <- x
+y[1] <- 42
+x
+# [1] 1 2 3
+  \end{minted}
+  \caption{Immutability example}\label{lst:imm}
+\end{listing}
+
+The only truly mutable values are environments, and they conform to a \textit{reference behavior}. Listing \ref{lst:envir} shows this behavior - the variable \texttt{x} is added to both \texttt{e1} and \texttt{e1}, even though it is only added to \texttt{e2}.
+
+\begin{listing}[h!]
+	\centering
+	\begin{minted}{R}
+e1 <- new.env()
+e2 <- e1
+e2$x <- 42
+e1$x
+# [1] 42
+  \end{minted}
+	\caption{Example of environment mutability}\label{lst:envir}
+\end{listing}
+
 
 %---------------------------------------------------------------
-\subsection{RIR bytecode interpreter}
+\section{Reflection}
 %---------------------------------------------------------------
 
-The custom bytecode used by Ř is called \textit{RIR}. It is a simple stack-based interpreter, not unsimilar to the one in GNU-R. For this thesis, the important details are three bytecode instructions: \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These are executed after a callee load, variable load or a branch condition evaluation respectively, and the semantically the instructions observe the top value on the stack\todoo{which stack} and record the information to the  \texttt{TypeFeedback} structure. The name \texttt{TypeFeedback} is a bit misleading here - it observes the type of value only for \texttt{record\_type\_}, whereas the \texttt{record\_call\_} records the address of callee, and \texttt{record\_test\_} if the top value is true, false, or any other.
+\todoadd
+As mentioned before, environments
 
-Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
+\begin{listing}
+  \centering
+  \begin{minted}{R}
+bad <- function() {
+  rm("x", envir=sys.frame(-1))
+  2
+}
 
-%---------------------------------------------------------------
-\subsection{PIR compiler}
-%---------------------------------------------------------------
-When a function or a loop is determined to be hot, it is compiled to \textit{PIR}, an intermediate representation to be used by optimizations and then the final compiler.
+good <- function(y) {
+  x <- 1
+  z <- y
+  x + z
+}
 
-After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT compiler}, which is part of the LLVM project and which does the lowering itself.
+good(bad())
+# Error in good(bad()) : object 'x' not found
+  \end{minted}
+  \caption{Example of malicious reflection}\label{lst:bad-ref}
+\end{listing}
 
-%---------------------------------------------------------------
-\subsection{Contextual dispatch}
-%---------------------------------------------------------------
+
