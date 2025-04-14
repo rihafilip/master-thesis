@@ -1,0 +1,39 @@
+%---------------------------------------------------------------
+\chapter{The R Virtual Machine}
+%---------------------------------------------------------------
+
+
+%---------------------------------------------------------------
+\section{GNU-R}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\section{The Ř compiler}
+%---------------------------------------------------------------
+
+\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language. It is built as an extension to GNU-R, althought several changes need to be made to the original codebase in order to use it. It bypasses the GNU-R bytecode interpreter, instead using a custom one. For the compilation to native code, the \textit{LLVM Project}\todocite is used. The project is freely available and hosted on GitHub.
+
+\todo{picture, high-level overview of Ř}
+
+%---------------------------------------------------------------
+\subsection{RIR bytecode interpreter}
+%---------------------------------------------------------------
+
+The custom bytecode used by Ř is called \textit{RIR}. It is a simple stack-based interpreter, not unsimilar to the one in GNU-R. For this thesis, the important details are three bytecode instructions: \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These are executed after a callee load, variable load or a branch condition evaluation respectively, and the semantically the instructions observe the top value on the stack\todo{which stack} and record the information to the  \texttt{TypeFeedback} structure. The name \texttt{TypeFeedback} is a bit misleading here - it observes the type of value only for \texttt{record\_type\_}, whereas the \texttt{record\_call\_} records the address of callee, and \texttt{record\_test\_} if the top value is true, false, or any other.
+
+Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
+
+%---------------------------------------------------------------
+\subsection{PIR compiler}
+%---------------------------------------------------------------
+When a function or a loop is determined to be hot, it is compiled to \textit{PIR}, an intermediate representation to be used by optimizations and then the final compiler.
+
+After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT compiler}, which is part of the LLVM project and which does the lowering itself.
+
+%---------------------------------------------------------------
+\subsection{Contextual dispatch}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\section{Other Implementations}
+%---------------------------------------------------------------
