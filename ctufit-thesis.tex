@@ -116,6 +116,9 @@
 \newcommand{\todoadd}[0]{\textbf{\textcolor{red}{(TODO)}}}
 \newcommand{\todocite}[0]{[\textbf{\textcolor{red}{?}}]}
 
+% Custom commands
+\newcommand{\SEXP}[0]{\texttt{SEXP}}
+
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS END
 %%%%%%%%%%%%%%%%%%%%%%
@@ -191,9 +194,11 @@
 \chapter{\thectufitabbreviationlabel}
 
 \begin{tabular}{rl}
+	AST  & Abstract Syntax Tree        \\
 	GC   & Garbage Collector           \\
 	IR   & Intermediate Representation \\
 	JIT  & Just-in-time                \\
+	SSA  & Static Single-Assignment    \\
 	SEXP & Symbolic Expression         \\
 	VM   & Virtual Machine             \\
 \end{tabular}
@@ -209,12 +214,11 @@
 \mainmatter\mainmatterinit % do not remove these two commands
 
 \include{text/0_introduction.tex}
-\include{text/1_r_language}
-\include{text/2_r_vm}
-\include{text/3_recording_tool}
-\include{text/4_feedback_pollution}
-\include{text/5_analysis}
-\include{text/6_related_work}
+\include{text/1_background}
+\include{text/2_recording_tool}
+\include{text/3_feedback_pollution}
+\include{text/4_analysis}
+\include{text/5_related_work}
 \include{text/x_conclusion}
 
 \appendix\appendixinit % do not remove these two commands

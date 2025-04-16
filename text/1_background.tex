@@ -1,12 +1,14 @@
 %---------------------------------------------------------------
-\chapter{The R Language}
+\chapter{Background}
 %---------------------------------------------------------------
 
 \begin{chapterabstract}
   \todoadd
 \end{chapterabstract}
 
-\todo{reflection, combined with the laziness \\ R has automatic memory management in form of a non-moving garbage collector. \\ attributes}
+%---------------------------------------------------------------
+\section{The R Language}
+%---------------------------------------------------------------
 
 \textit{R}\todocite is a programming language used for statistical computation and data visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language\todocite (a lot of S code can be run without changes in R). It is part of the GNU Project, licensed as a free software under GNU GPL.
 \todo{expand}
@@ -15,8 +17,10 @@ The language is high-level, dynamic, object-oriented, functional, interpreted, a
 
 Individual statements in R can be separated with a newline or the semicolon. Multiple statements can be grouped as one by being enclosed with curly braces (\texttt{\{} and \texttt{\}}). The \texttt{\#} symbols starts a comment until the end of the line.
 
+\todo{objects ?}
+
 %---------------------------------------------------------------
-\section{Basic types}
+\subsection*{Basic types}
 %---------------------------------------------------------------
 
 R is dynamically typed, meaning that variables do not have a type, but values do.
@@ -45,7 +49,7 @@ R has no concept of scalars, instead, all values basic types are represented as 
 	\begin{minted}{R}
 # The format of results is [1] el1 el2 ...
 # where [1] signifies that the result is one-dimensional vector
-# and follows by all the elements of the vector separated by a space
+# and it is followed by all the elements of the vector separated by a space
 
 c(1, 2, 0) == 1:3
 # [1] TRUE TRUE FALSE
@@ -69,8 +73,10 @@ To index an object, we can use \texttt{x[i, j, ...]} (used for extracting multip
 
 R also has the \texttt{NULL} value, representing an undefined value, and a constant \texttt{NA} (\textit{not available}) representing a missing value.
 
+\todo{attributes}
+
 %---------------------------------------------------------------
-\section{Control flow}
+\subsection*{Control flow}
 %---------------------------------------------------------------
 
 The flow of an R program can be controlled with traditional imperative control structures.
@@ -84,7 +90,7 @@ The flow of an R program can be controlled with traditional imperative control s
 In the \texttt{expr} of while or for loop, the current iteration can be skipped to the next one with \texttt{break} statement, and the whole loop can be finished preemtively with \texttt{break}.
 
 %---------------------------------------------------------------
-\section{Environments}
+\subsection*{Environments}
 %---------------------------------------------------------------
 
 Different scopes in R are separated using objects named \textit{environments}. An environment consists of a \textit{frame}, which is the collection of named objects (or variables), and a pointer to \textit{enclosing environment} (also called a \textit{parent}). The topmost environment has a pointer to a special \textit{empty environment} (which can be accessed with \texttt{emptyenv()}), which has no other parent.
@@ -116,7 +122,7 @@ So the code
 results in one vector with two numbers 42, because the definition of the variable \texttt{c} does not shadow the function of the same name from the base environment.
 
 %---------------------------------------------------------------
-\section{Functions}
+\subsection*{Functions}
 %---------------------------------------------------------------
 
 A \textit{function} is composed of three parts - \textit{formals}, which is the list of formal arguments and their default values, \textit{body}, which is the code of the function, and \textit{environment} defining the lexical scope of the function body. Each non-primitive function in R is also called a \textit{closure}, a name originating from Lisp, since it closes over the environment it is created in and can reference variables in it - this can be seen in listing \ref{lst:closure}, where the function \texttt{counter} references the variable \texttt{count} from an enclosing environment.
@@ -149,10 +155,6 @@ my.counter()
 
 New functions can be created with the syntax \texttt{function(arglist) expr}, where \texttt{arglist} is an optional comma separated list of formal arguments (default values are specified as \texttt{name = default\_value}) and \texttt{expr} is the body of the function. The environment field of the function is the environment in which it is created. To give a name to a function, it needs to be assigned to a variable.
 
-%---------------------------------------------------------------
-\subsection{Function forms}
-%---------------------------------------------------------------
-
 Part of the R philosophy is that \quotecite{everything that happens is a function call}\todocite. This can be achieved thanks to different forms that a function definition and its call can have.
 
 The most common forms that a function can have is a \textit{prefix function} \todo{official name?}, which is called as \texttt{name(arguments)}, where \texttt{name} is an identifier and \texttt{arguments} is a comma separated list of arguments. An argument is then either positional, or in the form \texttt{argname = expr}, where \texttt{argname} is the (partial) name of the formal argument and \texttt{expr} is the value assigned to this formal.
@@ -161,14 +163,14 @@ Another function form is the \textit{infix function}. These are either built-in 
 
 Next category is the \textit{replacement functions}. These are named as \texttt{name<-} and can be called as \texttt{name(args) <- expr}. This binds all \texttt{args} as arguments to the function and the \texttt{expr} as the last argument. This allows for a code which looks like it is working with mutable values, even though they are immutable (see section \todo{add section}).
 
-Last category of functions are the \texttt{special functions}. These represent the special built-in syntaxes like if statements, for loops or subscriptions (they correspond to calls to \texttt{`if`}, \texttt{`for`} and \texttt{`[`}, \texttt{`[[`]} respectively). They are cannot be user defined.
+Last category of functions are the \texttt{special functions}. These represent the special built-in syntaxes like if statements, for loops or subscriptions (they correspond to calls to \texttt{`if`}, \texttt{`for`} and \texttt{`[`}, \texttt{`[[`} respectively). They cannot be user defined.
 
 These different forms can be combined, so a function \texttt{`\%and\%<-`} can be called like \mintinline{R}{a %and% b <- c}.
 
 Every non-prefix function can be called like a prefix function with backticks, so the code \texttt{a <- if (T) 1 else 2} is equivalent to the call \texttt{`<-`(a, `if`(T, 1, 2))}.
 
 %---------------------------------------------------------------
-\section{Laziness}
+\subsection*{Laziness}
 %---------------------------------------------------------------
 
 R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a \textit{promise}. Only when the parameter is first accessed, the promise is evaluated (also called a force) and the result of the promise is cached. This can be seen in example \ref{lst:example-lazy}. The call at line 11 first prints \enquote{Hello} and only then the parameter \texttt{x} is accessed and the text \enquote{world} is printed. The second call to the function \texttt{h} demonstrates a second behavior - when a parameter is never accessed, it is not evaluated and thus the code of the promise is not executed and nothing is printed.
@@ -196,7 +198,7 @@ h(f(42))
 \end{listing}
 
 %---------------------------------------------------------------
-\section{Immutability}
+\subsection*{Immutability}
 %---------------------------------------------------------------
 
 All R values are \textit{semantically immutable}, with the exception of environments. This means that when a variable holds a value, this value never changes unless the variable is reassigned. We say that non-environment values have a \textit{copy-on-modify behavior} - when we modify the value, we create a new copy of it with the modified bits. R employs an optimization in this regard - if there exists only one reference to a given value, we can modify it in place to reduce a redundant copy.
@@ -215,7 +217,7 @@ x
   \caption{Immutability example}\label{lst:imm}
 \end{listing}
 
-The only truly mutable values are environments, and they conform to a \textit{reference behavior}. Listing \ref{lst:envir} shows this behavior - the variable \texttt{x} is added to both \texttt{e1} and \texttt{e1}, even though it is only added to \texttt{e2}.
+The only truly mutable values are environments, and they conform to a \textit{reference behavior}. Listing \ref{lst:envir} shows this behavior - the variable \texttt{x} is added to both \texttt{e1} and \texttt{e1}, even though we only defined it on \texttt{e2}.
 
 \begin{listing}[h!]
 	\centering
@@ -231,7 +233,7 @@ e1$x
 
 
 %---------------------------------------------------------------
-\section{Reflection}
+\subsection*{Reflection}
 %---------------------------------------------------------------
 
 \todoadd
@@ -247,7 +249,7 @@ bad <- function() {
 
 good <- function(y) {
   x <- 1
-  z <- y
+  z <- y # Here is the promise is evalated
   x + z
 }
 
@@ -258,3 +260,151 @@ good(bad())
 \end{listing}
 
 
+% %---------------------------------------------------------------
+% \chapter{The R Virtual Machine}
+% %---------------------------------------------------------------
+%
+% \begin{chapterabstract}
+% 	The R language is not formally specified, it only has a reference implementation that we will refer to as \textit{GNU-R}\todocite. On top of this virtual machine is built a Just-in-time compiler called \textit{Ř}\todocite. Although there are other implementations of R, we will only provide an overview on these two, as they are the focus of this thesis, and only provide an overview of the alternatives.
+% \end{chapterabstract}
+
+
+%---------------------------------------------------------------
+\section{GNU-R}
+%---------------------------------------------------------------
+
+\textit{GNU-R}, as the name suggest, is a part of the GNU project. It is written in the C programming language. \todo{expand}
+
+%---------------------------------------------------------------
+\subsection{Code representation}
+%---------------------------------------------------------------
+
+The GNU-R represents all code and values as \textit{symbolic expressions} (also \textit{S-expressions} or \textit{sexps}). An S-expression is a format for nested lists, popularized by Lisp language. It is usually recursively defined as either an atom (a named symbol), or a pair of two sexps.
+
+In GNU-R, the type \SEXP is a pointer to either a \texttt{SEXPREC} or \texttt{VECTOR\_SEXPREC} structure. Both of these structures contain a header structure of type \texttt{sxpinfo\_struct}, which is defined as in listing \ref{lst:sxpinfo}, a pointer to the attributes of the current value, and previous and next nodes in the garbage collector.
+
+\begin{listing}[h!]
+	\begin{minted}{C}
+#define NAMED_BITS 16
+struct sxpinfo_struct {
+    SEXPTYPE type      :  5;
+    unsigned int scalar:  1;  /* is this a numeric vector of length 1? */
+    unsigned int obj   :  1;  /* is this an object with a class attribute? */
+    unsigned int alt   :  1;  /* is this an ALTREP object? */
+    unsigned int gp    : 16;  /* general purpose */
+    unsigned int mark  :  1;  /* mark object as ‘in use’ in GC */
+    unsigned int debug :  1;
+    unsigned int trace :  1;
+    unsigned int spare :  1;  /* debug once and with reference counting */
+    unsigned int gcgen :  1;  /* generation for GC */
+    unsigned int gccls :  3;  /* class of node for GC */
+    unsigned int named : NAMED_BITS; /* used to control copying */
+    unsigned int extra : 32 - NAMED_BITS;
+}; /*		    Tot: 64 */
+  \end{minted}
+	\caption{The \texttt{sxpinfo\_struct} definition\cite[1.1.2 Rest of header]{rprojectInternals}}\label{lst:sxpinfo}
+\end{listing}
+
+The header contains the type of the \SEXP, which is one of the types defined as \ref{tbl:sexptype}, as well as aditional information about the type, garbage collection and debug information.
+
+\todo{what else?  bytecode compiler writen in R, interpreted in C}
+
+\begin{table}[h!]
+	\begin{tabular}{c l l}
+		\textbf{no} & \textbf{SEXPTYPE} & \textbf{Description}       \\
+		\hline
+		0           & NILSXP            & NULL                       \\
+		1           & SYMSXP            & symbols                    \\
+		2           & LISTSXP           & pairlists                  \\
+		3           & CLOSXP            & closures                   \\
+		4           & ENVSXP            & environments               \\
+		5           & PROMSXP           & promises                   \\
+		6           & LANGSXP           & language objects           \\
+		7           & SPECIALSXP        & special functions          \\
+		8           & BUILTINSXP        & builtin functions          \\
+		9           & CHARSXP           & internal character strings \\
+		10          & LGLSXP            & logical vectors            \\
+		13          & INTSXP            & integer vectors            \\
+		14          & REALSXP           & numeric vectors            \\
+		15          & CPLXSXP           & complex vectors            \\
+		16          & STRSXP            & character vectors          \\
+		17          & DOTSXP            & dot-dot-dot object         \\
+		18          & ANYSXP            & make “any” args work       \\
+		19          & VECSXP            & list (generic vector)      \\
+		20          & EXPRSXP           & expression vector          \\
+		21          & BCODESXP          & byte code                  \\
+		22          & EXTPTRSXP         & external pointer           \\
+		23          & WEAKREFSXP        & weak reference             \\
+		24          & RAWSXP            & raw vector                 \\
+		25          & OBJSXP            & objects not of simple type \\
+	\end{tabular}
+	\caption{The different SEXP types\cite[1.1.1 SEXPTYPEs]{rprojectInternals}}\label{tbl:sexptype}
+\end{table}
+
+These structures are not available directly, only the \SEXP is exported as an opaque pointer and individual fields are accessible via exported functions.
+
+\todo{picture, high-level overview of GNU-R ?}
+
+%---------------------------------------------------------------
+\subsection{Interpreter}
+%---------------------------------------------------------------
+
+The GNU-R parses the code to an \textit{abstract syntaxt tree} (\textit{AST}), also represented with the \SEXP.
+
+After the first execution, the function is passed to a
+
+%---------------------------------------------------------------
+\subsection{Garbage Collector}
+%---------------------------------------------------------------
+R does not have primitives for managing memory, instead an automatic memory management provided by the runtime is expected. GNU-R uses a generational non-moving stop-the-world garbage collector with three generations. \todo{explain ?}
+
+In order to correctly match the generation of objects assigned to other object, a \textit{write barrier} must be used, which ensures that the child object is at least as old as the parent one. This is possible due to opaqueness of the \SEXP type and ensuring that all of the assignments are done with exported functions, which make sure the write barrier is valid.
+
+%---------------------------------------------------------------
+\section{The Ř compiler}
+%---------------------------------------------------------------
+
+\textit{Ř} (also stylized as \textit{Rsh}, previously known as \textit{RIR}) is a just-in-time compiler for the R language, developed at Programming Languages Laboratory at Faculty of Information Technology, Czech Technical University in Prague\todocite\todo{Correct full name?}. The project is freely available and hosted on GitHub.
+
+It is built as an extension to GNU-R, although several changes need to be made to the original codebase in order to use it. It bypasses the GNU-R bytecode interpreter, instead using a custom one, while reusing the \SEXP representation, AST interpreter, and garbage collector.
+
+For the compilation to native code, the \textit{LLVM Project}\todocite is used.
+
+\todo{picture, high-level overview of Ř}
+
+%---------------------------------------------------------------
+\subsection{RIR bytecode interpreter}
+%---------------------------------------------------------------
+
+The custom bytecode used by Ř is called \textit{RIR}. It is a simple stack-based interpreter, not unsimilar to the one in GNU-R. It also uses the GNU-R bytecode node stack (the \textit{execution stack} of the GNU-R bytecode interpreter).
+
+When a function is first executed, the GNU-R code parses its code into an abstract syntax tree.
+
+\todo{how is a loop hijacked}
+
+For this thesis, the important bytecode instructions are \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These are executed after a \textit{callee load}, \textit{variable load} or a \textit{branch condition evaluation} respectively. The semantics of the instructions is observing the top value on the stack\todo{which stack} and record the information to the  \texttt{TypeFeedback} structure. The name \texttt{TypeFeedback} is a bit misleading here - it observes the type of value only for \texttt{record\_type\_}, whereas the \texttt{record\_call\_} records the address of callee, and \texttt{record\_test\_} if the top value is true, false, or any other.
+
+Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
+
+%---------------------------------------------------------------
+\subsection{PIR compiler}
+%---------------------------------------------------------------
+When a function or a loop is determined to be hot, it is compiled to \textit{PIR}, an intermediate representation used for the compilation to native code.
+
+PIR is composed of instruciton in a \textit{static single-assignment form} (\textit{SSA}). This means that all variables (called \textit{registers}) can be assigned only once, and they have to be assigned first before their first usage.
+
+PIR instructions are organized in \textit{basic blocks}, a continuous block of instruction ending in a \textit{terminator instruciton} - a (conditional) jump to another basic block, or a speculation anchor (explained later, see \todo{add chapter}).
+
+These basic blocks then form a \textit{directed graph}, which is encapsulated in a \textit{function}.
+
+After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT compiler}, which is part of the LLVM project and which does the lowering itself.
+
+%---------------------------------------------------------------
+\subsection{Contextual dispatch}
+%---------------------------------------------------------------
+
+% %---------------------------------------------------------------
+% \section{Other Implementations}
+% %---------------------------------------------------------------
+%
+% \todo{\\ pqR \\ FastR \\ Renjin \\ rho \\ Riposte \\ Microsoft R Open \\ GraalVM R}
