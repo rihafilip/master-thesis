@@ -3,40 +3,211 @@
 %---------------------------------------------------------------
 
 \begin{chapterabstract}
-  \todoadd
+	\todoadd
 \end{chapterabstract}
 
 In order to observe the behavior of the compiler, we had to create a tool
 
-The main goal was to unintrusively change the code base, allowing for certain hooks to be called, recording some state of the compiler. It is possible to compile the compiler without the recording tool, which has no impact on the rest of the code (except a one exported function).
+The main goal was to non-intrusively change the code base, allowing for certain hooks to be called, recording some state of the compiler. It is possible to compile the compiler without the recording tool, which has no impact on the rest of the code (except a one exported function). This is done by not defining the \texttt{RECORDING} macro (which is enabled by the \texttt{-DRECORDING=1} CMake flag).
 
-%---------------------------------------------------------------
-\section{Recorder}
-%---------------------------------------------------------------
+The code is merged into main branch of Ř and it is available on GitHub \todoadd. All the implementation is in the folder \texttt{rir/src} in files \texttt{recording.\{h, cpp\}}, \texttt{recording\_hooks.\{h, cpp\}} and \texttt{recording\_serialization.h}.
 
-%---------------------------------------------------------------
-\section{Events}
-%---------------------------------------------------------------
+\todo{Edgar's implementation}
 
 %---------------------------------------------------------------
 \section{Hooks}
 %---------------------------------------------------------------
 
+The recording mechanism managed via \textit{hooks}, functions defined in the file \texttt{recording\_serialization.h}. This is the only file that is intended to be included by other parts of the compiler. At various points in the compiler, calls are made to these hooks, emitting an event. No explicit state is managed by the caller, everything is done by the hooks.
+
+All  the calls to the hooks are surrounded by the \texttt{REC\_HOOK} macro. This macro controls the conditional compilation of these hooks, where if the recording is not enabled the macro results in nothing \todo{add REC\_HOOK definitin?}.
+
+A problem we encountered is that at the point we register an event, we do not have all of the useful information about the event. As an example, in listing \ref{lst:hook-docall} is the simplified logic around recompilation of an R function. If both the \texttt{RecompileHeuristic} and \texttt{RecompileCondition} return \texttt{true}, we do the recompilation of function in \texttt{DoRecompile}, where a hook emiting compilation event is called. But there are multiple heuristics and conditions determining if a function is to be compiled. Thus in each of the branches, additional hook call is made, modifying a global state of the recording (see listing \ref{lst:hook-recompile-condition}). We then also have to clean up the global state in case a compilation is not made, thus the call to \texttt{recording::recordReasonsClear} - this is also possible, because Ř is compiled with disabled exception, thus if we do not crash, we will always call this function.
+
+This architecture of global state allowed us to make minimal changes to the codebase, while still collecting important information about various details of the compiler.
+
+An example of calling hooks can be seen in listing \ref{lst:hook-deopt}, where we call hooks that register a \textit{deoptimization event}.
+
+\begin{listing}
+	\begin{minted}{cpp}
+if (!isDeoptimizing() && RecompileHeuristic(/* args */)) {
+    if (RecompileCondition(/* args */)) {
+        if (/* OSR condition */) {
+            REC_HOOK(recording::recordOsrTriggerCallerCallee());
+        }
+        DoRecompile(/* args */);
+    }
+}
+REC_HOOK(recording::recordReasonsClear());
+  \end{minted}
+	\caption{Simplified code of compilation logic in interpreter/interp.cpp, in function \texttt{doCall}}\label{lst:hook-docall}
+\end{listing}
+
+\begin{listing}
+	\begin{minted}{cpp}
+inline bool RecompileCondition(DispatchTable* table, Function* fun,
+                               const Context& context) {
+
+    if (fun->flags.contains(Function::MarkOpt)) {
+        REC_HOOK(recording::recordMarkOptReasonCondition());
+        return true;
+    }
+
+    if (!fun->isOptimized()) {
+        REC_HOOK(recording::recordNotOptimizedReason());
+        return true;
+    }
+
+    if (context.smaller(fun->context()) &&
+        context.isImproving(fun) > table->size()) {
+        REC_HOOK(recording::recordIsImprovingReason());
+        return true;
+    }
+
+    if (fun->flags.contains(Function::Reoptimize)) {
+        REC_HOOK(recording::recordReoptimizeFlagReason());
+        return true;
+    }
+
+    return false;
+}
+\end{minted}
+	\caption{Simplified code of function \texttt{RecompileCondition}, in interpreter/interp.h}\label{lst:hook-recompile-condition}
+\end{listing}
+
+
+
+\begin{listing}
+	\begin{minted}{cpp}
+void deoptImpl(/* parameters */) {
+    REC_HOOK(recording::recordDeopt(c, DispatchTable::unpack(BODY(cls)),
+                                    *deoptReason, deoptTrigger));
+
+    deoptReason->record(deoptTrigger);
+
+    REC_HOOK(recording::recordSCDeoptFinish());
+  \end{minted}
+	\caption{Example of calling recording hooks in file compiler/native/builtins.cpp, in function \texttt{deoptImpl}}\label{lst:hook-deopt}
+\end{listing}
+
+
+%---------------------------------------------------------------
+\section{Recorder}
+%---------------------------------------------------------------
+
+The main orchestration is done in the class \texttt{Record}, as defined in listing \ref{lst:record-class}. This is a class that holds the observed events and closures they belong to.
+
+\begin{listing}
+	\begin{minted}{cpp}
+class Record {
+    std::unordered_map<const DispatchTable*, size_t> dt_to_recording_index_;
+    std::unordered_map<int, size_t> primitive_to_body_index;
+    std::unordered_map<SEXP, size_t> bcode_to_body_index;
+    std::unordered_map<Function*, size_t> expr_to_body_index;
+
+  public:
+    std::vector<FunRecording> functions;
+    std::vector<std::unique_ptr<Event>> log;
+
+    template <typename E, typename... Args>
+    void record(SEXP cls, Args&&... args);
+
+    template <typename E, typename... Args>
+    void record(const DispatchTable* dt, Args&&... args);
+
+    template <typename E, typename... Args>
+    void record(Function* fun, Args&&... args);
+};
+
+struct FunRecording {
+    // Index into the array of primitive functions, or -1
+    ssize_t primIdx = -1;
+    // Possibly empty name of the closure
+    std::string name;
+    // Possibly empty name of the environment
+    // in which the name was bound to the closure
+    std::string env;
+    // The serialized closure
+    SEXP closure = R_NilValue;
+    // The address of the closure
+    uintptr_t address = 0;
+};
+  \end{minted}
+	\caption{Simplified definition of \texttt{Record} and \texttt{FunRecording} classes \todo{remove the record methods?}}\label{lst:record-class}
+\end{listing}
+
+We say that each event is connected to some closure - either a Ř dispatch table, Ř function without a dispatch table (when it is a top level compilation), a GNU-R compiled code (represented by some SEXP), or a primitive function. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and name of its environment for the given closure and serialize the closure (serialization can be disabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording}. This is what the \texttt{*\_to\_recoding\_index} fields are used for. Every event then only holds an index into the \texttt{functions} field.
+
+We use thoroughly that the GNU-R garbage collector is non-moving, as we can then index by the address of the objects and we can be sure that they are valid. There is still a possibilty that an object whose address we have captured gets collected and in its place a new object will be placed. This is prevented by calling the \texttt{R\_PreserveObject} function exported from GNU-R. This add the object to a \textit{precious list} so that it is never collected by the garbage collector until removed from the list by calling \texttt{R\_ReleaseObject}. This might change the runtime properties of an executed program, but we have not observed any observable difference.
+
+%---------------------------------------------------------------
+\section{Events}
+%---------------------------------------------------------------
+
+An \texttt{Event} is an abstract class, from which all of the other events inherit from. Every event has an index of a \texttt{FunRecording} which it is connected with.
+
+Currently, there are eight different events.
+
+\textit{Compilation start} and \textit{compilation end} events denote the start and end of a \textit{compilation session}, a single call to the compiler during which multiple closures might be lowered to native code. These events act as brackets of sorts, everything in between these is connected to the one compilation session. They record the heuristics used for triggering the compilation, its duration and if it at any point failed. For each of the closures we then register a \textit{compilation event}, where we reference the closure that was compiled, the type feedback it used, the PIR code that it resulted in, the LLVM bitcode that it was lowered to, and the number of \texttt{Deopt} instrucitons.
+
+When a deoptimizations happens, the \textit{deopt event} is triggered. It captures the deopt reason, the function and its feedback slot it is connected with, and also the trigger, which is either a closure referenced as \texttt{FunRecoding}, or the \texttt{SEXP} value.
+
+Every time we invoke a function, we register an \textit{invoke event}. Because of the contextual dispatch, there are mutliple places where a call might be dispatched to. Thus we capture the \textit{call context}, the infered context of the arguments, as well as if we are dispatching to a natively compiled function \todo{missing asmpt present, recovered}. There are also different places where the dispatching is resolved, this is captured in the source field.
+
+Due to the architecture of Ř, we also have a \textit{unregister invocation event}. \todoadd
+
+An update to the type feedback is registered as \textit{speculative context event}. We capture the new shape of the feedback, the index and closure it happend in, if the new value is updated and if this change happend because of deoptimization.
+
+We also have a definition of a \textit{custom event}, which is simply a user-defined message that can be emited with the R api.
+
 %---------------------------------------------------------------
 \section{Interface}
 %---------------------------------------------------------------
 
-%---------------------------------------------------------------
-\subsection{Environment Variables}
-%---------------------------------------------------------------
+Currently there are two ways to interact with the recording - environment variables passed to the program, and exported R functions.
 
 %---------------------------------------------------------------
-\subsection{R API}
+\subsection*{Environment Variables}
 %---------------------------------------------------------------
+
+With the environment variables it is possible to record the whole run of a program. This is done by setting \texttt{RIR\_RECORD} to the path where the serialized recording should be stored. With the \texttt{RIR\_RECORD\_FILTER} variable, we can control which events should be considered, while ignoring the rest. The available values are \texttt{Compile}, \texttt{Deopt}, \texttt{TypeFeedback} and \texttt{Invoke} and multiple can be specified when separated by comma. The custom events cannot be filtered out.
+
+As an example, by calling
+
+\mintoneline{bash}{RIR_RECORD=output.rds RIR_RECORD_FILTER=Compile,TypeFeedback R -f test.R}
+
+\noindent we record all compilation and type feedback events emited while running the script \texttt{test.R} into the file \texttt{output.rds}.
+
+There is also a \texttt{RIR\_RECORD\_SERIALIZE} environment variable which if it is set to non-zero integer enables the serialization of closures and deopt events. The serialization is by default turned off because of a bug in serialization of Ř objects \todo{say somewhere else}.
+
+%---------------------------------------------------------------
+\subsection*{R API}
+%---------------------------------------------------------------
+
+The functions available in R are: \todo{cite the GitHub documentation?}
+
+\begin{itemize}
+	\item \texttt{recordings.start()} starts or resumes the recording,
+	\item \texttt{recordings.stop()} pauses the recording,
+	\item \texttt{recordings.get()} returns the object with recorded functions and events,
+
+	\item \texttt{recordings.save(filename)} saves the recording as an RDS to the given file,
+	\item \texttt{recordings.load(filename)} loads the recording from the given file and returns the object representing it,
+
+	\item \texttt{recordings.reset()} clears all of the recording informations,
+	\item \texttt{recordings.enabled()} returns a boolean representing if we are recording right now,
+
+	\item \texttt{recordings.setFilter(compile, deoptimize, type\_feedback, invocation)} sets the filtering of individual events,
+
+	\item and \texttt{recordings.customEvent(message)} creates a custom event with the associated message.
+	\item \todo{eval, printEventPart}
+\end{itemize}
 
 %---------------------------------------------------------------
 \section{Serialization}
 %---------------------------------------------------------------
+
+In order to analyze the recorded data
 
 %---------------------------------------------------------------
 \subsection{CSV Format}
