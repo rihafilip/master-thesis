@@ -3,5 +3,140 @@
 %---------------------------------------------------------------
 
 \begin{chapterabstract}
-  \todoadd
+	\todoadd
 \end{chapterabstract}
+
+This chapter is based on the paper \todocite.
+
+%---------------------------------------------------------------
+\section{Motivation}
+%---------------------------------------------------------------
+
+\todo{event log?}
+Let's take the example in listing \ref{lst:pollution-motive} and consider disabled contextual dispatch in Ř and no OSR compilations of loops.
+
+At first, the function executes with doubles, and the type feedback will reflect that. After few executions, the function \texttt{sum} will get compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly, because the rest of the function can use specialized operations on doubles.
+
+Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of the arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This slows the function significantly for all subsequent calls. The evolution of type feedback is demonstrated in table \ref{tbl:pollution-motive-baseline}.
+
+This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information, thus we specialize to a more general context and lose performance.
+
+\begin{listing}
+	\begin{minted}{R}
+sum <- function(vec, init) {
+  s <- init
+  for (i in 1:length(vec))
+    s <- s + vec[[i]]
+  s
+}
+
+for (x in 1:1000) sum(doubles, 0.0)
+for (x in 1:1000) sum(integers, 0L)
+for (x in 1:1000) sum(doubles, 0.0)
+  \end{minted}
+	\caption{Motivating example for feedback pollution}\label{lst:pollution-motive}
+\end{listing}
+
+\begin{listing}
+	\begin{sublisting}{\textwidth}
+		\begin{minted}{text}
+# Load the first argument
+%1    = LdArg        0
+# Force the promise
+%2    = Force!<lazy> %1
+# Check if its type is double (real) with no attributes (-)
+%3    = IsType       %2 isA real-
+# Assume on the type
+        Assume       %3
+    \end{minted}
+		\subcaption{Compilation with feedback \texttt{[double]}}\label{lst:pollution-pir-real}
+	\end{sublisting}
+
+	\vspace{1em}
+
+	\begin{sublisting}{\textwidth}
+		\begin{minted}{text}
+# Load the first argument
+%1    = LdArg        0
+# Force the promise
+%2    = Force!<lazy> %1
+# Check if the argument has no attributes (-), maybe missing (?),
+# but could be of any type
+%3    = IsType       %2 isA val?-
+# Assume on the type
+        Assume       %3
+    \end{minted}
+		\subcaption{Compilation with feedback \texttt{[double, integer]}}\label{lst:pollution-pir-val}
+	\end{sublisting}
+	\caption{Simplified PIR instructions with assumptions on the type of first argument for listing \ref{lst:pollution-motive}}
+\end{listing}
+
+\begin{table}
+	\centering
+	\begin{subtable}{\linewidth}
+		\small
+		\centering
+		\begin{tabular}{|l l l l|}
+			\hline
+			\textbf{Call}              & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
+			\hline
+			\texttt{sum(doubles, 0.0)} & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C, NE       \\
+			\texttt{sum(integers, 0L)} & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & D, BE, C, NE    \\
+			\texttt{sum(doubles, 0.0)} & \texttt{[double, integer]}                               & 3s                      & NE              \\
+			\hline
+		\end{tabular}
+
+		\subcaption{Execution without contextual dispatch}\label{tbl:pollution-motive-baseline}
+	\end{subtable}
+
+	\vspace{1em}
+
+	\begin{subtable}{\linewidth}
+		\small
+		\centering
+		\begin{tabular}{|l l l l l|}
+			\hline
+			\textbf{Call}              & \textbf{Context} & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
+			\hline
+			\texttt{sum(doubles, 0.0)} & c1               & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C c1, NE c1 \\
+			\texttt{sum(integers, 0L)} & c2               & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & BE, C c2, NE c2 \\
+			\texttt{sum(doubles, 0.0)} & c1               & \texttt{[double, integer]}                               & 0.15s                   & NE c1           \\
+			\hline
+		\end{tabular}
+
+		\subcaption{Execution with contextual dispatch}\label{tbl:pollution-motive-context}
+	\end{subtable}
+	\caption{Execution of listing \ref{lst:pollution-motive} on Ř, BE - bytecode execution, C - compilation, NE - native execution, D - deoptimization, execution times are illustrative}
+\end{table}
+
+If we consider the contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and as was the case without contextual dispatch, the resulting code is much faster.
+
+When we call with integers, we do not dispatch into the already compiled version, because the call context is not \todo{what is the relation} of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in table \ref{tbl:pollution-motive-context}.
+
+%---------------------------------------------------------------
+\section{Definitions}
+%---------------------------------------------------------------
+
+We say that a \textit{feedback slot is polluted} when its value changes between individual compilations.
+
+\textit{Feedback pollution} is a ratio of the number of modified feedback slots to the total number of feedback slots.
+
+\textit{Polluted compilation} is a compilation, where the feedback pollution is greater than 0.
+
+\textit{Function pollution} is a ratio between the polluted compilations and the total number of compilations.
+
+%---------------------------------------------------------------
+\section{Observation}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\section{Prevention}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\subsection{Contextual Feedback}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\subsection{Feedback Decay (?)}
+%---------------------------------------------------------------
