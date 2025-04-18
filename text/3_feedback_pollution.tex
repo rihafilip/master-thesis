@@ -15,11 +15,11 @@ This chapter is based on the paper \todocite.
 \todo{event log?}
 Let's take the example in listing \ref{lst:pollution-motive} and consider disabled contextual dispatch in Ř and no OSR compilations of loops.
 
-At first, the function executes with doubles, and the type feedback will reflect that. After few executions, the function \texttt{sum} will get compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly, because the rest of the function can use specialized operations on doubles.
+At first, the function executes with doubles, and the type feedback will reflect that. After a few executions, the function \texttt{sum} will be compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly because the rest of the function can use specialized operations on doubles.
 
-Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of the arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This slows the function significantly for all subsequent calls. The evolution of type feedback is demonstrated in table \ref{tbl:pollution-motive-baseline}.
+Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type, and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This significantly slows the function for all subsequent calls. The evolution of type feedback is demonstrated in table \ref{tbl:pollution-motive-baseline}.
 
-This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information, thus we specialize to a more general context and lose performance.
+This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information; thus we specialize to a more general context and lose performance.
 
 \begin{listing}
 	\begin{minted}{R}
@@ -109,7 +109,7 @@ for (x in 1:1000) sum(doubles, 0.0)
 	\caption{Execution of listing \ref{lst:pollution-motive} on Ř, BE - bytecode execution, C - compilation, NE - native execution, D - deoptimization, execution times are illustrative}
 \end{table}
 
-If we consider the contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and as was the case without contextual dispatch, the resulting code is much faster.
+If we consider contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and, as was the case without contextual dispatch, the resulting code is much faster.
 
 When we call with integers, we do not dispatch into the already compiled version, because the call context is not \todo{what is the relation} of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in table \ref{tbl:pollution-motive-context}.
 
