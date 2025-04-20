@@ -42,7 +42,7 @@ for (x in 1:1000) sum(doubles, 0.0)
 		\begin{minted}{text}
 # Load the first argument
 %1    = LdArg        0
-# Force the promise
+# Evaluate the promise
 %2    = Force!<lazy> %1
 # Check if its type is double (real) with no attributes (-)
 %3    = IsType       %2 isA real-
@@ -58,7 +58,7 @@ for (x in 1:1000) sum(doubles, 0.0)
 		\begin{minted}{text}
 # Load the first argument
 %1    = LdArg        0
-# Force the promise
+# Evaluate the promise
 %2    = Force!<lazy> %1
 # Check if the argument has no attributes (-), maybe missing (?),
 # but could be of any type
@@ -72,19 +72,20 @@ for (x in 1:1000) sum(doubles, 0.0)
 \end{listing}
 
 \begin{table}
-	\centering
 	\begin{subtable}{\linewidth}
-		\small
-		\centering
-		\begin{tabular}{|l l l l|}
-			\hline
-			\textbf{Call}              & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
-			\hline
-			\texttt{sum(doubles, 0.0)} & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C, NE       \\
-			\texttt{sum(integers, 0L)} & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & D, BE, C, NE    \\
-			\texttt{sum(doubles, 0.0)} & \texttt{[double, integer]}                               & 3s                      & NE              \\
-			\hline
-		\end{tabular}
+		\begin{adjustwidth}{-2cm}{-2cm}
+			\small
+			\centering
+			\begin{tabular}{l l l l}
+				\hline
+				\textbf{Call}              & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
+				\hline
+				\texttt{sum(doubles, 0.0)} & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C, NE       \\
+				\texttt{sum(integers, 0L)} & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & D, BE, C, NE    \\
+				\texttt{sum(doubles, 0.0)} & \texttt{[double, integer]}                               & 3s                      & NE              \\
+				\hline
+			\end{tabular}
+		\end{adjustwidth}
 
 		\subcaption{Execution without contextual dispatch}\label{tbl:pollution-motive-baseline}
 	\end{subtable}
@@ -92,20 +93,23 @@ for (x in 1:1000) sum(doubles, 0.0)
 	\vspace{1em}
 
 	\begin{subtable}{\linewidth}
-		\small
-		\centering
-		\begin{tabular}{|l l l l l|}
-			\hline
-			\textbf{Call}              & \textbf{Context} & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
-			\hline
-			\texttt{sum(doubles, 0.0)} & c1               & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C c1, NE c1 \\
-			\texttt{sum(integers, 0L)} & c2               & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & BE, C c2, NE c2 \\
-			\texttt{sum(doubles, 0.0)} & c1               & \texttt{[double, integer]}                               & 0.15s                   & NE c1           \\
-			\hline
-		\end{tabular}
+		\begin{adjustwidth}{-2cm}{-2cm}
+			\small
+			\centering
+			\begin{tabular}{l l l l l}
+				\hline
+				\textbf{Call}              & \textbf{Context} & \textbf{Type feedback}                                   & \textbf{Execution time} & \textbf{Events} \\
+				\hline
+				\texttt{sum(doubles, 0.0)} & c1               & \texttt{[]} \rightarrow \texttt{[double]}                & 0.15s                   & BE, C c1, NE c1 \\
+				\texttt{sum(integers, 0L)} & c2               & \texttt{[double]} \rightarrow \texttt{[double, integer]} & 3s                      & BE, C c2, NE c2 \\
+				\texttt{sum(doubles, 0.0)} & c1               & \texttt{[double, integer]}                               & 0.15s                   & NE c1           \\
+				\hline
+			\end{tabular}
+		\end{adjustwidth}
 
 		\subcaption{Execution with contextual dispatch}\label{tbl:pollution-motive-context}
 	\end{subtable}
+
 	\caption{Execution of listing \ref{lst:pollution-motive} on Ř, BE - bytecode execution, C - compilation, NE - native execution, D - deoptimization, execution times are illustrative}
 \end{table}
 
@@ -129,13 +133,16 @@ We say that a \textit{feedback slot is polluted} when its value changes between 
 \section{Observation}
 %---------------------------------------------------------------
 
+
 %---------------------------------------------------------------
 \section{Prevention}
 %---------------------------------------------------------------
 
+
 %---------------------------------------------------------------
 \subsection{Contextual Feedback}
 %---------------------------------------------------------------
+
 
 %---------------------------------------------------------------
 \subsection{Feedback Decay (?)}
