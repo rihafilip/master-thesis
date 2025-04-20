@@ -45,9 +45,8 @@ REC_HOOK(recording::recordReasonsClear());
 
 \begin{listing}
 	\begin{minted}{cpp}
-inline bool RecompileCondition(DispatchTable* table, Function* fun,
-                               const Context& context) {
-
+bool RecompileCondition(DispatchTable* table, Function* fun,
+                        const Context& context) {
     if (fun->flags.contains(Function::MarkOpt)) {
         REC_HOOK(recording::recordMarkOptReasonCondition());
         return true;
@@ -86,6 +85,8 @@ void deoptImpl(/* parameters */) {
     deoptReason->record(deoptTrigger);
 
     REC_HOOK(recording::recordSCDeoptFinish());
+    // ...
+}
   \end{minted}
 	\caption{Example of calling recording hooks in file compiler/native/builtins.cpp, in function \texttt{deoptImpl}}\label{lst:hook-deopt}
 \end{listing}
