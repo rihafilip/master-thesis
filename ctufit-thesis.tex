@@ -101,6 +101,9 @@
 \addbibresource{text/bib-database.bib}
 \usepackage{xurl}
 
+\usepackage{subcaption}
+\renewcommand{\thesubtable}{\thetable.\arabic{subtable}}
+
 \usepackage[newfloat]{minted}
 \SetupFloatingEnvironment{listing}{name=Code listing}
 \DeclareCaptionSubType*[arabic]{listing}
@@ -117,7 +120,6 @@
 \newcommand{\todocite}[0]{[\textbf{\textcolor{red}{?}}]}
 
 \usepackage{multirow}
-\usepackage{subcaption}
 
 % Custom commands
 \newcommand{\SEXP}[0]{\texttt{SEXP}}
