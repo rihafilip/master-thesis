@@ -97,8 +97,10 @@
 %%%%%%%%%%%%%%%%%%%%%%
 \usepackage{dirtree}
 \usepackage{tikz}
+
 \usepackage[style=iso-numeric]{biblatex}
 \addbibresource{text/bib-database.bib}
+
 \usepackage{xurl}
 
 \usepackage{subcaption}
@@ -108,16 +110,22 @@
 \SetupFloatingEnvironment{listing}{name=Code listing}
 \DeclareCaptionSubType*[arabic]{listing}
 \setminted{linenos}
-\newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
 
 \usepackage{calc}
-
 \usepackage{csquotes}
+\usepackage{multirow}
+\usepackage{changepage}
+
 \usepackage{svg}
 \svgsetup{
   inkscapelatex=true,
   inkscapeversion=1
 }
+
+\usepackage{filemod}
+
+% Custom commands
+\newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
 
 \newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
 
@@ -125,8 +133,6 @@
 \newcommand{\todoadd}[0]{\textbf{\textcolor{red}{(TODO)}}}
 \newcommand{\todocite}[0]{[\textbf{\textcolor{red}{?}}]}
 
-\usepackage{multirow}
-\usepackage{changepage}
 % Inspired by https://github.com/FabianReister/drawio-latex
 % Arguments - input file, page index, output file
 \newcommand{\exportdrawio}[3]{
@@ -136,8 +142,6 @@
   }{}
 }
 
-% Custom commands
-\newcommand{\SEXP}[0]{\texttt{SEXP}}
 % Arguments - [includegraphics options], page index
 % \newcommand{\includediagram}[2][]{
 %   \exportdrawio{diagrams/diagrams.drawio}{#2}{diagrams/diagram-#2.pdf}
