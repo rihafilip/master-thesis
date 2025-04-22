@@ -113,6 +113,12 @@
 \usepackage{calc}
 
 \usepackage{csquotes}
+\usepackage{svg}
+\svgsetup{
+  inkscapelatex=true,
+  inkscapeversion=1
+}
+
 \newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
 
 \newcommand{\todo}[1]{\textbf{\textcolor{red}{(TODO: #1)}}}
@@ -121,10 +127,26 @@
 
 \usepackage{multirow}
 \usepackage{changepage}
+% Inspired by https://github.com/FabianReister/drawio-latex
+% Arguments - input file, page index, output file
+\newcommand{\exportdrawio}[3]{
+  \filemodCmp{#1}{#3}{
+    \immediate\write18{drawio #1 --output #3 --page-index #2 --export --transparent --embed-svg-images --embed-svg-fonts false --svg-theme light}
+    % \immediate\write18{drawio #1 --output #3 --page-index #2 --export --crop}
+  }{}
+}
 
-\usepackage{svg}
 % Custom commands
 \newcommand{\SEXP}[0]{\texttt{SEXP}}
+% Arguments - [includegraphics options], page index
+% \newcommand{\includediagram}[2][]{
+%   \exportdrawio{diagrams/diagrams.drawio}{#2}{diagrams/diagram-#2.pdf}
+%   \includegraphics[#1]{diagrams/diagram-#2.pdf}
+% }
+\newcommand{\includediagram}[2][0.85]{
+  \exportdrawio{diagrams/diagrams.drawio}{#2}{diagrams/diagram-#2.svg}
+  \scalebox{#1}{\includesvg{diagrams/diagram-#2.svg}}
+}
 
 %%%%%%%%%%%%%%%%%%%%%%
 % PACKAGES SETTINGS END

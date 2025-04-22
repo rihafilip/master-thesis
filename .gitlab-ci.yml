@@ -2,6 +2,8 @@ image: texlive/texlive:latest
 
 LuaLaTeX:
     script:
+        - apt-get update
+        - apt-get install -y inkscape drawio
         - latexmk --shell-escape -pdflua ctufit-thesis.tex
     artifacts:
         paths:

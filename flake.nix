@@ -11,6 +11,7 @@
         buildInputs = with pkgs; [
           texlive.combined.scheme-full
           latexminted
+          inkscape
         ];
       };
     };

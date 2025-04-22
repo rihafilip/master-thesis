@@ -21,3 +21,6 @@ pdfa.xmpi
 *.xmpdata
 *.tdo
 _minted
+svg-inkscape
+diagrams/.$*
+diagrams/*.svg
