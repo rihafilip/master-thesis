@@ -1,0 +1,61 @@
+\documentclass[varwidth=15cm, border={1cm 0.1cm 1cm 1cm}]{standalone}
+
+\usepackage[newfloat]{minted}
+\RequirePackage{lmodern}[2009/10/30]
+
+\usemintedstyle{trac}
+
+\begin{document}
+\begin{listing}
+    \begin{minted}{text}
+0:
+      0   push_  <blt is.integer>
+      5   dup_
+      6   ldvar_noforce_  is.integer
+     11   identical_noforce_
+     12   [ _ ] Test#0
+     17   brtrue_  1
+     22   pop_
+     23   ldfun_  is.integer
+     28   [ 0, <0>, valid  ] Call#0
+     33   mk_promise_  0
+     38   ; is.integer(x)
+          call_  1
+     55   br_  2
+1:
+     60   ldvar_cached_  x{0}
+     69   [ <?> ] Type#1
+     74   ; is.integer(x)
+          call_  1
+2:
+     91   [ <?> ] Type#2
+     96   asbool_
+     97   brtrue_  3
+    102   push_  42
+    107   visible_
+    108   br_  4
+3:
+    113   ldfun_  h
+    118   [ 0, <0>, valid  ] Call#1
+    123   mk_promise_  1
+    128   ; h(x)
+          call_  1
+    145   [ <?> ] Type#4
+4:
+    150   ret_
+
+[Prom (index 0)]
+0:
+      0   ldvar_  x
+      5   [ <?> ] Type#0
+     10   ret_
+
+[Prom (index 1)]
+0:
+      0   ldvar_  x
+      5   [ <?> ] Type#3
+     10   ret_
+    \end{minted}
+\end{listing}
+\end{document}
+
