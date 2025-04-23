@@ -587,7 +587,6 @@
 		\DeclareRobustCommand{\listlistingname}{\thectufitlollabel}%
 		\DeclareRobustCommand{\thectufitlistingscommand}{\listoflistings}%
 		\ifdefined\@ctufitthesisblackandwhite
- 			\usemintedstyle{trac}%
 			\setminted{linenos}%
 			\setmintedinline{linenos=false}%
 		\fi

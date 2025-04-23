@@ -110,6 +110,7 @@
 \SetupFloatingEnvironment{listing}{name=Code listing}
 \DeclareCaptionSubType*[arabic]{listing}
 \setminted{linenos}
+% \usemintedstyle{trac}
 
 \usepackage{calc}
 \usepackage{csquotes}
@@ -126,6 +127,7 @@
 
 % Custom commands
 \newcommand{\mintoneline}[2]{\mint[linenos=false]{#1}{#2}}
+\newcommand{\pirlexer}[0]{./minted/PIRLexer.py}
 
 \newcommand{\quotecite}[1]{\enquote{\textit{#1}}}
 
