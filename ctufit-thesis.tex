@@ -140,15 +140,10 @@
 \newcommand{\exportdrawio}[3]{
   \filemodCmp{#1}{#3}{
     \immediate\write18{drawio #1 --output #3 --page-index #2 --export --transparent --embed-svg-images --embed-svg-fonts false --svg-theme light}
-    % \immediate\write18{drawio #1 --output #3 --page-index #2 --export --crop}
   }{}
 }
 
 % Arguments - [includegraphics options], page index
-% \newcommand{\includediagram}[2][]{
-%   \exportdrawio{diagrams/diagrams.drawio}{#2}{diagrams/diagram-#2.pdf}
-%   \includegraphics[#1]{diagrams/diagram-#2.pdf}
-% }
 \newcommand{\includediagram}[2][0.85]{
   \exportdrawio{diagrams/diagrams.drawio}{#2}{diagrams/diagram-#2.svg}
   \scalebox{#1}{\includesvg{diagrams/diagram-#2.svg}}
