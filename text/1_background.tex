@@ -15,12 +15,12 @@
 
 The language is high-level, dynamic, object-oriented, functional, interpreted, and lazy, with automatic memory management.
 
-The beauty of R is that very complex operations can be expressed in very few lines of code. \todo{some example} It is highly used by statistician, where a big part of them are non-programmers, and this is reflected in the design of the language.
+The beauty of R is that very complex operations can be expressed in very few lines of code. \todo{some example (eval in shadows, 6.1 data.table)} It is highly used by statistician, where a big part of them are non-programmers, and this is reflected in the design of the language.
 
 The R syntax is very C-like, with \texttt{if} statements, \texttt{for} and \texttt{while} loops, array indexing and function calls. For assignment, the \texttt{<-} operator is used. Statements are separated by newline, optionally by semicolon if they are on the same line.
 
 %---------------------------------------------------------------
-\subsection*{Types}
+\subsubsection*{Types}
 %---------------------------------------------------------------
 
 R basic types are the \textit{numeric types} (\textit{integer}, \textit{double} and \textit{complex}), \textit{character type} (strings) and \textit{logical type} (the boolean values \texttt{TRUE} and \texttt{FALSE}). R also has \texttt{NULL}, and a constant \texttt{NA} (\textit{not available}) representing a missing value.
@@ -34,7 +34,7 @@ Every type can have associated \textit{attributes}, a collection of name-value p
 R also has multiple \textit{object models}. The most common ones are \textit{S3}, which is controlled by setting a \texttt{class} attribute on any type, and \textit{S4}, which defines more formal classes which have to be created and instantiated. S4 objects have special type.
 
 %---------------------------------------------------------------
-\subsection*{Environments}
+\subsubsection*{Environments}
 %---------------------------------------------------------------
 
 Different scopes in R are separated using objects named \textit{environments}. An environment consists of a \textit{frame}, which is the collection of variables, and a pointer to an \textit{enclosing environment} (also called a \textit{parent}). The topmost environment has a pointer to a special \textit{empty environment}, which has no other parent.
@@ -43,24 +43,32 @@ When a variable or a function is accessed, it is first looked for in the current
 
 The lookup for functions is separate from non-function lookup. An assignment of a variable in some environment does not shadow a function in its enclosing environment. So the code \texttt{c <- 42; c(c, c)} results in one vector with two numbers 42, because the definition of the variable \texttt{c} does not shadow the function of the same name from the base environment.
 
-These environments are also first-class values. We can create new environments (\texttt{new.env()}), access the value of the currently executed one (\texttt{environment()}), or even access and modify environments on the call stack (for example \texttt{sys.frame(-1)} accesses the environment of caller of current function).
+These environments are also first-class values. We can create new environments, access the value of the currently executed one , or even access and modify environments on the call stack.
 
 %---------------------------------------------------------------
-\subsection*{Functions}
+\subsubsection*{Functions}
 %---------------------------------------------------------------
 
 A \textit{function}, or also a \textit{closure}, is composed of three parts - \textit{formals}, which is the list of formal arguments and their default values, \textit{body}, which is the code of the function, and \textit{environment} defining the lexical scope of the function body. New functions can be created with the \texttt{function} keyword.
 
 Most operations that happen in R are in fact function calls. This includes the control flow statements (like \textit{if} or \textit{while}), binary operations, assignment, and even surrounding an expression with parenthesis or multiple expression with braces. This is demonstrated in listing \ref{lst:r-special-calls}. Note that built-in functions have to be surrounded with backticks in order to referr to them as identifiers.
 
-\begin{listing}
-	\begin{minted}{R}
+\begin{listing}[ht!]
+	\begin{sublisting}[t!]{0.47\textwidth}
+		\centering
+		\begin{minted}{R}
 a <- if (TRUE) {
   1
 } else
   2 * (3 + 4)
-
-# This is equivalent to the previous statement
+    \end{minted}
+	\end{sublisting}
+	\hfill
+	\begin{sublisting}[t!]{0.47\textwidth}
+		\centering
+		\begin{minted}{R}
+# This is equivalent to
+# the previous statement
 `<-`(a, `if`(
   TRUE,
   `{`(1),
@@ -69,19 +77,20 @@ a <- if (TRUE) {
     `(`(`+`(3, 4))
   )
 ))
-  \end{minted}
+    \end{minted}
+	\end{sublisting}
 	\caption{Demonstration of R special calls}\label{lst:r-special-calls}
 \end{listing}
 
 %---------------------------------------------------------------
-\subsection*{Laziness}
+\subsubsection*{Laziness}
 %---------------------------------------------------------------
 
 R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a \textit{promise}, a tuple of \textit{expression}, \textit{value}, and \textit{environment}. The value is at first set to the unbound value. When the promise is first accessed, the expression of the promise is evaluated with its environment (also called a \textit{force}). The result is cached in the value field, and every other access to the argument results in the cached value.
 
 This can be seen in example \ref{lst:example-lazy}. The call at line 12 first prints \enquote{Hello from g}, then the parameter \texttt{x} is accessed, the promise is forced, and the text \enquote{Hello from f} is printed. The second call to the function \texttt{h} demonstrates a second behavior - when a parameter is never accessed, the promise is not evaluated, and nothing is printed.
 
-\begin{listing}
+\begin{listing}[h!]
 	\centering
 	\begin{minted}{R}
 f <- function(x) {
@@ -110,36 +119,37 @@ Being lazy in the arguments allows R to have very expressive domain-specific lan
 Promises can also be created manually by calling the \texttt{delayedAssign} function or from the C api.
 
 %---------------------------------------------------------------
-\subsection*{Immutability}
+\subsubsection*{Immutability}
 %---------------------------------------------------------------
 
-All R values are \textit{semantically immutable}, with the exception of environments. This means that when a variable holds a value, this value never changes unless the variable is reassigned. We say that non-environment values have a \textit{copy-on-modify behavior} - when a value is modified, a new copy is created with the modified parts. R employs an optimization in this regard - if there exists only one reference to a given value, we can modify it in place to reduce a redundant copy \todo{mention only in GNU-R?}.
+All R values are \textit{semantically immutable}, with the exception of environments. This means that when a variable holds a value, this value never changes unless the variable is reassigned. We say that non-environment values have a \textit{copy-on-write behavior} - when a value is modified, a new copy is created with the modified parts. R employs an optimization in this regard - if there exists only one reference to a given value, we can modify it in place to reduce a redundant copy \todo{mention only in GNU-R?}.
 
-Thanks to the syntax of R, it is possible to write code that looks like it is using mutability, but keeps the copy-on-modify behavior. In the example \ref{lst:imm}, the statement on line 3 looks like it is mutating the vector in place, but instead the function \texttt{[<-} is called, which creates a copy of the vector, modifies it and reassigns the variable x.
+Thanks to the syntax of R, it is possible to write code that looks like it is using mutability, but keeps the copy-on-write behavior. In the example \ref{lst:imm}, the statement on line 3 looks like it is mutating the vector in place, but instead the function \texttt{[<-} is called, which creates a copy of the vector, modifies it and reassigns the variable x.
 
-\begin{listing}
-	\centering
-	\begin{minted}{R}
+The only truly mutable values are environments, and they conform to a \textit{reference behavior}. Listing \ref{lst:envir} shows this behavior - the variable \texttt{x} is added to both \texttt{e1} and \texttt{e1}, even though we only defined it on \texttt{e2}.
+
+\begin{listing}[h!]
+  \centering
+	\begin{minipage}{0.47\textwidth}
+			\begin{minted}{R}
 x <- c(1, 2, 3)
 y <- x
 y[1] <- 42
 # x is still vector (1, 2, 3)
-  \end{minted}
-	\caption{Immutability example}\label{lst:imm}
-\end{listing}
-
-The only truly mutable values are environments, and they conform to a \textit{reference behavior}. Listing \ref{lst:envir} shows this behavior - the variable \texttt{x} is added to both \texttt{e1} and \texttt{e1}, even though we only defined it on \texttt{e2}.
-
-\begin{listing}
-	\centering
-	\begin{minted}{R}
+      \end{minted}
+			\caption{Immutability example}\label{lst:imm}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.47\textwidth}
+			\begin{minted}{R}
 e1 <- new.env()
 e2 <- e1
 e2$x <- 42
 e1$x == 42
 # TRUE
-  \end{minted}
-	\caption{Example of environment mutability}\label{lst:envir}
+      \end{minted}
+			\caption{Example of environment mutability}\label{lst:envir}
+	\end{minipage}
 \end{listing}
 
 %---------------------------------------------------------------
@@ -174,203 +184,196 @@ R also has primitives for creating, manipulating, and evaluating expressions fro
 
 Combining reflection, laziness and side effects, it is very hard to speculate and optimize this language.
 
-
-% %---------------------------------------------------------------
-% \chapter{The R Virtual Machine}
-% %---------------------------------------------------------------
+% \begin{listing}
+% 	\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
+% Code:
+%   1 LDCONST 1
+%   3 STARTFOR 4 3 29
+%   7 GETBUILTIN 5
+%   9 GETVAR 7
+%  11 PUSHARG
+%  12 PUSHCONSTARG 8
+%  14 CALLBUILTIN 6
+%  16 BRIFNOT 9 27
+%  19 GETFUN 10
+%  21 MAKEPROM 12
+%  23 CALL 11
+%  25 GOTO 28
+%  27 LDNULL
+%  28 POP
+%  29 STEPFOR 7
+%  31 ENDFOR
+%  32 POP
+%  33 GETVAR 7
+%  35 RETURN
 %
-% \begin{chapterabstract}
-% 	The R language is not formally specified, it only has a reference implementation that we will refer to as \textit{GNU-R}\todocite. On top of this virtual machine is built a Just-in-time compiler called \textit{Ř}\todocite. Although there are other implementations of R, we will only provide an overview on these two, as they are the focus of this thesis, and only provide an overview of the alternatives.
-% \end{chapterabstract}
-
-\begin{listing}
-	\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
-Code:
-  1 LDCONST 1
-  3 STARTFOR 4 3 29
-  7 GETBUILTIN 5
-  9 GETVAR 7
- 11 PUSHARG
- 12 PUSHCONSTARG 8
- 14 CALLBUILTIN 6
- 16 BRIFNOT 9 27
- 19 GETFUN 10
- 21 MAKEPROM 12
- 23 CALL 11
- 25 GOTO 28
- 27 LDNULL
- 28 POP
- 29 STEPFOR 7
- 31 ENDFOR
- 32 POP
- 33 GETVAR 7
- 35 RETURN
-
-Constant pool:
-0:
- language {  for (i in 1:10) {; if (x%..
-1:
- int [1:10] 1 2 3 4 5 6 7 8 9 10
-2:
- language 1:10
-3:
- symbol i
-4:
- language for (i in 1:10) {     if (x%..
-5:
- symbol %%
-6:
- language x%%2
-7:
- symbol x
-8:
- num 2
-9:
- language if (x%%2) {     g(x) ...
-10:
- symbol g
-11:
- language g(x)
-12:
- Promise 0:
-   Code:
-     1 GETVAR 0
-     3 RETURN
-
-   Constant pool:
-   0:
-    symbol x
-   1:
-    language g(x)
-   2:
-    'expressionsIndex' int [1:4] NA 1 1 1
-13:
- 'expressionsIndex' int [1:36] NA 2 2 ..
-  \end{minted}
-\end{listing}
-
-\begin{listing}
-	\begin{multicols}{2}
-		\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
-0:
-      0   push_  1
-      5   visible_
-      6   force_
-      7   push_  10
-     12   visible_
-     13   force_
-     14   ; :(1, 10)
-          colon_input_effects_
-     15   pop_
-     16   swap_
-     17   colon_cast_lhs_
-     18   [ <?> ] Type#0
-     23   ensure_named_
-     24   swap_
-     25   colon_cast_rhs_
-     26   ensure_named_
-     27   [ <?> ] Type#1
-     32   dup2_
-     33   ; NULL
-          le_
-     34   [ _ ] Test#0
-     39   brfalse_  1
-     44   push_  1L
-     49   br_  2
-1:
-     54   push_  -1L
-2:
-     59   swap_
-     60   pick_  2
-     65   dup2_
-     66   ; NULL
-          ne_
-     67   [ _ ] Test#1
-     72   brfalse_  7
-     77   dup_
-     78   stvar_cached_  i{0}
-     87   pull_  2
-     92   ensure_named_
-     93   ; NULL
-          add_
-     94   ldfun_  g
-     99   [ 0, <0>, valid  ] Call#0
-    104   mk_promise_  0
-    109   ; g(x)
-          call_  1
-    126   [ <?> ] Type#3
-    131   asbool_
-    132   brtrue_  3
-    137   ldvar_cached_  G{2}
-    146   [ <?> ] Type#4
-    151   stvar_cached_  x{1}
-    160   br_  4
-3:
-    165   ldvar_cached_  x{1}
-    174   [ <?> ] Type#5
-    179   stvar_cached_  x{1}
-4:
-    188   dup2_
-    189   ; NULL
-          ne_
-    190   brfalse_  7
-    195   dup_
-    196   stvar_cached_  i{0}
-    205   pull_  2
-    210   ensure_named_
-    211   ; NULL
-          add_
-    212   ldfun_  g
-    217   [ 0, <0>, valid  ] Call#1
-    222   mk_promise_  1
-    227   ; g(x)
-          call_  1
-    244   [ <?> ] Type#7
-    249   asbool_
-    250   brtrue_  5
-    255   ldvar_cached_  G{2}
-    264   [ <?> ] Type#8
-    269   stvar_cached_  x{1}
-    278   br_  6
-5:
-    283   ldvar_cached_  x{1}
-    292   [ <?> ] Type#9
-    297   stvar_cached_  x{1}
-6:
-    306   br_  4
-7:
-    311   popn_  3
-    316   ldvar_cached_  x{1}
-    325   [ <?> ] Type#10
-    330   ret_
-
-[Prom (index 0)]
-0:
-      0   ldvar_  x
-      5   [ <?> ] Type#2
-     10   ret_
-
-[Prom (index 1)]
-0:
-      0   ldvar_  x
-      5   [ <?> ] Type#6
-     10   ret_
-
-    \end{minted}
-	\end{multicols}
-\end{listing}
+% Constant pool:
+% 0:
+%  language {  for (i in 1:10) {; if (x%..
+% 1:
+%  int [1:10] 1 2 3 4 5 6 7 8 9 10
+% 2:
+%  language 1:10
+% 3:
+%  symbol i
+% 4:
+%  language for (i in 1:10) {     if (x%..
+% 5:
+%  symbol %%
+% 6:
+%  language x%%2
+% 7:
+%  symbol x
+% 8:
+%  num 2
+% 9:
+%  language if (x%%2) {     g(x) ...
+% 10:
+%  symbol g
+% 11:
+%  language g(x)
+% 12:
+%  Promise 0:
+%    Code:
+%      1 GETVAR 0
+%      3 RETURN
+%
+%    Constant pool:
+%    0:
+%     symbol x
+%    1:
+%     language g(x)
+%    2:
+%     'expressionsIndex' int [1:4] NA 1 1 1
+% 13:
+%  'expressionsIndex' int [1:36] NA 2 2 ..
+%   \end{minted}
+% \end{listing}
+%
+% \begin{listing}
+% 	\begin{multicols}{2}
+% 		\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
+% 0:
+%       0   push_  1
+%       5   visible_
+%       6   force_
+%       7   push_  10
+%      12   visible_
+%      13   force_
+%      14   ; :(1, 10)
+%           colon_input_effects_
+%      15   pop_
+%      16   swap_
+%      17   colon_cast_lhs_
+%      18   [ <?> ] Type#0
+%      23   ensure_named_
+%      24   swap_
+%      25   colon_cast_rhs_
+%      26   ensure_named_
+%      27   [ <?> ] Type#1
+%      32   dup2_
+%      33   ; NULL
+%           le_
+%      34   [ _ ] Test#0
+%      39   brfalse_  1
+%      44   push_  1L
+%      49   br_  2
+% 1:
+%      54   push_  -1L
+% 2:
+%      59   swap_
+%      60   pick_  2
+%      65   dup2_
+%      66   ; NULL
+%           ne_
+%      67   [ _ ] Test#1
+%      72   brfalse_  7
+%      77   dup_
+%      78   stvar_cached_  i{0}
+%      87   pull_  2
+%      92   ensure_named_
+%      93   ; NULL
+%           add_
+%      94   ldfun_  g
+%      99   [ 0, <0>, valid  ] Call#0
+%     104   mk_promise_  0
+%     109   ; g(x)
+%           call_  1
+%     126   [ <?> ] Type#3
+%     131   asbool_
+%     132   brtrue_  3
+%     137   ldvar_cached_  G{2}
+%     146   [ <?> ] Type#4
+%     151   stvar_cached_  x{1}
+%     160   br_  4
+% 3:
+%     165   ldvar_cached_  x{1}
+%     174   [ <?> ] Type#5
+%     179   stvar_cached_  x{1}
+% 4:
+%     188   dup2_
+%     189   ; NULL
+%           ne_
+%     190   brfalse_  7
+%     195   dup_
+%     196   stvar_cached_  i{0}
+%     205   pull_  2
+%     210   ensure_named_
+%     211   ; NULL
+%           add_
+%     212   ldfun_  g
+%     217   [ 0, <0>, valid  ] Call#1
+%     222   mk_promise_  1
+%     227   ; g(x)
+%           call_  1
+%     244   [ <?> ] Type#7
+%     249   asbool_
+%     250   brtrue_  5
+%     255   ldvar_cached_  G{2}
+%     264   [ <?> ] Type#8
+%     269   stvar_cached_  x{1}
+%     278   br_  6
+% 5:
+%     283   ldvar_cached_  x{1}
+%     292   [ <?> ] Type#9
+%     297   stvar_cached_  x{1}
+% 6:
+%     306   br_  4
+% 7:
+%     311   popn_  3
+%     316   ldvar_cached_  x{1}
+%     325   [ <?> ] Type#10
+%     330   ret_
+%
+% [Prom (index 0)]
+% 0:
+%       0   ldvar_  x
+%       5   [ <?> ] Type#2
+%      10   ret_
+%
+% [Prom (index 1)]
+% 0:
+%       0   ldvar_  x
+%       5   [ <?> ] Type#6
+%      10   ret_
+%
+%     \end{minted}
+% 	\end{multicols}
+% \end{listing}
 
 \newpage
 %---------------------------------------------------------------
 \section{GNU-R}
 %---------------------------------------------------------------
 
+The R language is not formally specified, it only has a reference implementation that we will refer to as \textit{GNU-R}
+
 \textit{GNU-R}, as the name suggest, is a part of the GNU project. It is written in the C programming language. \todo{expand}
 
 \todo{C api}
 
 %---------------------------------------------------------------
-\subsection*{Representation}
+\subsubsection*{Representation}
 %---------------------------------------------------------------
 
 The GNU-R represents all code and values as \textit{symbolic expressions} (also \textit{S-expressions} or \textit{sexps}), a format for nested lists, popularized by the Lisp languages. The type \texttt{SEXP} is a pointer to either a \texttt{SEXPREC} or \texttt{VECTOR\_SEXPREC} structure. Both of these structures contain a header of type \texttt{sxpinfo\_struct}, a pointer to the attributes of the current value, and previous and next nodes in the garbage collector. The header then contains \texttt{SEXPTYPE}, the type of the \texttt{SEXP} (values are defined as in \ref{tbl:sexptype}), as well as additional attributes with information about the type, garbage collection and debug information. The rest of the structure cointains the actual data. The structure of a \texttt{SEXP} value is represented in figure \ref{fig:sexp-struct}.
@@ -418,7 +421,7 @@ The GNU-R represents all code and values as \textit{symbolic expressions} (also 
 These structures are not available directly, the \texttt{SEXP} is exported as an opaque pointer type. Individual fields are accessible via exported functions.
 
 %---------------------------------------------------------------
-\subsection*{Interpreter}
+\subsubsection*{Interpreter}
 %---------------------------------------------------------------
 
 The GNU-R parses the code to an \textit{abstract syntaxt tree} (\textit{AST}), also represented with \texttt{SEXP}s with the \texttt{LANGSXP} type.
@@ -429,14 +432,16 @@ When a function is compiled, its \texttt{SEXP} is modified in-place, replacing t
 
 An example of the bytecode can be seen in \texttt{todo}.
 
+\todo{interpreter optimizes (if, +, assume plus in plus, constfold)}
+
 %---------------------------------------------------------------
-\subsection*{Garbage Collector}
+\subsubsection*{Garbage Collector}
 %---------------------------------------------------------------
 R does not have primitives for managing memory, instead an automatic memory management provided by the runtime is expected. GNU-R uses a generational non-moving stop-the-world garbage collector with three generations\todocite.
 
 In order to correctly match the generation of objects assigned to other object, it uses a \textit{write barrier}\todocite. This is always managed by the interal functions, and since the internals of \texttt{SEXP} are not exported, it is always correct \todo{reword}.
 
-Next to the GC, GNU-R also has a reference counter for each object, included in the object header, with values 0, 1 and many. This is used for optimistic mutations - when an object would be copied and mutated, but there is only one reference to it, it is instead mutated in place, avoiding an unnecesarry copy. This correctly preserves the copy-on-modify behavior.
+Next to the GC, GNU-R also has a reference counter for each object, included in the object header. This is used for optimistic mutations - when an object would be copied and mutated, but there is only one reference to it, it is instead mutated in place, avoiding an unnecesarry copy. This correctly preserves the copy-on-write behavior.
 
 \newpage
 %---------------------------------------------------------------
@@ -458,8 +463,10 @@ The compilation pipeline is outlined in figure \ref{fig:rsh-archit}
 \end{figure}
 
 %---------------------------------------------------------------
-\subsection{Runtime objects}
+\subsubsection*{Runtime objects}
 %---------------------------------------------------------------
+
+\todo{simple image of composition?}
 
 Ř uses the GNU-R \texttt{SEXP} representation and memory management. All runtime objects are embedded into the SEXP objects. This is one of the modifications that need to be applied to GNU-R, a new \texttt{SEXPTYPE} is added (\texttt{EXTERNALSXP}), along with the necessary changes to how it is collected and how it references other objects.
 
@@ -492,7 +499,7 @@ The \textit{feedback} collected from a bytecode interpretation consists of three
 \end{figure}
 
 %---------------------------------------------------------------
-\subsection{RIR bytecode interpreter}
+\subsubsection{RIR bytecode interpreter}
 %---------------------------------------------------------------
 
 The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. It uses the GNU-R bytecode execution stack. Unlike the GNU-R bytecode, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code that in GNU-R. The RIR is also much less optimized, due to being only an interpreter intended to be further optimized, whereas the GNU-R bytecode is the final compilation stage.
@@ -506,7 +513,7 @@ For this thesis, the important bytecode instructions are \texttt{record\_call\_}
 Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
 
 %---------------------------------------------------------------
-\subsection{PIR compiler}
+\subsubsection{PIR compiler}
 %---------------------------------------------------------------
 When a function or a loop is determined to be hot, it is compiled to \textit{PIR}, an intermediate representation used for the compilation to native code.
 
@@ -519,6 +526,10 @@ Every instruction has a type (also called a \textit{PIR type}), which model the 
 After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT compiler}, which is part of the LLVM project and which does the lowering itself.
 
 %---------------------------------------------------------------
-\subsection{Contextual dispatch}
+\subsubsection{Contextual dispatch}
 %---------------------------------------------------------------
 
+%---------------------------------------------------------------
+\section{RBenchmarking}
+%---------------------------------------------------------------
+and the Titanic
