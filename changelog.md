@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.5] - 25. 4. 2025
+
+Added observation theorem.
+
+### Added
+- Added observation as a new theorem.
+
+
 ## [1.4.4] - 25. 4. 2025
 
 Fix of PDF-A, footnotes.
