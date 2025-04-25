@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.4] - 25. 4. 2025
+
+Fix of PDF-A, footnotes.
+
+### Changed
+- Removed PDF-A keywords, which were breaking the PDF-A standard.
+- Removed hyperref package, which is already included by pdfx package.
+- Moved pdfx inclusion to end of cls because of clash with other packages.
+
+
 ## [1.4.3] - 1. 4. 2025
 
 Fix of definition English version.

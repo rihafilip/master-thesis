@@ -92,7 +92,6 @@
 \RequirePackage{xcolor}[2023/11/15]
 \usepackage{silence}
 \WarningFilter{pdfx}{Setting all color commands to rgb}
-\RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
     \RequirePackage[top=4.6cm,bottom=4cm,footskip=4em,inner=4.7cm,outer=3.25cm]{geometry}[2020/01/02] %page layout
@@ -122,7 +121,6 @@
 \fi
 % colours end
 
-\RequirePackage{hyperref}[2024/11/05]
 \DeclareRobustCommand{\ctufittitle}[1]{
 	\def\thectufittitle{#1}
 	\title{#1}
@@ -201,11 +199,6 @@
 	\immediate\openout\metadatafile=\jobname.xmpdata
 	\immediate\write\metadatafile{\string\Title{\thectufittitle}}
 	\immediate\write\metadatafile{\string\Author{\thectufitauthorfull}}
-	\if\@ctufitlang E{
-		\immediate\write\metadatafile{\string\Keywords{\thectufitkeywords}}
-	}\else{
-		\immediate\write\metadatafile{\string\Keywords{\thectufitklicovaslova}}
-	}\fi
 	\immediate\write\metadatafile{\string\Subject{\thectufittitle\ctufitthesistypename}}
 	\immediate\write\metadatafile{\string\Copyright{© \thectufityear\space  \thectufitauthorfull}}
 	\immediate\closeout\metadatafile
@@ -593,3 +586,6 @@
 		\setmintedinline{bgcolor={}}
 	}{}%
 }
+
+% Should be last beause of hyperref
+\RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
