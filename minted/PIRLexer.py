@@ -9,15 +9,19 @@ class CustomLexer(RegexLexer):
 
     tokens = {
         "root": [
-            (r"#.*$", T.Comment.Single),
+            (r"^#.*$", T.Comment.Single),
 
             (r"%\d+(\.\d+)?", T.Name.Variable),
             (r"e\d+(\.\d+)?", T.Name.Namespace),
             (r"BB\d+", T.Name.Namespace),
+            (r"R_GlobalEnv", T.Name.Namespace),
 
             (
+                r"\b("
                 r"StArg|StVar|MkEnv|\(MkEnv\)|Assume|AssumeNot|"
-                r"(Force!?(<[^>]+>)?)|"
+                r"Force!?<[^>]+>|"
+                r"Force!?|"
+                r"Add|"
                 r"LdFun|"
                 r"LdVar|"
                 r"LdArg|"
@@ -69,15 +73,18 @@ class CustomLexer(RegexLexer):
                 r"Names|"
                 r"SetNames|"
                 r"PirCopy|"
-                r"Nop",
+                r"Nop"
+                r")\b",
                 T.Name.Function,
             ),
 
             (
+                r"\b("
                 r"void|"
                 r"ct|cp|fs|dr|"
                 r"ast|raw|vec|char|real|complex|str|env|code|expression|list|prim|nul|cls|spec|blt|sym|int|lgl|miss|dots|\*dots|other|"
-                r"missing|val|num",
+                r"missing|val|num"
+                r")\b",
                 T.Keyword.Type
             ),
 

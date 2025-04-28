@@ -1,1 +1,4 @@
-{"custom_lexers": {"PIRLexer.py": "5e0bc5b0307279e842264150c5755ab3e56fc8555791aa4ab1afccf935027e89"}}
+{"custom_lexers": {
+"PIRLexer.py": "98bc68a6a4aed6f63051e96fd4dc5eadb496187f4880a58d165f4d5a65881aaf",
+"RIRLexer.py": "28c0ae363bfe28ee8a1cc518cfc8d79e5fd78dfa7d283a39c260dadbb3e94279"
+}}

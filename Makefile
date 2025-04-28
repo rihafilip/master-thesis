@@ -6,7 +6,10 @@ compile:
 	latexmk --shell-escape -file-line-error -pdflua ctufit-thesis.tex
 
 minted:
-	sha256sum minted/PIRLexer.py | awk '{print "{\"custom_lexers\": {\"PIRLexer.py\": \"" $$1  "\"}}"}' > .latexminted_config
+	echo '{"custom_lexers": {' > .latexminted_config
+	sha256sum minted/PIRLexer.py | awk '{print "\"PIRLexer.py\": \"" $$1  "\","}' >> .latexminted_config
+	sha256sum minted/RIRLexer.py | awk '{print "\"RIRLexer.py\": \"" $$1  "\""}' >> .latexminted_config
+	echo "}}" >> .latexminted_config
 
 force: cleanmk minted compile
 
