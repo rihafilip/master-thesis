@@ -24,3 +24,5 @@ _minted
 svg-inkscape
 diagrams/.$*
 diagrams/*.svg
+tf-example/example.png
+tf-example/example.pdf
