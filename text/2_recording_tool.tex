@@ -14,9 +14,18 @@
 
 The problem we observed was that the behavior of Ř is a black box. There are logging utilities for the JIT compilation, but these only print the RIR, PIR and LLVM code at the different stages of compilation. This is usefull for manual observation of the produced code, or for tracking down bugs in the compilation, but it does not reflect the rest of Ř.
 
-What we want is an event log that would reflect the behaviour of the compiler, like in the figure \todoadd. We want to have information about what functions were invoked and to which version was the call dispatched. When a functions is compiled, we do not know what was the reason for the compilation, as there are multiple heuristics used. When a deoptimization happens, we can log the final PIR instruction than triggered the deoptimization, but not the runtime value that caused it.
+What we want is an event log that would reflect the behaviour of the compiler, like in the figure \ref{fig:motivation-events}. We want to have information about what functions were invoked and to which version was the call dispatched. When a functions is compiled, we do not know what was the reason for the compilation, as there are multiple heuristics used. When a deoptimization happens, we can log the final PIR instruction than triggered the deoptimization, but not the runtime value that caused it.
 
-In reality, the behavior is more complex than the motivating figure. When a compilation is triggered (we call that a start of \textit{compilation session}), multiple closures can be lowered to their native version. At the time of compilation, the feedback vector of each function is static, but we have no idea of how we got to that state, thus we also have observe all changes to of the feedback during the execution. In the end, the event log look more like in figure \todoadd.
+\begin{figure}[H]
+	\centering
+	\begin{adjustwidth}{-3cm}{-3cm}
+		\includediagram[0.95]{4}
+	\end{adjustwidth}
+  \caption{Idealized event log}\label{fig:motivation-events}
+\end{figure}
+
+
+In reality, the behavior is more complex than the motivating figure. When a compilation is triggered (we call that a start of \textit{compilation session}), multiple closures can be lowered to their native version. At the time of compilation, the feedback vector of each function is static, but we have no idea of how we got to that state, thus we also have observe all changes to of the feedback during the execution. In the end, the event log looks more like in figure \todoadd.
 
 %---------------------------------------------------------------
 \section{Design}

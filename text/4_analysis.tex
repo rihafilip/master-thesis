@@ -1,19 +1,179 @@
 %---------------------------------------------------------------
-\chapter{Analysis}
+\chapter{Beyond Pollution}
 %---------------------------------------------------------------
 
-\todo{assesment?}
+\todo{actually name it}
 
 \begin{chapterabstract}
-  \todoadd
+	\todoadd
 \end{chapterabstract}
 
-% How pollution affects
+After observing that the pollution happens in the compiler, the next step is to understand how the feedback slots infulence the compilation of the codebase.
+
+\todo{why do we do it}
+
+In this chapter, we only focus on the \textit{type slots}, as these are \todo{why only type slots}.
+
+The Ř compiler does \textit{optimistic speculations} on the feedback slots \todo{better wording}. This means that when a PIR instruction with an attached type feedback is observed, we emit an assumption on the type and the a cast to this type (a nop in the native code) in hopes that this unlocks some optimizations later. This has advantage that if an optimization is based on many complex speculations, it will be applied. The disadvanatge is that we might restrict the type more than is necesarry, e.g. we might speculate on a more specific type than is needed.
+
+This is contrary to how most other JIT compiler do speculations, like the JavaScript V8 VM\todocite, where they only emit an assumption on a type at the point where the type is used.
+
+% ----
+
+Let's take the example in the listing \todoadd. This is a function that takes a global variable and when it is a vector of length 1, it returns 33.
+
+When we call it at least once and compile it to PIR, it results in the code \todoadd (omiting deoptimization branches). We can see that the function is pretty optimized. First we load the \texttt{length} function and assume that it is the builtin \texttt{length} (line 8). Then we load the global variablem, force it, and we assume on its type being \texttt{int\$-}, a scalar integer with no attributes (lines 10 and 11). Since we then know it is a scalar, we do not need to call the builtin length function and this allows us to constant fold the if statement, thus we return the number 33.
+
+The problem is when we reassign the variable \texttt{G} to a different scalar like \texttt{G <- 42}. The code is still valid, as the only part of the information that is used is the scalar. Event thought we only need to assume on \textit{is scalar} part, we assume on something more specific (is a scalar integer and has no attributes). Thus, when we call the function again after reassigning G to a double \texttt{42}, we trigger a deopt.
+
+\begin{listing}
+	\begin{minted}{R}
+G <- 42L
+
+f <- function() {
+  if (length(G) == 1){
+    33
+  }
+}
+  \end{minted}
+	\caption{Example of wide type assumtion}\label{lst:assume-example}
+\end{listing}
+
+\begin{listing}
+	\begin{minted}{\pirlexer}
+BB0
+  goto BB1
+BB1   <- [0]
+  %1.0  = LdVar              length, R_GlobalEnv
+  %1.1  = Identical          <blt length>, %1.0   <true>
+  %1.2  = Checkpoint          -> BB2 (default) | BB3 (if assume failed)
+BB2   <- [1]
+          Assume             %1.1, %1.2 (DeadBranchReached[Test#0])
+  %2.1  = LdVar              G, R_GlobalEnv
+  %2.2  = IsType             %2.1 isA int$-
+          Assume             %2.2, %1.2 (Typecheck[Type#1])
+          Visible
+          Return             33
+  \end{minted}
+	\caption{PIR code generated for listing \ref{lst:assume-example}, omiting deopt branches}\label{lst:assume-example-pir}
+\end{listing}
 
 %---------------------------------------------------------------
-\section{Slot categorization}
+\section{Definitions}
+%---------------------------------------------------------------
+
+For the rest of the chapter, we are going to observe only \textit{type feedback slots}, as \todo{why?}.
+
+First, we separate the \textit{empty} and \textit{non-empty} slots. The empty slots are not interesting, as they are paths thru the program that are not interesting.
+
+We say that a slot is \textit{referenced}, if it is part of a function that is compiled to native, or inlined into native compilation \todo{reword}. A slot is then \textit{read} if during this compilation the infromation in the slot is observed. A \textit{used slot} is a type feedback slot that in the final version of PIR has an assumption connected with it.
+
+We also say that a slot is \textit{polymorphic} it has more than one different types recorded. A non-polymorphic slot is \textit{monomorphic}. This is a superset of all \textit{polluted slots}. If a slot is polluted, it has to have two different non-empty values between the compilation, thus there had to be at least two recordings of different type.
+
+\todo{explain example}
+
+\begin{listing}[p]
+	\begin{minipage}{0.47\textwidth}
+		\begin{minted}{R}
+G <- 42L
+H <- 42
+
+f <- function() {
+    x <- G + G
+    if (FALSE) {
+        return(H)
+    }
+    x + 42
+}
+    \end{minted}
+		\subcaption{R code}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.47\textwidth}
+		\begin{minted}{\rirlexer}
+0:
+      0   ldvar_cached_  G{1}
+      9   [ integer (s) | value ] Type#0
+     14   ldvar_cached_  G{1}
+     23   [ integer (s) | value ] Type#1
+     28   ; +(G, G)
+          add_
+     29   [ integer (s) ] Type#2
+     34   stvar_cached_  x{0}
+     43   push_  FALSE
+     48   visible_
+     49   asbool_
+     50   brtrue_  1
+     55   br_  2
+1:
+     60   ldvar_cached_  H{2}
+     69   [ <?> ] Type#3
+     74   ret_
+2:
+     75   ldvar_cached_  x{0}
+     84   [ integer (s) | value ] Type#4
+     89   push_  42
+     94   visible_
+     95   ; +(x, 42)
+          add_
+     96   [ double (s) ] Type#5
+    101   ret_
+    \end{minted}
+		\subcaption{RIR code}
+	\end{minipage}
+	\vfill
+	\begin{adjustwidth}{-1cm}{-1cm}
+		\begin{minipage}{\textwidth}
+			\begin{minted}{\pirlexer}
+BB0
+  goto BB1
+BB1   <- [0]
+  val?^ | miss    %1.0  = LdVar              G, R_GlobalEnv
+  val?            %1.1  = Force!<value>      %1.0,    <int$->
+  lgl$#-          %1.2  = IsType             %1.1 isA int$-
+  cp              %1.3  = Checkpoint          -> BB2 (default) | BB3 (if assume failed)
+BB2   <- [1]
+  void                    Assume             %1.2, %1.3 (Typecheck[Type#0])
+  int$-           %2.1  = CastType           dn %1.1
+  int$-           %2.2  = Add                %2.1, %2.1, elided   <int$->
+  void                    Visible
+  real$-          %2.4  = Add                %2.2, 42, elided   <real$->
+  void                    Return             %2.4
+      \end{minted}
+			\subcaption{PIR code}
+		\end{minipage}
+		\caption{Example of type slots categories}
+	\end{adjustwidth}
+\end{listing}
+
+When a type check and assumption is being emited, it is not emited only based on the feedback. We take the \textit{static type}, the type inferred from the context, other assumptions or known types of instructions, and the \textit{feedback}, which is the type resulting from all of the observations, and intersect them, resulting in what we call \textit{expected} type. The actual type of emited type check is a \textit{check for} type.
+
+\begin{figure}
+	\centering
+	\includediagram{8}
+\end{figure}
+
+If the static type has more information than the feedback and thus the expected type is more specific than the feedback, we say that the \textit{type feedback was narrowed}. For example, if we know from the static type that it is a scalar but we have not obserevd this, the expected type is also a scalar, thus the feedback is narrowed.
+
+\todo{widened (str- to val?-)}
+
+\todo{exact match}
+If the type we check for
+
+%---------------------------------------------------------------
+\subsubsection*{Limitations}
 %---------------------------------------------------------------
 
 %---------------------------------------------------------------
-\section{Results}
+\section{Observations}
 %---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\section{Next steps}
+%---------------------------------------------------------------
+
+Reducing recording
+
+Reducing pollution
+
+Relaxing assumptions and

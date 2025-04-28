@@ -12,6 +12,9 @@
           texlive.combined.scheme-full
           latexminted
           inkscape
+          pplatex
+          imagemagick
+          ghostscript
         ];
       };
     };
