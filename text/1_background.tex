@@ -439,7 +439,7 @@ An example of the bytecode can be seen in \texttt{todo}.
 %---------------------------------------------------------------
 R does not have primitives for managing memory, instead an automatic memory management provided by the runtime is expected. GNU-R uses a generational non-moving stop-the-world garbage collector with three generations\cite{r-gc-notes}.
 
-In order to correctly match the generation of objects assigned to other object, it uses a \textit{write barrier}\todocite. This is always managed by the interal functions, and since the internals of \texttt{SEXP} are not exported, it is always correct \todo{reword}.
+In order to correctly match the generation of objects assigned to other object, it uses a \textit{write barrier}. This is always managed by the interal functions, and since the internals of \texttt{SEXP} are not exported, it is always correct \todo{reword}.
 
 Next to the GC, GNU-R also has a reference counter for each object, included in the object header. This is used for optimistic mutations - when an object would be copied and mutated, but there is only one reference to it, it is instead mutated in place, avoiding an unnecesarry copy. This correctly preserves the copy-on-write behavior.
 
@@ -452,7 +452,7 @@ Next to the GC, GNU-R also has a reference counter for each object, included in 
 
 It is built as an extension to GNU-R, although it uses a slightly modified version of the codebase. It bypasses the GNU-R bytecode compiler and interpreter, instead using a custom one, while reusing the \texttt{SEXP} representation, AST interpreter, and garbage collector.
 
-For the compilation to native code, the \textit{LLVM Project}\todocite is used.
+For the compilation to native code, the \textit{LLVM Project}\cite{llvm} is used.
 
 The compilation pipeline is outlined in figure \ref{fig:rsh-archit}
 
