@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.2] - 4. 5. 2025
+
+Improved title page spacing.
+
+### Changed
+- Changed title page vertical spaces.
+
+
 ## [1.5.1] - 4. 5. 2025
 
 Improved title page, abstracts on separate pages.

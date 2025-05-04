@@ -1,6 +1,8 @@
 %% This is the ctufit-thesis document class. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
+%% This is version 1.5.2, built 25. 4. 2025.
+%%
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
 %%
@@ -221,7 +223,7 @@
 \includegraphics[width=3cm]{images/logoCVUT.pdf}
 \vskip 1.5cm
 \noindent{\noindent\huge\bfseries\color{black}\begin{flushleft}\begin{onehalfspace}\MakeUppercase{\thectufittitle}\end{onehalfspace}\end{flushleft}}
-\vskip 20mm
+\vskip 10mm
 \noindent{\large  \bfseries \thectufitauthorfull}
 
 \vfill
