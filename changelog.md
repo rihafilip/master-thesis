@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.1] - 4. 5. 2025
+
+Improved title page, abstracts on separate pages.
+
+### Changed
+- Reordering title pages elements.
+- Changed title page vertical spaces.
+- Specialisation and study program added to title page.
+- Abstracts are now on separate pages.
+
+
 ## [1.5.0] - 4. 5. 2025
 
 Fix of class parameters, improved title page.
