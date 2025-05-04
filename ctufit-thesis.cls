@@ -35,7 +35,6 @@
 \DeclareOption{bachelor}{\def\@ctufitthesistype{B}}
 \DeclareOption{master}{\def\@ctufitthesistype{M}}
 \DeclareOption{dissertation}{\def\@ctufitthesistype{D}}
-\DeclareOption{bw}{\def\@ctufitthesisblackandwhite}
 \DeclareOption{czech}{
 	\AtBeginDocument{\selectlanguage{czech}}
 	\PassOptionsToPackage{english,main=czech}{babel}
@@ -81,6 +80,7 @@
 \DeclareOption{paragraph}{
 	\def\@ctufitsecdepth{4}
 }
+\DeclareOption{bw}{\def\@ctufitthesisblackandwhite}
 \PassOptionsToPackage{svgnames}{xcolor}
 \PassOptionsToPackage{newfloat}{minted}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
@@ -207,6 +207,9 @@
 % title page
 \renewcommand{\maketitle}{\begin{titlepage}%
 \newgeometry{left=67mm,top=80mm,right=40mm}%\thispagestyle{empty}%
+\noindent
+\includegraphics[width=3cm]{images/logoCVUT.pdf}
+\vskip 2cm
 \noindent{\large\noindent\thectufitthesistype}
 \vskip 3mm
 \noindent{\noindent\huge\bfseries\color{black}\begin{flushleft}\begin{onehalfspace}\MakeUppercase{\thectufittitle}\end{onehalfspace}\end{flushleft}}
@@ -216,6 +219,7 @@
 \vfill
 
 \noindent{\thectufitfaculty\\
+\thectufituniversity\\
 \thectufitdepartment\\
 \thectufitsupervisorlabelcapital: \thectufitsupervisor\\
 \today}\end{titlepage}

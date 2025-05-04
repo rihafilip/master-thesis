@@ -4,24 +4,36 @@ LuaLaTeX:
     script: 
         - sed 's/\[czech/\[slovak/' ctufit-thesis.tex > ctufit-thesis-sk.tex
         - sed 's/\[czech/\[english/' ctufit-thesis.tex > ctufit-thesis-en.tex
+        - sed 's/oneside\]/twoside\]/' ctufit-thesis.tex > ctufit-thesis-twoside.tex
+        - sed 's/oneside\]/oneside,bw\]/' ctufit-thesis.tex > ctufit-thesis-bw.tex
         - latexmk -pdflua ctufit-thesis.tex
         - latexmk -pdflua ctufit-thesis-en.tex
         - latexmk -pdflua ctufit-thesis-sk.tex
+        - latexmk -pdflua ctufit-thesis-twoside.tex
+        - latexmk -pdflua ctufit-thesis-bw.tex
     artifacts:
         paths:
             - ctufit-thesis.pdf
             - ctufit-thesis-en.pdf
             - ctufit-thesis-sk.pdf
+            - ctufit-thesis-twoside.pdf
+            - ctufit-thesis-bw.pdf
 
 XeLaTeX:
     script: 
         - sed 's/\[czech/\[slovak/' ctufit-thesis.tex > ctufit-thesis-sk.tex
         - sed 's/\[czech/\[english/' ctufit-thesis.tex > ctufit-thesis-en.tex
+        - sed 's/oneside\]/twoside\]/' ctufit-thesis.tex > ctufit-thesis-twoside.tex
+        - sed 's/oneside\]/oneside,bw\]/' ctufit-thesis.tex > ctufit-thesis-bw.tex
         - latexmk -pdfxe ctufit-thesis.tex
         - latexmk -pdfxe ctufit-thesis-en.tex
         - latexmk -pdfxe ctufit-thesis-sk.tex
+        - latexmk -pdfxe ctufit-thesis-twoside.tex
+        - latexmk -pdfxe ctufit-thesis-bw.tex
     artifacts:
         paths:
             - ctufit-thesis.pdf
             - ctufit-thesis-en.pdf
             - ctufit-thesis-sk.pdf
+            - ctufit-thesis-twoside.pdf
+            - ctufit-thesis-bw.pdf
