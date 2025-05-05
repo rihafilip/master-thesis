@@ -408,17 +408,17 @@ When a function compilation to native is triggered, it is compiled for a specifi
 When a function is invoked, its arguments are observed and a call context is created. Based on this, the function is either dispatched to the version connected with the same context as the call context, or a less precise context which is ordered lower than the call context. If no such version is found, the call is dispatched to the baseline interpreted version.
 
 %---------------------------------------------------------------
-\section{Corpus}
+\section{Corpus}\label{ch:1-corpus}
 %---------------------------------------------------------------
 
 For the experiments and analysis, we use two codebases.
 
 The first one is a collection of Ř benchmarks\footnote{\url{https://github.com/reactorlabs/RBenchmarking}}. This consists of four different suites of benchmarks:
 \begin{itemize}
-	\item{} \textit{Are We Fast Yet}, a collection of both micro and macro benchmarks based on the cross-language compiler benchmark suite\todocite,
-	\item{} \textit{Real Thing}, (TODO),
-	\item{} \textit{shootout} benchmarks from a popular cross-language benchmarks game\todocite,
-	\item{} and \textit{simple}, which are custom written short scripts used for microbenchmarking.
+  \item{} \textit{Are We Fast Yet}, a collection of both micro and macro benchmarks based on the cross-language compiler benchmark suite\cite{are-we-fast-yet},
+	\item{} \textit{Real Thing}, a collection of real-world programs,
+  \item{} \textit{shootout} benchmarks from a popular cross-language benchmarks game\cite{shootout},
+	\item{} and \textit{simple}, which are custom written short scripts used for microbenchmarking individual R features.
 \end{itemize}
 
-The second codebase is a code from a Kaggle competition, used \todoadd
+The second codebase is a script from a Kaggle competition about machine learning on the Titanic dataset\cite{titanic}. The script is a representation of more real-world program, is 108 lines of code extracted from a Rmarkdown notebook and uses some of the popular libraries like \texttt{ggplot2} or \texttt{dplyr}.

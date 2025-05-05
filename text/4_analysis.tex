@@ -8,11 +8,11 @@
 	\todoadd
 \end{chapterabstract}
 
-After observing that the pollution happens in the compiler, the next step is to understand how the feedback slots infulence the compilation of the codebase.
+After observing that the pollution happens in the compiler, the next step is to understand how the feedback slots infulence the compilation of a function. In order to do this, we need to categorize the slots.
 
 \todo{why do we do it}
 
-In this chapter, we only focus on the \textit{type slots}, as these are \todo{why only type slots}.
+In this chapter, we only focus on the \textit{type slots}, because as previously observed these suffer from pollution the most and are the ones that are changing the most, providing a richer analysis.
 
 The Ř compiler does \textit{optimistic speculations} on the feedback slots \todo{better wording}. This means that when a PIR instruction with an attached type feedback is observed, we emit an assumption on the type and the a cast to this type (a nop in the native code) in hopes that this unlocks some optimizations later. This has advantage that if an optimization is based on many complex speculations, it will be applied. The disadvanatge is that we might restrict the type more than is necesarry, e.g. we might speculate on a more specific type than is needed.
 
@@ -21,8 +21,6 @@ This is contrary to how most other JIT compiler do speculations, like the JavaSc
 %---------------------------------------------------------------
 \section{Definitions}
 %---------------------------------------------------------------
-
-For the rest of the chapter, we are going to observe only \textit{type feedback slots}, as \todo{why?}.
 
 First, we separate the \textit{empty} and \textit{non-empty} slots. The empty slots are not interesting, as they are paths of the program that are not excercised.
 
@@ -165,6 +163,7 @@ The final data is aggregated over these closure version compilations. Thus when 
 
 
 %---------------------------------------------------------------
+\todo{Make sure the loc are correct}
 \begin{table}[ht]
 	\centering
 	\begin{adjustwidth}{-2cm}{-2cm}

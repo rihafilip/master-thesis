@@ -12,16 +12,9 @@ This chapter is based on the paper \cite{feedback-vmil}.
 \section{Motivation}
 %---------------------------------------------------------------
 
-\todo{event log?}
 Let's take the example in listing \ref{lst:pollution-motive} and consider disabled contextual dispatch in Ř and no OSR compilations of loops.
 
-At first, the function executes with doubles, and the type feedback will reflect that. After a few executions, the function \texttt{sum} will be compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly because the rest of the function can use specialized operations on doubles.
-
-Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type, and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This significantly slows the function for all subsequent calls. The evolution of type feedback is demonstrated in figure \ref{fig:pollution-motive-baseline}.
-
-This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information; thus we specialize to a more general context and lose performance.
-
-\begin{listing}
+\begin{listing}[H]
 	\begin{minted}{R}
 sum <- function(vec, init) {
   s <- init
@@ -37,6 +30,12 @@ for (x in 1:1000) sum(doubles, 0.0)
 	\caption{Motivating example for feedback pollution}\label{lst:pollution-motive}
 \end{listing}
 
+At first, the function executes with doubles, and the type feedback will reflect that. After a few executions, the function \texttt{sum} will be compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly because the rest of the function can use specialized operations on doubles.
+
+Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type, and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This significantly slows the function for all subsequent calls. The evolution of type feedback is demonstrated in figure \ref{fig:pollution-motive-baseline}.
+
+This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information; thus we specialize to a more general context and lose performance.
+
 \begin{listing}
 	\begin{sublisting}{\textwidth}
 		\begin{minted}{\pirlexer}
@@ -51,9 +50,7 @@ for (x in 1:1000) sum(doubles, 0.0)
     \end{minted}
 		\subcaption{Compilation with feedback \texttt{[double]}}\label{lst:pollution-pir-real}
 	\end{sublisting}
-
-	\vspace{1em}
-
+	\par\vspace{1em}\par
 	\begin{sublisting}{\textwidth}
 		\begin{minted}{\pirlexer}
 # Load the first argument
@@ -73,7 +70,7 @@ for (x in 1:1000) sum(doubles, 0.0)
 
 \begin{figure}
 	\centering
-  \begin{subfigure}{\linewidth}
+	\begin{subfigure}{\linewidth}
 		\begin{adjustwidth}{-3cm}{-3cm}
 			\includediagram{5}
 		\end{adjustwidth}
@@ -82,48 +79,86 @@ for (x in 1:1000) sum(doubles, 0.0)
 
 	\vspace{2em}
 
-  \begin{subfigure}{\linewidth}
+	\begin{subfigure}{\linewidth}
 		\begin{adjustwidth}{-3cm}{-3cm}
 			\includediagram{6}
 		\end{adjustwidth}
-		\subcaption{Execution with contextual dispatch}\label{fig:pollution-motive-context}
+		\subcaption{\todo{also update}Execution with contextual dispatch}\label{fig:pollution-motive-context}
 	\end{subfigure}
-
 	\caption{Execution of listing \ref{lst:pollution-motive} on Ř (execution times are illustrative)}
 \end{figure}
 
 
 If we consider contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and, as was the case without contextual dispatch, the resulting code is much faster.
 
-When we call with integers, we do not dispatch into the already compiled version, because the call context is not \todo{what is the relation} of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in figure \ref{fig:pollution-motive-context}.
+When we call with integers, we do not dispatch into the already compiled version, because the call context disjunct with the context of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in figure \ref{fig:pollution-motive-context}.
 
 %---------------------------------------------------------------
-\section{Definitions}
+\section{Methodology}
 %---------------------------------------------------------------
 
-We say that a \textit{feedback slot is polluted} when its value changes between individual compilations.
+Our main goal is to quantify the pollution of the feedback vector. A pollution happens when between individual compilations the feedback vector changes, either because an interpreter has observed a new value or a native version failes on an assumption and deoptimizes. This implies that the first compilation cannot be polluted, hence we are interested in \textit{subsequent compilations} (also \textit{recompilations}).
 
-\textit{Feedback pollution} is a ratio of the number of modified feedback slots to the total number of feedback slots.
+Since the state of the feedback cannot go to a previous state (i.e. on an update, the feedback either stays the same or it is in a never before observed state), we can simply observe the state of the feedback slots when a compilation is triggered and compare it to the previous compilation.
 
-\textit{Polluted compilation} is a compilation, where the feedback pollution is greater than 0.
+Formally, we define
+\begin{itemize}
+	\item{} \textit{polluted feedback slot} as a slot whose value at the point of compilation has changed from previous compilation,
+	\item{} \textit{feedback pollution} as a ratio of the number of modified feedback slots to the total number of feedback slots,
+	\item{} \textit{polluted compilation} as a compilation, where the feedback pollution is greater than 0,
+	\item{} and \textit{function pollution} as a ratio between the polluted compilations and the total number of recompilations.
+\end{itemize}
 
-\textit{Function pollution} is a ratio between the polluted compilations and the total number of compilations.
+\todo{overview table}
 
-%---------------------------------------------------------------
-\section{Observation}
-%---------------------------------------------------------------
-
-
-%---------------------------------------------------------------
-\section{Prevention}
-%---------------------------------------------------------------
-
+For collecting the data, we used the recording tool introduced in the previous chapter. As an input to the experiment, we used 16 benchmarks from the Ř benchmarks collection containing nearly 1300 lines of code and a Kaggle script, both outlined in chapter \ref{ch:1-corpus}. The Ř compiler is ran with default parameters, meaning that a function is compiled after 100 invocations. Compilations triggered by loop iterations are ignored.
 
 %---------------------------------------------------------------
-\subsection{Contextual Feedback}
+\section{Analysis}
 %---------------------------------------------------------------
 
+First, we will observe the the Kaggle code. Running the script, 315 functions are compiled and 146 of them are compiled more than once. A function compilation is triggered 970 times and out of these 824 are recompilations (2.6 recompilations on average per function). Overall, we have observed 90 polluted recompilations (10.9\%), where 19 recompilations have more than half of the slots polluted and 10 have all of the slots polluted.
+
+Figure \ref{fig:kaggle-pollution} shows the function pollution in Kaggle. Each point represents a compilation, where the y-axis is showing an \textit{accumulated pollution}, i.e. the summed pollution of all subsequent compilations up to that point. On the x-axis, we show all of the functions that were compiled more than once.
+
+\begin{figure}
+	\centering
+	\begin{adjustwidth}{-2cm}{-2cm}
+		\includegraphics[width=1.3\textwidth]{figures/pollution/master/kaggle-function-pollution.pdf}
+	\end{adjustwidth}
+	\caption{Function pollution in Kaggle script, each point represents a compilation\cite{feedback-vmil}}\label{fig:kaggle-pollution}
+\end{figure}
+
+When we take as an example the function \texttt{typeof}, we have three compilations. The second compilation has a 100\% polluting and the third a 200\% pollution, meaning that both of the recompilations use all slots as polluted. The function is a wrapper around a C function that returns the type of the argument. It has a single parameter, to which the slot is connected to, and since it can be called with any type, it will always pollute when a new type is observed.
+
+Looking at the benchmarks, we have observed much less compilations than in the Kaggle code. This is to be expected, as the benchmarks are mostly small numerical programs. In figure \ref{fig:bench-pollution} we can see the \textit{benchmark pollution}, which is the ratio of polluted recompilations out of all recompilations. Out of the 16 selected benchmarks, 10 of them have at least one polluted compilation. The overall ratio between polluted compilations is 8.2\%, which is very similar to the 10.9\% observed in the Kaggle code, but when looking at the function pollution, we have observed that out of 139 compiled functions there are 21 polluted functions (15.1\%). This is very likely due to the nature of the benchmarks, as they are numeric programs which are mostly using very few types. Still, a pollution can be observed and should be prevented.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\textwidth]{figures/pollution/master/benchmark-pollutionBW.pdf}
+	\caption{Pollution of functions in benchmarks\cite{feedback-vmil}}\label{fig:bench-pollution}
+\end{figure}
+
+Splitting the pollution by a feedback slot type, the observed values are taking most of the pollution. Out of the 11,199 slots in the Kaggle code, 0.5\% of observed calls, 2.7\% of observed tests, and 5.7\% of observed values are polluted. This is not surprising, as the type feedback slots are the slots with most variability.
 
 %---------------------------------------------------------------
-\subsection{Feedback Decay (?)}
+\subsubsection*{Summary}
 %---------------------------------------------------------------
+
+In table \todoadd is a summary of the feedback compilation in the benchmarks and in the Kaggle code. We can see that feedback pollution happens in both the Kaggle code as well as in the benchmarks, although the benchmarks have a lower pollution rates, mostl likely due to the stable nature of the code.
+
+We have observed that pollution is most likely caused by polymorphic functions that are called often with different types, but other causes for pollution can be a global state.
+
+Most of the polluted slots are the observed values.
+
+The code of the analysis is freely available at GitLab\footnote{\url{https://gitlab.com/rirvm/splitfeedback-experiments/-/tree/artifact}} as part of the VMIL paper\cite{feedback-vmil} aritfact.
+
+%---------------------------------------------------------------
+\section{Pollution prevention}
+%---------------------------------------------------------------
+
+After observing that a feedback pollution is a real phenomenon, we want to create a way to reduce it. \todo{wtf}
+
+One way to reduce the pollution is to split the feedback vector into multiple different ones. Since Ř already employs a contextual dispatch, the constructed dispatch could be reused by the feedback, constructing a unique vector for each call context the function is invoked with. A split feedback was implemented by Michal Štěpánek as a part of his master thesis\cite{michal2025obohaceny}. However, this solution brought new problems, as now the observed information is much sparser and needs to be merged from multiple vectors. Splitting the feedback also negativaly impacts the interpreter performance, and complicates function compilation.
+
+Another way to reduce the pollution would be to implement a \textit{feedback decay}. The idea is that the feedback information in every slot would slowly \textit{decay} as new information is observed. This will need to be finely tuned, as very quickly the JIT could be stuck in a \textit{deopt loop}, compiling a function just to trigger a deoptimization next time it is invoked.
