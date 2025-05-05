@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.4] - 5. 5. 2025
+
+Fix of different CZE/ENG abstract pages.
+
+### Changed
+- Fixed visual style of first and second abstract page.
+
+
 ## [1.5.3] - 4. 5. 2025
 
 Algorithm pseudocode numbering based on chapters.
