@@ -1,72 +1,81 @@
-% \begin{listing}
-% 	\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
-% Code:
-%   1 LDCONST 1
-%   3 STARTFOR 4 3 29
-%   7 GETBUILTIN 5
-%   9 GETVAR 7
-%  11 PUSHARG
-%  12 PUSHCONSTARG 8
-%  14 CALLBUILTIN 6
-%  16 BRIFNOT 9 27
-%  19 GETFUN 10
-%  21 MAKEPROM 12
-%  23 CALL 11
-%  25 GOTO 28
-%  27 LDNULL
-%  28 POP
-%  29 STEPFOR 7
-%  31 ENDFOR
-%  32 POP
-%  33 GETVAR 7
-%  35 RETURN
-%
-% Constant pool:
-% 0:
-%  language {  for (i in 1:10) {; if (x%..
-% 1:
-%  int [1:10] 1 2 3 4 5 6 7 8 9 10
-% 2:
-%  language 1:10
-% 3:
-%  symbol i
-% 4:
-%  language for (i in 1:10) {     if (x%..
-% 5:
-%  symbol %%
-% 6:
-%  language x%%2
-% 7:
-%  symbol x
-% 8:
-%  num 2
-% 9:
-%  language if (x%%2) {     g(x) ...
-% 10:
-%  symbol g
-% 11:
-%  language g(x)
-% 12:
-%  Promise 0:
-%    Code:
-%      1 GETVAR 0
-%      3 RETURN
-%
-%    Constant pool:
-%    0:
-%     symbol x
-%    1:
-%     language g(x)
-%    2:
-%     'expressionsIndex' int [1:4] NA 1 1 1
-% 13:
-%  'expressionsIndex' int [1:36] NA 2 2 ..
-%   \end{minted}
-% \end{listing}
-%
-\begin{listing}
+%---------------------------------------------------------------
+\chapter{Bytecode examples}\label{ch:appendix-bc}
+%---------------------------------------------------------------
+
+\begin{listing}[h]
 	\begin{multicols}{2}
-		\begin{minted}[fontsize=\footnotesize,linenos=false]{\rirlexer}
+		\begin{minted}[fontsize=\footnotesize,linenos=false]{text}
+Code:
+  1 LDCONST 1
+  3 STARTFOR 4 3 30
+  7 GETVAR 3
+  9 LDCONST 5
+ 11 ADD 6
+ 13 LDCONST 7
+ 15 GT 8
+ 17 BRIFNOT 9 28
+ 20 GETFUN 10
+ 22 MAKEPROM 12
+ 24 CALL 11
+ 26 GOTO 29
+ 28 LDNULL
+ 29 POP
+ 30 STEPFOR 7
+ 32 ENDFOR
+ 33 POP
+ 34 GETFUN 10
+ 36 MAKEPROM 12
+ 38 CALL 11
+ 40 RETURN
+Constant pool:
+0:
+ language {  for (i in 1:10) {; i..
+1:
+ int [1:10] 1 2 3 4 5 6 7 8 9 10
+2:
+ language 1:10
+3:
+ symbol i
+4:
+ language for (i in 1:10) {     i..
+5:
+ num 2
+6:
+ language i + 2
+7:
+ num 1
+8:
+ language i + 2 > 1
+9:
+ language if (i + 2 > 1) {     g(..
+10:
+ symbol g
+11:
+ language g(x)
+12:
+ Promise 0:
+  Code:
+    1 GETVAR 0
+    3 RETURN
+  Constant pool:
+  0:
+   symbol x
+  1:
+   language g(x)
+  2:
+   'expressionsIndex' int [1:4] N..
+13:
+ 'expressionsIndex' int [1:41] NA..
+    \end{minted}
+	\end{multicols}
+	\caption{GNU-R bytecode for listing \ref{lst:bc-example-r}}\label{lst:appendix-gnur}
+\end{listing}
+
+\begin{listing}[p]
+	\begin{adjustwidth}{-2cm}{-2cm}
+
+		\begin{multicols}{3}
+			\begin{minted}[fontsize=\footnotesize,linenos=false]{\rirlexer}
 0:
       0   push_  1
       5   visible_
@@ -108,69 +117,101 @@
      92   ensure_named_
      93   ; NULL
           add_
-     94   ldfun_  g
-     99   [ 0, <0>, valid  ] Call#0
-    104   mk_promise_  0
-    109   ; g(x)
-          call_  1
-    126   [ <?> ] Type#3
-    131   asbool_
-    132   brtrue_  3
-    137   ldvar_cached_  G{2}
-    146   [ <?> ] Type#4
-    151   stvar_cached_  x{1}
-    160   br_  4
-3:
-    165   ldvar_cached_  x{1}
-    174   [ <?> ] Type#5
-    179   stvar_cached_  x{1}
-4:
-    188   dup2_
-    189   ; NULL
-          ne_
-    190   brfalse_  7
-    195   dup_
-    196   stvar_cached_  i{0}
-    205   pull_  2
-    210   ensure_named_
-    211   ; NULL
+     94   ldvar_cached_  i{0}
+    103   [ <?> ] Type#2
+    108   push_  2
+    113   visible_
+    114   ; +(i, 2)
           add_
-    212   ldfun_  g
-    217   [ 0, <0>, valid  ] Call#1
-    222   mk_promise_  1
-    227   ; g(x)
+    115   [ <?> ] Type#3
+    120   push_  1
+    125   visible_
+    126   ; >(+(i, 2), 1)
+          gt_
+    127   [ <?> ] Type#4
+    132   asbool_
+    133   brtrue_  3
+    138   br_  4
+3:
+    143   ldfun_  g
+    148   [ 0, <0>, valid  ] Call#0
+    153   mk_promise_  0
+    158   ; g(x)
           call_  1
-    244   [ <?> ] Type#7
-    249   asbool_
-    250   brtrue_  5
-    255   ldvar_cached_  G{2}
-    264   [ <?> ] Type#8
-    269   stvar_cached_  x{1}
-    278   br_  6
+    175   pop_
+4:
+    176   dup2_
+    177   ; NULL
+          ne_
+    178   brfalse_  7
+    183   dup_
+    184   stvar_cached_  i{0}
+    193   pull_  2
+    198   ensure_named_
+    199   ; NULL
+          add_
+    200   ldvar_cached_  i{0}
+    209   [ <?> ] Type#6
+    214   push_  2
+    219   visible_
+    220   ; +(i, 2)
+          add_
+    221   [ <?> ] Type#7
+    226   push_  1
+    231   visible_
+    232   ; >(+(i, 2), 1)
+          gt_
+    233   [ <?> ] Type#8
+    238   asbool_
+    239   brtrue_  5
+    244   br_  6
 5:
-    283   ldvar_cached_  x{1}
-    292   [ <?> ] Type#9
-    297   stvar_cached_  x{1}
+    249   ldfun_  g
+    254   [ 0, <0>, valid  ] Call#1
+    259   mk_promise_  1
+    264   ; g(x)
+          call_  1
+    281   pop_
 6:
-    306   br_  4
+    282   br_  4
 7:
-    311   popn_  3
-    316   ldvar_cached_  x{1}
-    325   [ <?> ] Type#10
-    330   ret_
+    287   popn_  3
+    292   ldfun_  g
+    297   [ 0, <0>, valid  ] Call#2
+    302   mk_promise_  2
+    307   ; g(x)
+          call_  1
+    324   [ <?> ] Type#11
+    329   ret_
 
 [Prom (index 0)]
 0:
       0   ldvar_  x
-      5   [ <?> ] Type#2
+      5   [ <?> ] Type#5
      10   ret_
 
 [Prom (index 1)]
 0:
       0   ldvar_  x
-      5   [ <?> ] Type#6
+      5   [ <?> ] Type#9
      10   ret_
 
-    \end{minted}
-	\end{multicols}
+[Prom (index 2)]
+0:
+      0   ldvar_  x
+      5   [ <?> ] Type#10
+     10   ret_
+function (x)
+{
+    for (i in 1:10) {
+        if (i + 2 > 1) {
+            g(x)
+        }
+    }
+    g(x)
+}
+      \end{minted}
+		\end{multicols}
+	\end{adjustwidth}
+	\caption{RIR bytecode for listing \ref{lst:bc-example-r}}\label{}
 \end{listing}
