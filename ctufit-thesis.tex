@@ -1,7 +1,7 @@
 %% This is the ctufit-thesis example file. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
-%% This is version 1.5.2, built 25. 4. 2025.
+%% This is version 1.5.3, built 25. 4. 2025.
 %% 
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
@@ -114,7 +114,7 @@
 % PACKAGES SETTINGS END
 %%%%%%%%%%%%%%%%%%%%%%
 
-\begin{document} 
+\begin{document}
 \frontmatter\frontmatterinit % do not remove these two commands
 
 \thispagestyle{empty}\maketitle\thispagestyle{empty}\cleardoublepage % do not remove these four commands
@@ -134,7 +134,7 @@
 %%%%%%%%%%%%%%%%%%%
 \begin{acknowledgmentpage}
 	Chtěl bych poděkovat především sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue.
-\end{acknowledgmentpage} 
+\end{acknowledgmentpage}
 %%%%%%%%%%%%%%%%%%%
 % ACKNOWLEDGMENT END
 %%%%%%%%%%%%%%%%%%%
@@ -148,9 +148,9 @@
 % ENG: choose one of approved texts of the declaration. DO NOT CREATE YOUR OWN. Find the approved texts at https://courses.fit.cvut.cz/SFE/download/index.html#_documents (document Declaration for FT in English)
 % CZE/SLO: Vyberte jedno z fakultou schvalenych prohlaseni. NEVKLADEJTE VLASTNI TEXT. Schvalena prohlaseni najdete zde: https://courses.fit.cvut.cz/SZZ/dokumenty/index.html#_dokumenty (prohlášení do ZP)
 \begin{declarationpage}
-FILL IN ACCORDING TO THE INSTRUCTIONS. VYPLŇTE V SOULADU S POKYNY. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
+	FILL IN ACCORDING TO THE INSTRUCTIONS. VYPLŇTE V SOULADU S POKYNY. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
 
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
+	Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hendrerit ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Cras pede libero, dapibus nec, pretium sit amet, tempor quis. Sed vel lectus. Donec odio tempus molestie, porttitor ut, iaculis quis, sem. Suspendisse sagittis ultrices augue. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. In sem justo, commodo ut, suscipit at, pharetra vitae, orci. Pellentesque pretium lectus id turpis.
 \end{declarationpage}
 %%%%%%%%%%%%%%%%%%%
 % DECLARATION END
@@ -198,7 +198,8 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hen
 \begingroup
 \let\clearpage\relax
 \listoftables % list of tables. Remove if you do not have any.
-\thectufitlistingscommand % list of code listings. Remove if you do not have any.
+\thectufitlistingscommand{} % list of code listings. Remove if you do not have any.
+\thectufitlistofalgorithmscommand{} % list of algorithm pseudocodes defined using the algorithm package.
 \endgroup
 
 %%%%%%%%%%%%%%%%%%%
@@ -208,17 +209,17 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Curabitur sagittis hen
 % List the abbreviations in lexicography order.
 %%%%%%%%%%%%%%%%%%%
 \chapter{\thectufitabbreviationlabel}
-	
+
 \begin{tabular}{rl}
-DFA & Deterministic Finite Automaton\\
-FA & Finite Automaton\\
-LPS & Labelled Prüfer Sequence\\
-NFA & Nondeterministic Finite Automaton\\
-NPS & Numbered Prüfer Sequence\\
-XML & Extensible Markup Language\\
-XPath & XML Path Language\\
-XSLT & eXtensible Stylesheet Language Transformations\\
-W3C & World Wide Web Consortium
+	DFA   & Deterministic Finite Automaton                 \\
+	FA    & Finite Automaton                               \\
+	LPS   & Labelled Prüfer Sequence                       \\
+	NFA   & Nondeterministic Finite Automaton              \\
+	NPS   & Numbered Prüfer Sequence                       \\
+	XML   & Extensible Markup Language                     \\
+	XPath & XML Path Language                              \\
+	XSLT  & eXtensible Stylesheet Language Transformations \\
+	W3C   & World Wide Web Consortium
 \end{tabular}
 %%%%%%%%%%%%%%%%%%%
 % ABBREVIATIONS END
