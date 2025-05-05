@@ -197,7 +197,11 @@
 
 \DeclareRobustCommand{\thectufitlistinglabel}{\if\@ctufitlang C{V{\'y}pis k{\'o}du}\else\if\@ctufitlang S{V{\'y}pis k{\'o}du}\else{Code listing}\fi\fi}
 
-\DeclareRobustCommand{\thectufitlollabel}{\if\@ctufitlang C{Seznam v{\'y}pis{\r u} k{\'o}du}\else\if\@ctufitlang S{Zoznam v{\'y}pisov k{\'o}du}\else{List of code listings}\fi\fi}
+\DeclareRobustCommand{\thectufitlollabel}{\if\@ctufitlang C{Seznam v{\'y}pis{\r u} k{\'o}du}\else\if\@ctufitlang S{Zoznam v{\'y}pisov k{\'o}du}\else{List of Code listings}\fi\fi}
+
+\DeclareRobustCommand{\thectufitalgorithmlabel}{\if\@ctufitlang C{Pseudokód}\else\if\@ctufitlang S{Pseudokód}\else{Algorithm}\fi\fi}
+
+\DeclareRobustCommand{\thectufitloalabel}{\if\@ctufitlang C{Seznam pseudokódů}\else\if\@ctufitlang S{Zoznam pseudokódov}\else{List of Algorithms}\fi\fi}
 
 \DeclareRobustCommand{\thectufitdeclarationlabel}{\if\@ctufitlang C{Prohlášení}\else\if\@ctufitlang E{Declaration}\else{Vyhlásenie}\fi\fi}
 
@@ -607,6 +611,14 @@
 		\fi
 		\setmintedinline{bgcolor={}}
 	}{}%
+	\@ifpackageloaded{algorithm}{%
+		\numberwithin{algorithm}{chapter}%
+		\DeclareRobustCommand{\listalgorithmname}{\thectufitloalabel}%
+		\DeclareRobustCommand{\ALG@name}{\thectufitalgorithmlabel}%
+		\DeclareRobustCommand{\thectufitlistofalgorithmscommand}{\listofalgorithms}%
+	}{%
+		\DeclareRobustCommand{\thectufitlistofalgorithmscommand}{}%
+	}%
 }
 
 % Should be last beause of hyperref
