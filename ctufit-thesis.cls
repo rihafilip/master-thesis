@@ -1,7 +1,7 @@
 %% This is the ctufit-thesis document class. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
-%% This is version 1.5.2, built 25. 4. 2025.
+%% This is version 1.5.4, built 5. 5. 2025.
 %%
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
@@ -565,9 +565,9 @@
 
 {\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}\vfill}
 \fi
+\end{abstractpage}
 
-\pagebreak
-
+\begin{abstractpage}
 \if\@ctufitlang E{%
 \begin{abstrakt}%
 \thectufitabstrakt
