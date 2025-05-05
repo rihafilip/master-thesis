@@ -28,8 +28,8 @@ ggplot(
 ) +
   geom_point() +
   scale_x_log10()
-      \end{minted}
-		\captionof{listing}{R example\todocite}\label{lst:motivation}
+    \end{minted}
+		\captionof{listing}{R example\cite{r-crash-course}}\label{lst:motivation}
 	\end{minipage}%
 	\hfill
 	\begin{minipage}{0.45\textwidth}
@@ -183,7 +183,7 @@ e1$x == 42
 
 As mentioned before, environments are a first-class citizen. This allows for any function to access and even modify any environment where it was created or called. Moreover, when combined with lazy arguments, a function can reflect on the environment it is being forced in and modify it, sometimes in unpredictable ways.
 
-This is demonstrated in listing \ref{lst:bad-ref}, where we call to \texttt{good}, inside of which we evaluate to the call to \texttt{bad}, which reflects on the caller environment, deletes a binding, and results in a unbinded variable on line 9.\todo{rewrite}
+This is demonstrated in listing \ref{lst:bad-ref}. We can see that evaluating the promise (the call to \texttt{bad}) removes a variable binding, resulting in an error.
 
 \begin{listing}
 	\centering
@@ -202,10 +202,10 @@ good <- function(y) {
 good(bad())
 # Error in good(bad()) : object 'x' not found
   \end{minted}
-	\caption{Example of malicious reflection\todocite}\label{lst:bad-ref}
+	\caption{Example of malicious reflection\cite{r-melts-brains}}\label{lst:bad-ref}
 \end{listing}
 
-R also has primitives for creating, manipulating, and evaluating expressions from the language itself. This allows for, among other things, evaluate a promise under a different environment, programatically create arbitrary pieces of code, or instrument functions with additional calls \todo{different example \dots}.
+R also has primitives for creating, manipulating, and evaluating expressions from the language itself. This allows for, among other things, evaluate a promise under a different environment, programatically create arbitrary pieces of code, or instrument functions with additional calls.
 
 Combining reflection, laziness and side effects makes R a very complex language to optimize.
 
@@ -214,7 +214,7 @@ Combining reflection, laziness and side effects makes R a very complex language 
 \section{GNU-R}
 %------------------------------------------------------------------------------------------------------------------------------
 
-The R language is not formally specified, it only has a reference implementation that we will refer to as \textit{GNU-R}\todocite. It is written in the C programming language, spans over more than {250 000} lines of code and is currently maintained by the R Core Team
+The R language is not formally specified, it only has a reference implementation that we will refer to as \textit{GNU-R}. It is written in the C programming language, spans over more than {250 000} lines of code and is currently maintained by the R Core Team
 
 %---------------------------------------------------------------
 \subsubsection*{Representation}
@@ -288,7 +288,7 @@ Next to the GC, GNU-R also has a reference counter for each object, included in 
 \subsubsection*{Packages}
 %---------------------------------------------------------------
 
-A big advantage of using R is the vast library of packages, libraries and data sets. These are hosted at \textit{The Comprehensive R Archive Network}\todocite package repository, wich is currated and tested by the R Core Team. They can be very simply installed by calling \texttt{install.packages} and loaded with the \texttt{library} function.
+A big advantage of using R is the vast library of packages, libraries and data sets. These are hosted at \textit{The Comprehensive R Archive Network}\cite{cran} package repository, wich is currated and tested by the R Core Team. They can be very simply installed by calling \texttt{install.packages} and loaded with the \texttt{library} function.
 
 The GNU-R base installation is also distributes with several packages, including, but not limited to, \texttt{base} containing the basic functions for using R, \texttt{stats} implementing statistical functions, \texttt{graphics} with base functions for manipulating graphical output, \texttt{compiler} implementing the mentioned bytecode compiler, or \texttt{Matrix} with hiearchy of dense and sparse matrix classes.
 
@@ -307,7 +307,7 @@ This makes evolution of R without breaking packages very hard, as well as compli
 \section{The Ř compiler}
 %------------------------------------------------------------------------------------------------------------------------------
 
-\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language, developed at Programming Languages Laboratory at Czech Technical University in Prague\footnote{\url{https://prl-prg.github.io/}} and Programming Research Laboratory at Notheastern University\footnote{\url{https://prl.khoury.northeastern.edu/}}. The project is freely available and hosted on GitHub\todocite.
+\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language, developed at Programming Languages Laboratory at Czech Technical University in Prague\footnote{\url{https://prl-prg.github.io/}} and Programming Research Laboratory at Notheastern University\footnote{\url{https://prl.khoury.northeastern.edu/}}. The project is freely available and hosted on GitHub\cite{rsh-github}.
 
 It is built as an extension to GNU-R, although it uses a slightly modified version of the codebase. It bypasses the GNU-R bytecode compiler and interpreter, instead using a custom one, while reusing the \texttt{SEXP} representation, AST interpreter, and garbage collector. For the compilation to native code, the \textit{LLVM Project}\cite{llvm} is used. The compilation pipeline is outlined in figure \ref{fig:rsh-archit}
 
@@ -319,8 +319,7 @@ It is built as an extension to GNU-R, although it uses a slightly modified versi
 
 %---------------------------------------------------------------
 \subsubsection*{Runtime objects}
-%---------------------------------------------------------------
-
+%-------------------------------------------------------------
 Ř uses the GNU-R \texttt{SEXP} representation and memory management. All runtime objects are embedded into the SEXP objects. This is one of the modifications that need to be applied to GNU-R, a new \texttt{SEXPTYPE} is added (\texttt{EXTERNALSXP}), along with the necessary changes to how it is garbage collected and how it references other objects.
 
 The structure of Ř runtime object can be seen in figure \ref{fig:rsh-object-struct}. It represented as the \texttt{SEXP} header, the \texttt{SEXPTYPE} alwyas set to the \texttt{EXTERNALSXP}, and then the embeded \texttt{RirRuntimeObject}. This object always starts with two \texttt{uint32\_t} numbers, the first dictates how many bytes after the start of the Ř object do start the pointers to the other \texttt{SEXP}s, and the second indicates how many pointers are there. The magic number dictates which Ř object it is.
@@ -343,7 +342,7 @@ Every dispatch table entry is represented by a \texttt{Function} structure. This
 
 The body of a function is stored in a structure called \texttt{Code}. This is either the bytecode body or a pointer to the native function, and the constants pool.
 
-The \textit{feedback vector} collected from a bytecode interpretation is represented by the \texttt{TypeFeedback} structure\footnote{\texttt{TypeFeedback} is a missleading name as the interpreter also collect non-type information}. It consists of \textit{slots}, where one slot corresponds to information about one bytecode instruction, and there are three different types of slots. \textit{Observed calls} records the destination of calling a function, \textit{observed types} record the types of values that are loaded from environment, forced, or are results of a function call, and \textit{observed tests} has one of four values recording how a branch was taken (\texttt{None}, \texttt{OnlyFalse}, \texttt{OnlyTrue} and \texttt{Both}). Since every function has different number of slots, the \texttt{TypeFeedback} object has different size for each function and is using a \textit{flexible array member}\todocite to store the observed values.
+The \textit{feedback vector} collected from a bytecode interpretation is represented by the \texttt{TypeFeedback} structure\footnote{\texttt{TypeFeedback} is a missleading name as the interpreter also collect non-type information}. It consists of \textit{slots}, where one slot corresponds to information about one bytecode instruction, and there are three different types of slots. \textit{Observed calls} records the destination of calling a function, \textit{observed types} record the types of values that are loaded from environment, forced, or are results of a function call, and \textit{observed tests} has one of four values recording how a branch was taken (\texttt{None}, \texttt{OnlyFalse}, \texttt{OnlyTrue} and \texttt{Both}). Since every function has different number of slots, the \texttt{TypeFeedback} object has different size for each function and is using a \textit{flexible array member}\cite{flexible-array} to store the observed values.
 
 \begin{figure}
 	\centering
@@ -355,7 +354,7 @@ The \textit{feedback vector} collected from a bytecode interpretation is represe
 \subsubsection*{RIR bytecode interpreter}
 %---------------------------------------------------------------
 
-The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. It uses the GNU-R bytecode execution stack. Unlike the GNU-R bytecode, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code that in GNU-R. An example of RIR compiled code can be seen in listing \ref{lst:bc-example-rir}. Note that the example code is not complete and is only used to give impression between the size differences of the bytecodes. The full code listing is in appendix \todoadd.
+The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. It uses the GNU-R bytecode execution stack. Unlike the GNU-R bytecode, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code that in GNU-R. An example of RIR compiled code can be seen in listing \ref{lst:bc-example-rir}. Note that the example code is not complete and is only used to give impression between the size differences of the bytecodes. The full code listing is in appendix \ref{ch:appendix-bc}.
 
 For this thesis, the important bytecode instructions are \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These do the recording of feedback information about calls, types and tests respectively by observing the top value on the execution stack and recording the information to the \texttt{TypeFeedback} structure on an index stored as an immediate. The instructions are printed in listings as the observed values in square brackets followed by the label \texttt{Call\#N}, \texttt{Type\#N} or \texttt{Test\#N}, where \texttt{N} is the slot index.
 
@@ -400,7 +399,7 @@ After all of the optimizations are finished, the PIR code is transformed into \t
 \subsubsection*{Contextual dispatch}\label{ch:1-ctx-dispatch}
 %---------------------------------------------------------------
 
-Next to the speculative optimizations, Ř employs another technique for optimizing on dynamic types called \textit{contextual dispatch}\todocite. The idea is based on observing arguments on runtime and based on their types, creating a disjunct native version with the ability to specialize uniquely to the type.
+Next to the speculative optimizations, Ř employs another technique for optimizing on dynamic types called \textit{contextual dispatch}\cite{ctx-dispatch}. The idea is based on observing arguments on runtime and based on their types, creating a disjunct native version with the ability to specialize uniquely to the type.
 
 For every function call, we can create a \textit{context}. It captures information about the first six arguments (if they are eager, non-reflective, not an object, or a simple scalar integer or double), the number of missing arguments, as well as if the arguments are correctly ordered, or if there aren’t too many arguments passed. These contexts form a partial ordering.
 
