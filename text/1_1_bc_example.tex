@@ -1,0 +1,139 @@
+\begin{listing}[p]
+	\centering
+	\begin{minipage}{0.33\textwidth}
+    \begin{minted}[fontsize=\small,linenos=false]{R}
+f <- function(x) {
+  for (i in 1:10) {
+    if (i + 2 > 1) {
+      g(x)
+    }
+  }
+  g(x)
+}
+    \end{minted}
+		\subcaption{R code}\label{lst:bc-example-r}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{0.66\textwidth}
+		\begin{minipage}{0.20\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{text}
+Code:
+  1 LDCONST 1
+  3 STARTFOR 4 3 30
+  7 GETVAR 3
+  9 LDCONST 5
+ 11 ADD 6
+ 13 LDCONST 7
+ 15 GT 8
+ 17 BRIFNOT 9 28
+ 20 GETFUN 10
+ 22 MAKEPROM 12
+ 24 CALL 11
+ 26 GOTO 29
+ 28 LDNULL
+ 29 POP
+ 30 STEPFOR 7
+ 32 ENDFOR
+ 33 POP
+ 34 GETFUN 10
+ 36 MAKEPROM 12
+ 38 CALL 11
+ 40 RETURN
+      \end{minted}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.48\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{text}
+Constant pool:
+0:
+ language {  for (i in 1:10) {; i..
+1:
+ int [1:10] 1 2 3 4 5 6 7 8 9 10
+2:
+ language 1:10
+...
+12:
+ Promise 0:
+  Code:
+    1 GETVAR 0
+    3 RETURN
+  Constant pool:
+  0:
+   symbol x
+  1:
+   language g(x)
+  2:
+   'expressionsIndex' int [1:4] N..
+13:
+ 'expressionsIndex' int [1:41] NA..
+      \end{minted}
+		\end{minipage}
+		\subcaption{GNU-R code}\label{lst:bc-example-gnur}
+	\end{minipage}
+	\par\vspace{2mm}\par
+	\begin{minipage}{\textwidth}
+		\centering
+		\begin{minipage}{0.47\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{\rirlexer}
+0:
+      0   push_  1
+      5   visible_
+      6   force_
+      7   push_  10
+     12   visible_
+     13   force_
+     14   ; :(1, 10)
+          colon_input_effects_
+     15   pop_
+     16   swap_
+     17   colon_cast_lhs_
+     18   [ <?> ] Type#0
+     23   ensure_named_
+     24   swap_
+     25   colon_cast_rhs_
+     26   ensure_named_
+     27   [ <?> ] Type#1
+     32   dup2_
+     33   ; NULL
+          le_
+     34   [ _ ] Test#0
+     39   brfalse_  1
+     44   push_  1L
+     49   br_  2
+      \end{minted}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.47\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{\rirlexer}
+1:
+     54   push_  -1L
+     ...
+7:
+    287   popn_  3
+    292   ldfun_  g
+    297   [ 0, <0>, valid  ] Call#2
+    302   mk_promise_  2
+    307   ; g(x)
+          call_  1
+    324   [ <?> ] Type#11
+    329   ret_
+
+[Prom (index 0)]
+0:
+      0   ldvar_  x
+      5   [ <?> ] Type#5
+     10   ret_
+
+[Prom (index 1)]
+0:
+      0   ldvar_  x
+      5   [ <?> ] Type#9
+     10   ret_
+     ...
+      \end{minted}
+		\end{minipage}
+		\subcaption{RIR code}\label{lst:bc-example-rir}
+	\end{minipage}
+  \caption{A truncated example of generated GNU-R and RIR bytecodes, full code in appendix \todoadd}\label{lst:bc-example}
+% \ref{ch:appendix-bc}
+\end{listing}
