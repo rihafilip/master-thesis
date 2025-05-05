@@ -1,7 +1,7 @@
 %% This is the ctufit-thesis document class. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
-%% This is version 1.5.4, built 5. 5. 2025.
+%% This is version 1.5.5, built 5. 5. 2025.
 %%
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
@@ -440,7 +440,7 @@
 % declaration page END
 
 % abstract page
-\newenvironment{abstractpage}{\frontchapternotprinted{\if\@ctufitlang E{Abstract}\else{Abstrakt}\fi}
+\newenvironment{abstractpage}[1]{\frontchapternotprinted{#1}
 }{}
 % abstract page END
 
@@ -546,46 +546,45 @@
 \numberwithin{theorem}{chapter}
 % theorems, proofs, definitions, etc. end
 
+\DeclareRobustCommand{\printczechabstractpage}{%
+	\begin{abstrakt}%
+		\thectufitabstrakt
+	\end{abstrakt}
+		
+	\vskip 0.5cm
+		
+	{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}\vfill
+}
+
+\DeclareRobustCommand{\printenglishabstractpage}{%
+	\begin{abstract}%
+		\thectufitabstract
+	\end{abstract}
+	
+	\vskip 0.5cm
+	
+	{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}
+	\vfill
+}
+
 \DeclareRobustCommand{\printabstractpage}{%
-\begin{abstractpage}
-\if\@ctufitlang E{%
-\begin{abstract}%
-\thectufitabstract
-\end{abstract}
+	\if\@ctufitlang E{%	
+		\begin{abstractpage}{Abstract}
+			\printenglishabstractpage
+		\end{abstractpage}
 
-\vskip 0.5cm
+		\begin{abstractpage}{Abstrakt}
+			\printczechabstractpage
+		\end{abstractpage}
+	}\else{%
+		\begin{abstractpage}{Abstrakt}
+			\printczechabstractpage
+		\end{abstractpage}
 
-{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}
-\vfill}\else{%
-\begin{abstrakt}%
-\thectufitabstrakt
-\end{abstrakt}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}\vfill}
-\fi
-\end{abstractpage}
-
-\begin{abstractpage}
-\if\@ctufitlang E{%
-\begin{abstrakt}%
-\thectufitabstrakt
-\end{abstrakt}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}
-\vfill}\else{
-\begin{abstract}%
-\thectufitabstract
-\end{abstract}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}
-\vfill}\fi
-\end{abstractpage}
+		\begin{abstractpage}{Abstract}
+			\printenglishabstractpage
+		\end{abstractpage}
+	}\fi
 }
 
 \newenvironment{chapterabstract}{\hfill\begin{minipage}{\dimexpr\textwidth-0.5cm}\itshape}{\end{minipage}\vskip 0.5cm\par\@afterindentfalse\@afterheading}

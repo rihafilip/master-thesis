@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.5] - 5. 5. 2025
+
+Fix of abstracts in table of content.
+
+### Changed
+- Refactoring abstract creation to simplify creation and handling.
+
+
 ## [1.5.4] - 5. 5. 2025
 
 Fix of different CZE/ENG abstract pages.
