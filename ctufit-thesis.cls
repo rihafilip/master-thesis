@@ -1,6 +1,8 @@
 %% This is the ctufit-thesis document class. It is used to produce theses
 %% for submission to Czech Technical University, Faculty of Information Technology.
 %%
+%% This is version 1.5.5, built 5. 5. 2025.
+%%
 %% Get the newest version from
 %% https://gitlab.fit.cvut.cz/theses-templates/FITthesis-LaTeX
 %%
@@ -35,7 +37,6 @@
 \DeclareOption{bachelor}{\def\@ctufitthesistype{B}}
 \DeclareOption{master}{\def\@ctufitthesistype{M}}
 \DeclareOption{dissertation}{\def\@ctufitthesistype{D}}
-\DeclareOption{bw}{\def\@ctufitthesisblackandwhite}
 \DeclareOption{czech}{
 	\AtBeginDocument{\selectlanguage{czech}}
 	\PassOptionsToPackage{english,main=czech}{babel}
@@ -81,6 +82,7 @@
 \DeclareOption{paragraph}{
 	\def\@ctufitsecdepth{4}
 }
+\DeclareOption{bw}{\def\@ctufitthesisblackandwhite}
 \PassOptionsToPackage{svgnames}{xcolor}
 \PassOptionsToPackage{newfloat}{minted}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
@@ -92,7 +94,6 @@
 \RequirePackage{xcolor}[2023/11/15]
 \usepackage{silence}
 \WarningFilter{pdfx}{Setting all color commands to rgb}
-\RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
 \RequirePackage{babel}[2021/03/03]
 \if@twoside
     \RequirePackage[top=4.6cm,bottom=4cm,footskip=4em,inner=4.7cm,outer=3.25cm]{geometry}[2020/01/02] %page layout
@@ -122,7 +123,6 @@
 \fi
 % colours end
 
-\RequirePackage{hyperref}[2024/11/05]
 \DeclareRobustCommand{\ctufittitle}[1]{
 	\def\thectufittitle{#1}
 	\title{#1}
@@ -144,6 +144,12 @@
 }
 \DeclareRobustCommand{\ctufitdepartment}[1]{
 	\def\thectufitdepartment{#1}
+}
+\DeclareRobustCommand{\ctufitprogram}[1]{
+	\def\thectufitprogram{#1}
+}
+\DeclareRobustCommand{\ctufitspecialisation}[1]{
+	\def\thectufitspecialisation{#1}
 }
 \DeclareRobustCommand{\ctufityear}[1]{
 	\def\thectufityear{#1}
@@ -179,6 +185,10 @@
 
 \DeclareRobustCommand{\thectufitfaculty}{\if\@ctufitlang C{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}\else\if\@ctufitlang S{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}\else{Faculty of Information Technology}\fi\fi}
 
+\DeclareRobustCommand{\thectufitprogramlabelcapital}{\if\@ctufitlang C{Studijní program}\else\if\@ctufitlang S{Študijný program}\else{Study program}\fi\fi}
+
+\DeclareRobustCommand{\thectufitspecialisationlabelcapital}{\if\@ctufitlang C{Specializace}\else\if\@ctufitlang S{Špecializácia}\else{Specialisation}\fi\fi}
+
 \DeclareRobustCommand{\thectufitsupervisorlabelcapital}{\if\@ctufitlang C{Vedouc{\' i}}\else\if\@ctufitlang S{Ved\'uci}\else{Supervisor}\fi\fi}
 
 \DeclareRobustCommand{\thectufitcitationlabel}{\if\@ctufitlang C{Odkaz na tuto pr{\' a}ci}\else\if\@ctufitlang S{Odkaz na t\'uto pr{\' a}cu}\else{Citation of this thesis}\fi\fi}
@@ -187,7 +197,11 @@
 
 \DeclareRobustCommand{\thectufitlistinglabel}{\if\@ctufitlang C{V{\'y}pis k{\'o}du}\else\if\@ctufitlang S{V{\'y}pis k{\'o}du}\else{Code listing}\fi\fi}
 
-\DeclareRobustCommand{\thectufitlollabel}{\if\@ctufitlang C{Seznam v{\'y}pis{\r u} k{\'o}du}\else\if\@ctufitlang S{Zoznam v{\'y}pisov k{\'o}du}\else{List of code listings}\fi\fi}
+\DeclareRobustCommand{\thectufitlollabel}{\if\@ctufitlang C{Seznam v{\'y}pis{\r u} k{\'o}du}\else\if\@ctufitlang S{Zoznam v{\'y}pisov k{\'o}du}\else{List of Code listings}\fi\fi}
+
+\DeclareRobustCommand{\thectufitalgorithmlabel}{\if\@ctufitlang C{Pseudokód}\else\if\@ctufitlang S{Pseudokód}\else{Algorithm}\fi\fi}
+
+\DeclareRobustCommand{\thectufitloalabel}{\if\@ctufitlang C{Seznam pseudokódů}\else\if\@ctufitlang S{Zoznam pseudokódov}\else{List of Algorithms}\fi\fi}
 
 \DeclareRobustCommand{\thectufitdeclarationlabel}{\if\@ctufitlang C{Prohlášení}\else\if\@ctufitlang E{Declaration}\else{Vyhlásenie}\fi\fi}
 
@@ -201,11 +215,6 @@
 	\immediate\openout\metadatafile=\jobname.xmpdata
 	\immediate\write\metadatafile{\string\Title{\thectufittitle}}
 	\immediate\write\metadatafile{\string\Author{\thectufitauthorfull}}
-	\if\@ctufitlang E{
-		\immediate\write\metadatafile{\string\Keywords{\thectufitkeywords}}
-	}\else{
-		\immediate\write\metadatafile{\string\Keywords{\thectufitklicovaslova}}
-	}\fi
 	\immediate\write\metadatafile{\string\Subject{\thectufittitle\ctufitthesistypename}}
 	\immediate\write\metadatafile{\string\Copyright{© \thectufityear\space  \thectufitauthorfull}}
 	\immediate\closeout\metadatafile
@@ -214,16 +223,21 @@
 % title page
 \renewcommand{\maketitle}{\begin{titlepage}%
 \newgeometry{left=67mm,top=80mm,right=40mm}%\thispagestyle{empty}%
-\noindent{\large\noindent\thectufitthesistype}
-\vskip 3mm
+\noindent
+\includegraphics[width=3cm]{images/logoCVUT.pdf}
+\vskip 1.5cm
 \noindent{\noindent\huge\bfseries\color{black}\begin{flushleft}\begin{onehalfspace}\MakeUppercase{\thectufittitle}\end{onehalfspace}\end{flushleft}}
-\vskip 35mm
+\vskip 10mm
 \noindent{\large  \bfseries \thectufitauthorfull}
 
 \vfill
 
-\noindent{\thectufitfaculty\\
+\noindent{\thectufitthesistype\\
+\thectufitfaculty\\
+\thectufituniversity\\
 \thectufitdepartment\\
+\thectufitprogramlabelcapital: \thectufitprogram\\
+\thectufitspecialisationlabelcapital: \thectufitspecialisation\\
 \thectufitsupervisorlabelcapital: \thectufitsupervisor\\
 \today}\end{titlepage}
 \restoregeometry
@@ -426,7 +440,7 @@
 % declaration page END
 
 % abstract page
-\newenvironment{abstractpage}{\frontchapternotprinted{\if\@ctufitlang E{Abstract}\else{Abstrakt}\fi}
+\newenvironment{abstractpage}[1]{\frontchapternotprinted{#1}
 }{}
 % abstract page END
 
@@ -518,9 +532,10 @@
 \theoremstyle{plain}
 \newtheorem{theorem}{\if\@ctufitlang C{Věta}\else\if\@ctufitlang E{Theorem}\else{Veta}\fi\fi}
 \newtheorem{lemma}[theorem]{\if\@ctufitlang C{Tvrzení}\else\if\@ctufitlang E{Lemma}\else{Tvrdenie}\fi\fi}
+\newtheorem{observation}[theorem]{\if\@ctufitlang C{Pozorování}\else\if\@ctufitlang E{Observation}\else{Pozorovanie}\fi\fi}
 \newtheorem{corollary}[theorem]{\if\@ctufitlang C{Důsledek}\else\if\@ctufitlang E{Corollary}\else{Dôsledok}\fi\fi}
 \newtheorem{proposition}[theorem]{\if\@ctufitlang C{Návrh}\else\if\@ctufitlang E{Proposition}\else{Návrh}\fi\fi}
-\newtheorem{definition}[theorem]{\if\@ctufitlang C{Definice}\else\if\@ctufitlang E{Definiton}\else{Definícia}\fi\fi}
+\newtheorem{definition}[theorem]{\if\@ctufitlang C{Definice}\else\if\@ctufitlang E{Definition}\else{Definícia}\fi\fi}
 \theoremstyle{definition}
 \newtheorem{example}[theorem]{\if\@ctufitlang C{Příklad}\else\if\@ctufitlang E{Example}\else{Príklad}\fi\fi}
 \theoremstyle{remark}
@@ -531,42 +546,45 @@
 \numberwithin{theorem}{chapter}
 % theorems, proofs, definitions, etc. end
 
+\DeclareRobustCommand{\printczechabstractpage}{%
+	\begin{abstrakt}%
+		\thectufitabstrakt
+	\end{abstrakt}
+		
+	\vskip 0.5cm
+		
+	{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}\vfill
+}
+
+\DeclareRobustCommand{\printenglishabstractpage}{%
+	\begin{abstract}%
+		\thectufitabstract
+	\end{abstract}
+	
+	\vskip 0.5cm
+	
+	{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}
+	\vfill
+}
+
 \DeclareRobustCommand{\printabstractpage}{%
-\begin{abstractpage}
-\if\@ctufitlang E{%
-\begin{abstract}%
-\thectufitabstract
-\end{abstract}
+	\if\@ctufitlang E{%	
+		\begin{abstractpage}{Abstract}
+			\printenglishabstractpage
+		\end{abstractpage}
 
-\vskip 0.5cm
+		\begin{abstractpage}{Abstrakt}
+			\printczechabstractpage
+		\end{abstractpage}
+	}\else{%
+		\begin{abstractpage}{Abstrakt}
+			\printczechabstractpage
+		\end{abstractpage}
 
-{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}}\else{%
-\begin{abstrakt}%
-\thectufitabstrakt
-\end{abstrakt}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}}\fi
-
-\vskip 1cm
-
-\if\@ctufitlang E{%
-\begin{abstrakt}%
-\thectufitabstrakt
-\end{abstrakt}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Klíčová slova\hspace{1em}}{\thectufitklicovaslova}}\else{
-\begin{abstract}%
-\thectufitabstract
-\end{abstract}
-
-\vskip 0.5cm
-
-{\noindent\color{heading}\bfseries Keywords\hspace{1em}}{\thectufitkeywords}}\fi
-\end{abstractpage}
+		\begin{abstractpage}{Abstract}
+			\printenglishabstractpage
+		\end{abstractpage}
+	}\fi
 }
 
 \newenvironment{chapterabstract}{\hfill\begin{minipage}{\dimexpr\textwidth-0.5cm}\itshape}{\end{minipage}\vskip 0.5cm\par\@afterindentfalse\@afterheading}
@@ -592,4 +610,15 @@
 		\fi
 		\setmintedinline{bgcolor={}}
 	}{}%
+	\@ifpackageloaded{algorithm}{%
+		\numberwithin{algorithm}{chapter}%
+		\DeclareRobustCommand{\listalgorithmname}{\thectufitloalabel}%
+		\DeclareRobustCommand{\ALG@name}{\thectufitalgorithmlabel}%
+		\DeclareRobustCommand{\thectufitlistofalgorithmscommand}{\listofalgorithms}%
+	}{%
+		\DeclareRobustCommand{\thectufitlistofalgorithmscommand}{}%
+	}%
 }
+
+% Should be last beause of hyperref
+\RequirePackage[a-1b]{pdfx}  % PDF/A-1b compliance
