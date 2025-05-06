@@ -149,7 +149,7 @@ struct FunRecording {
 	\caption{Simplified definition of \texttt{Record} and \texttt{FunRecording} classes \todo{remove the record methods?}}\label{lst:record-class}
 \end{listing}
 
-We say that each event is connected to some closure, either a \textit{Ř dispatch table}, \textit{Ř function without a dispatch table} (when it is a top-level compilation), a \textit{GNU-R compiled code} (represented by some SEXP), or a \textit{primitive function}. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and the name of its environment for the given closure and serialize the closure (serialization can be disabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording}, this is what the \texttt{*\_to\_recoding\_index} fields are used for. Events hold a single index into the \texttt{functions} field.
+We say that each event is connected to some closure, either a \textit{Ř dispatch table}, \textit{Ř function without a dispatch table} (when it is a top-level compilation), a \textit{GNU-R compiled code} (represented by some SEXP), or a \textit{primitive function}. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and the name of the environment it is defined in, and serialize the closure (serialization can be disabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording} by indexing with the \texttt{*\_to\_recoding\_index} fields. Events only need to hold a single index into the \texttt{functions} field.
 
 We use thoroughly that the GNU-R garbage collector is non-moving, as we can then index by the address of the objects and we can be sure that they are valid. There is still a possibility that an object whose address we have captured gets collected by GC and in its place a new object will be placed. To prevented that, we protect the objects by calling the \texttt{R\_PreserveObject} function exported from GNU-R, marking the object as alive until it is released by a call to \texttt{R\_ReleaseObject}. A drawback of this approch is the possibility of different runtime properties of some programs.
 
@@ -275,10 +275,9 @@ The functions available in R are\cite[documentation/recording.md]{rsh-github}:
 \section{Assesment}
 %---------------------------------------------------------------
 
-The whole implementation of the recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
+The recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
 
-To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour.
+To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is acceptable for usage as an analysis tool, but for more involved debugging we would need to optimize the serialization more.
 
-When the tool is not turned compiled into the runtime, no change to the performance was observed as expected.
-
+When the tool is not turned compiled into the runtime, no change to the performance was observed, as expected.
 

@@ -70,36 +70,29 @@ This is where we say that in the second compilation the \textit{type feedback sl
 
 \begin{figure}
 	\centering
-	\begin{subfigure}{\linewidth}
-		\begin{adjustwidth}{-3cm}{-3cm}
-			\includediagram{5}
-		\end{adjustwidth}
-		\subcaption{Execution without contextual dispatch}\label{fig:pollution-motive-baseline}
-	\end{subfigure}
-
-	\vspace{2em}
-
-	\begin{subfigure}{\linewidth}
-		\begin{adjustwidth}{-3cm}{-3cm}
-			\includediagram{6}
-		\end{adjustwidth}
-		\subcaption{\todo{also update}Execution with contextual dispatch}\label{fig:pollution-motive-context}
-	\end{subfigure}
-	\caption{Execution of listing \ref{lst:pollution-motive} on Ř (execution times are illustrative)}
+	\begin{adjustwidth}{-3cm}{-3cm}
+		\includediagram{5}
+	\end{adjustwidth}
+	\caption{Event log of listing \ref{lst:pollution-motive} without contextual dispatch}\label{fig:pollution-motive-baseline}
 \end{figure}
-
 
 If we consider contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and, as was the case without contextual dispatch, the resulting code is much faster.
 
 When we call with integers, we do not dispatch into the already compiled version, because the call context disjunct with the context of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in figure \ref{fig:pollution-motive-context}.
+
+\begin{figure}
+	\centering
+	\begin{adjustwidth}{-3cm}{-3cm}
+		\includediagram{6}
+	\end{adjustwidth}
+	\caption{\todo{also update}Event log of listing \ref{lst:pollution-motive} with contextual dispatch}\label{fig:pollution-motive-context}
+\end{figure}
 
 %---------------------------------------------------------------
 \section{Methodology}
 %---------------------------------------------------------------
 
 Our main goal is to quantify the pollution of the feedback vector. A pollution happens when between individual compilations the feedback vector changes, either because an interpreter has observed a new value or a native version failes on an assumption and deoptimizes. This implies that the first compilation cannot be polluted, hence we are interested in \textit{subsequent compilations} (also \textit{recompilations}).
-
-Since the state of the feedback cannot go to a previous state (i.e. on an update, the feedback either stays the same or it is in a never before observed state), we can simply observe the state of the feedback slots when a compilation is triggered and compare it to the previous compilation.
 
 Formally, we define
 \begin{itemize}
@@ -110,6 +103,8 @@ Formally, we define
 \end{itemize}
 
 \todo{overview table}
+
+Since the state of the feedback cannot go to a previous state (i.e. on an update, the feedback either stays the same or it is in a never before observed state), we can simply observe the state of the feedback slots when a compilation is triggered and compare it to the previous compilation.
 
 For collecting the data, we used the recording tool introduced in the previous chapter. As an input to the experiment, we used 16 benchmarks from the Ř benchmarks collection containing nearly 1300 lines of code and a Kaggle script, both outlined in chapter \ref{ch:1-corpus}. The Ř compiler is ran with default parameters, meaning that a function is compiled after 100 invocations. Compilations triggered by loop iterations are ignored.
 
@@ -140,6 +135,8 @@ Looking at the benchmarks, we have observed much less compilations than in the K
 \end{figure}
 
 Splitting the pollution by a feedback slot type, the observed values are taking most of the pollution. Out of the 11,199 slots in the Kaggle code, 0.5\% of observed calls, 2.7\% of observed tests, and 5.7\% of observed values are polluted. This is not surprising, as the type feedback slots are the slots with most variability.
+
+\todo{the polymorphic functions}
 
 %---------------------------------------------------------------
 \subsubsection*{Summary}
