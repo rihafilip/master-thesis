@@ -1,8 +1,6 @@
 %---------------------------------------------------------------
-\chapter{Beyond Pollution}
+\chapter{Feedback Usage}
 %---------------------------------------------------------------
-
-\todo{actually name it}
 
 \begin{chapterabstract}
 	\todoadd
@@ -21,7 +19,7 @@ First, we define an \textit{non-empty slot} as a slot that has at least one obse
 We say that a slot is \textit{referenced} if it is part of a function that is compiled to native, including slots inside of inlined functions. A slot is then \textit{read} if during this compilation the information in the slot is observed. A \textit{used slot} is a type feedback slot that has an assumption connected with it in the final version of PIR (after all optimizations finished running). A used slot is always non-empty as we cannot assume a type if we have not observed any.
 
 %---------------------------------------------------------------
-\subsubsection*{Used slots}
+\subsubsection*{Used Slots}
 %---------------------------------------------------------------
 
 When an assumption on a type is emited, it has a structure outlined in listing \ref{lst:assume-structure}. The value we speculate on is in the register \texttt{\%1} with a \textit{static type}, which is inferred from the call context, known types of builtins, and preceding assumptions. The instruction has also an associated \textit{feedback type}, which is the union of types observed in the interpreter. The speculated value is an input to an \texttt{IsType} instruction, which checks the actual runtime type against the \textit{assumed type}. The result of the type check is then an input to the \texttt{Assume} instruction, along with the corresponding \texttt{Checkpoint}. If the type check fails (\texttt{\%2} is false), we trigger a deoptimization and restore the frame state according to the checkpoint, otherwise we continue with the execution.
@@ -51,7 +49,7 @@ If the R type of the expected type is not integer, float or logical vector, we d
 If the assumed type is equal to the feedback type, we say that the feedback was used as \textit{exact match}. This implies that it has not been narrowed, nor widened.
 
 %---------------------------------------------------------------
-\subsubsection*{Unused slots}
+\subsubsection*{Unused Slots}
 %---------------------------------------------------------------
 
 \todo{throw away the example?}
@@ -141,7 +139,7 @@ Because we can infer that the type of the return value from the surrounding cont
 There are more reasons to why a slot might not be used, like the information in the feedback not being useful for speculation, the information being overriden by static information, or that the slot is too polluted. We do not categorize these further, as they do not play with slot pollution significantlly \todo{rewrite}.
 
 %---------------------------------------------------------------
-\subsubsection*{Polymorphic slots}
+\subsubsection*{Polymorphic Slots}
 %---------------------------------------------------------------
 
 A \textit{polymorphic slot} is slot that has observed more than one distinct type. This is a superset of the \textit{polluted slots}, because if a slot is polluted, it has to have two different non-empty values between the compilation, thus there had to be at least two recordings of different type. A non-polymorphic slot is \textit{monomorphic}.
@@ -164,8 +162,8 @@ The final data is aggregated over these closure version compilations. Thus when 
 			\hline
 			\textbf{Program name}   & \textbf{Benchmark suite} & \textbf{Lines of code} & \textbf{Compilations} & \textbf{Referenced slots} \\
 			\hline
-			Bounce\_nonames\_simple & Are We Fast Yet          & 58                     & 11                    & 264                       \\
-			Mandelbrot              & Are We Fast Yet          & 65                     & 14                    & 358                       \\
+			bounce\_nonames\_simple & Are We Fast Yet          & 58                     & 11                    & 264                       \\
+			mandelbrot              & Are We Fast Yet          & 65                     & 14                    & 358                       \\
 			flexclust\_no\_s4       & Real Thing               & 163                    & 144                   & 5335                      \\
 			volcano                 & Real Thing               & 63                     & 23                    & 2037                      \\
 			binarytrees\_naive      & Shootout                 & 31                     & 22                    & 1070                      \\
@@ -189,7 +187,7 @@ We run the analysis on a selection of ten benchmarks from the benchmark suite an
 
 \todo{figures labels, adjust them so they do not overflow}
 
-In constrast to the pollution analysis, while categorizing the slots we have observed that the Kaggle script behaves very much in the same way as the benchmark programs do. This is interesting, because they are written in very different ways and are doing different computations. It might point to a deeper issue, either connected with the behavior of R or the Ř compiler.
+In constrast to the pollution analysis, while categorizing the slots we have observed that the Kaggle script behaves very much in the same way as the benchmark programs do. This is interesting, because they are written in very different ways and are doing different computations. It might point to a deeper issue, either connected with the behavior the Ř compiler.
 
 In figure \ref{fig:graph-overview} is the categorization of used slots. We can see that most of the slots are not empty (68\% on average) and most of the non-empty slots are read (81\% on average), thus are considered for speculation. But on average only 14\% of slots are used, (21\% of non-empty slots). This is surprising, as the recording of information is impacting the speed the bytecode interpreter, and yet the recorded information is used quite sparsely.
 
@@ -277,43 +275,4 @@ The definition of a redundant slot is very broad and might catch some slots that
 
 The analysis of usage is also quite broad, but due to the architecture of Ř we are unable to observe nor reconstruct how a paricular type of an instruction is constructed. Ideally we would like to be able to say precisely which parts of the feedback are used and in which instrucitons, but this would probably lead to a whole refactoring of the compiler.
 
-%---------------------------------------------------------------
-\section{Future work}
-
-\todo{chapter?}
-%---------------------------------------------------------------
-
-quantifying speed is a very hard problem
-
-The main question we are currently unable to answer is \textit{how much the observations impact the execution time of real programs}. This is a very hard question due to the intriquite way that running in the interpreter, recording feedback information and execution of a JIT compiled code and are interconnected. Another factor is that a lot of R code is actually just wrapping C functions and calls.
-
-Nonetheless, the observations made as a part of this thesis unlock for us multiple ways we could advance the JIT compiler.
-
-%---------------------------------------------------------------
-\subsubsection*{Reducing pollution}
-%---------------------------------------------------------------
-
-In order to properly analyze how a polluted slot affects the runtime performance of JIT compiled code, we would need an \textit{oracle} that at a point of compilation would be able to correctly return an \textit{ideal feedback vector} such that the compilation produces as optimized code as possible. Since we want to observe the behavior of real-world programs, it is unfeasable to hand-write this oracle for every compilation.
-
-We could achieve at least an approximate oracle by extending the recording tool by its counterpart that would be able to \textit{replay} the recorded information, i.e. infulence a compilation based on previous observations. Iteratively, we would run the program with the trace of the previous run as an additional input from which it would deduce the ideal feedback vector.
-
-%---------------------------------------------------------------
-\subsubsection*{Reducing recoding}
-%---------------------------------------------------------------
-
-Another angle to take is reducing the time spent recording the feedback information in the interpreter.
-
-If we are able to statically find redundant feedback slots and therefore eliminate some number of recording instructions, we should be able to speed up the interpreter, but this should not be to the detrement of JIT compilation. Another angle would be to dynamically observe which slots are being used and which are not and based on this trace conditionaly turn off recording of certain slots.
-
-%---------------------------------------------------------------
-\subsubsection*{Relaxing assumptions}
-%---------------------------------------------------------------
-
-Last way we could improve the JIT is by relaxing the assumptions.
-
-The Ř compiler does \textit{eager speculations} on the observed values, meaning that it tries to assume on the information whenever possible in hopes that this unlocks some optimizations later. This is contrary to how most other JIT compiler do speculations, like the JavaScript V8 VM\todocite, where they only emit an assumption on a type at the point where the type is used. Eager speculation has an advantage in that if an optimization is based on many complex speculations, it will be applied. The disadvanatge is that we might restrict the type more than is necesarry, e.g. we might speculate on a more specific type than is needed.
-
-As an example, consider a function which has observed a double scalar type in one of its slots and based on the scalarness, it is able to do some significant optimizations, but the fact that the value is a double type is never used. Currently the compiler still emits a guard on a double scalar. This means that if the observed value changes to an integer scalar, we fail the assumption, even though the native code is still correct.
-
-By carefully observing the usage of feedback information, we would be able to relax the assumptions in the native code if not all of the information is used. This relaxation could even extend to the contextual dispatch. If we are compiling a function for a certain call context, but we never use part of the context information, we could make the context more general, leading to more invocations of the function ending up in a native version.
-
+\todo{unstable benchmarks and titanic}

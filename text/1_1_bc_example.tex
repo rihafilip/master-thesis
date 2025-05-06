@@ -1,7 +1,6 @@
 \begin{listing}[p]
 	\centering
-	\begin{adjustwidth}{-1cm}{-1cm}
-		\begin{minipage}{0.18\textwidth}
+		\begin{minipage}{0.33\textwidth}
 			\begin{minted}[fontsize=\small,linenos=false]{R}
 f <- function(x) {
   for (i in 1:10) {
@@ -15,8 +14,8 @@ f <- function(x) {
 			\subcaption{\centering R code}\label{lst:bc-example-r}
 		\end{minipage}
 		\hfill
-		\begin{minipage}{0.80\textwidth}
-			\begin{minipage}{0.18\textwidth}
+    \begin{minipage}[t]{0.61\textwidth}
+			\begin{minipage}{0.20\textwidth}
 				\begin{minted}[fontsize=\small,linenos=false]{text}
 Code:
   1 LDCONST 1
@@ -43,15 +42,9 @@ Code:
         \end{minted}
 			\end{minipage}
 			\hfill
-			\begin{minipage}{0.60\textwidth}
+      \begin{minipage}{0.40\textwidth}
 				\begin{minted}[fontsize=\small,linenos=false]{text}
 Constant pool:
-0:
- language {  for (i in 1:10) {; i..
-1:
- int [1:10] 1 2 3 4 5 6 7 8 9 10
-2:
- language 1:10
 ...
 12:
  Promise 0:
@@ -64,14 +57,12 @@ Constant pool:
   1:
    language g(x)
   2:
-   'expressionsIndex' int [1:4] N..
-13:
- 'expressionsIndex' int [1:41] NA..
+   'expressionsIndex' ...
+...
         \end{minted}
 			\end{minipage}
 			\subcaption{\centering GNU-R code}\label{lst:bc-example-gnur}
 		\end{minipage}
-	\end{adjustwidth}
 	\par\vspace{2mm}\par
 	\begin{minipage}{\textwidth}
 		\centering

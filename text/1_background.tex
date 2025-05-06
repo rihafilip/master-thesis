@@ -14,7 +14,7 @@
 
 The popularity of R stems from its domain-specific focus. Unlike general-purpose languages, R offers high-level abstractions for statistical operations, making complex analyses more accessible. As a consequence, many R users users are statisticians rather than traditional programmers. An example of the R expressivity is in the listing \ref{lst:motivation}.
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
 	\begin{minipage}{0.45\textwidth}
 		\centering
@@ -35,7 +35,7 @@ ggplot(
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/motivation-Rplots.pdf}
-		\caption{Plot of listing \ref{lst:motivation}}
+		\caption{Plot of listing \ref{lst:motivation}, showing the relationship between the GDP per capita and life expectancy}
 	\end{minipage}
 \end{figure}
 
@@ -294,7 +294,7 @@ A big advantage of using R is the vast library of packages, libraries and data s
 The GNU-R base installation is also distributes with several packages, including, but not limited to, \texttt{base} containing the basic functions for using R, \texttt{stats} implementing statistical functions, \texttt{graphics} with base functions for manipulating graphical output, \texttt{compiler} implementing the mentioned bytecode compiler, or \texttt{Matrix} with definitions of dense and sparse matrix classes.
 
 %---------------------------------------------------------------
-\subsubsection*{C interface}
+\subsubsection*{C Interface}
 %---------------------------------------------------------------
 
 In order to speed-up certain packages, GNU-R allows parts of the code to be written in more low-level languages via a C interface. This includes the definitions for the SEXP types, a big set of functions and macros to create and manipulate values, as well as several evaluations functions. The SEXP structure is only exported as an opaque pointer, with the intent that individual fields are to be accessed and manipulated via the exported functions.
@@ -305,10 +305,10 @@ This makes evolution of R without breaking packages very hard, as well as compli
 
 \newpage
 %------------------------------------------------------------------------------------------------------------------------------
-\section{The Ř compiler}
+\section{The Ř Compiler}
 %------------------------------------------------------------------------------------------------------------------------------
 
-\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language, developed at Programming Languages Laboratory at Czech Technical University in Prague\footnote{\url{https://prl-prg.github.io/}} and Programming Research Laboratory at Notheastern University\footnote{\url{https://prl.khoury.northeastern.edu/}}. The project is freely available and hosted on GitHub\cite{rsh-github}.
+\textit{Ř} (also stylized as \textit{Rsh}) is a just-in-time compiler for the R language, developed at Programming Languages Laboratory at Czech Technical University in Prague\footnote{\url{https://prl-prg.github.io/}} and Programming Research Laboratory at Notheastern University in Boston\footnote{\url{https://prl.khoury.northeastern.edu/}}. The project is freely available and hosted on GitHub\cite{rsh-github}.
 
 It is built as an extension to GNU-R, although it uses a slightly modified version of the codebase. It bypasses the GNU-R bytecode compiler and interpreter, instead using a custom one, while reusing the \texttt{SEXP} representation, AST interpreter, and garbage collector. For the compilation to native code, the \textit{LLVM Project}\cite{llvm} is used. The compilation pipeline is outlined in figure \ref{fig:rsh-archit}
 
@@ -319,7 +319,7 @@ It is built as an extension to GNU-R, although it uses a slightly modified versi
 \end{figure}
 
 %---------------------------------------------------------------
-\subsubsection*{Runtime objects}
+\subsubsection*{Runtime Objects}
 %-------------------------------------------------------------
 Ř uses the GNU-R \texttt{SEXP} representation and memory management. All runtime objects are embedded into the SEXP objects. This is one of the modifications that need to be applied to GNU-R, a new \texttt{SEXPTYPE} is added (\texttt{EXTERNALSXP}), along with the necessary changes to how it is garbage collected and how it references other objects.
 
@@ -352,7 +352,7 @@ The \textit{feedback vector} collected from a bytecode interpretation is represe
 \end{figure}
 
 %---------------------------------------------------------------
-\subsubsection*{RIR bytecode interpreter}
+\subsubsection*{RIR Bytecode Interpreter}
 %---------------------------------------------------------------
 
 The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. Similarly to GNU-R, RIR assume the base functions are not shadowed, allowing it to have instrucitons for arithmetic operations and control flow. Unlike GNU-R, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code. An example of RIR compiled code can be seen in listing \ref{lst:bc-example-rir}. Note that the example code is not complete and is only used to give impression between the size differences of the bytecodes and the full code listing is in appendix \ref{ch:appendix-bc}.
@@ -362,7 +362,7 @@ For this thesis, the important bytecode instructions are \texttt{record\_call\_}
 Apart from the feedback information, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
 
 %---------------------------------------------------------------
-\subsubsection*{PIR compiler}
+\subsubsection*{PIR Compiler}
 %---------------------------------------------------------------
 
 When a function or a loop meets the compilation heuristics, it is compiled from RIR to \textit{PIR}, an intermediate representation used for optimizations. PIR is composed of instructions in a \textit{static single-assignment form} (SSA), organized in basic blocks, with each block being terminated with a (conditional) jump to another basic block, or a speculation checkpoint.
@@ -394,7 +394,7 @@ Based on the observed feedback, the compiler performs \textit{speculative optimi
 After all of the optimizations are finished, the PIR code is transformed into \textit{LLVM bitcode}, the intermediate representation of LLVM. This is then passed to the \textit{ORC JIT} compiler, which is part of the LLVM project and which compiles to the native executable format.
 
 %---------------------------------------------------------------
-\subsubsection*{Contextual dispatch}\label{ch:1-ctx-dispatch}
+\subsubsection*{Contextual Dispatch}\label{ch:1-ctx-dispatch}
 %---------------------------------------------------------------
 
 Next to the speculative optimizations, Ř employs another technique for optimizing on dynamic types called \textit{contextual dispatch}\cite{ctx-dispatch}. The idea is based on observing arguments on runtime and based on their types, creating a disjunct native version with the ability to specialize uniquely to the type.
@@ -404,6 +404,12 @@ For every function call, we can create a \textit{context}. It captures informati
 When a function compilation to native is triggered, it is compiled for a specific context and the compiler is able to optimize on the information in the context. The resulting code (called a \textit{version}) is installed into the dispatch table along with the information about the context.
 
 When a function is invoked, its arguments are observed and a call context is created. Based on this, the function is either dispatched to the version connected with the same context as the call context, or a less precise context which is ordered lower than the call context. If no such version is found, the call is dispatched to the baseline interpreted version.
+
+%---------------------------------------------------------------
+\section{Related work}
+%---------------------------------------------------------------
+
+\todoadd
 
 %---------------------------------------------------------------
 \section{Corpus}\label{ch:1-corpus}
@@ -420,3 +426,5 @@ The first one is a collection of Ř benchmarks\footnote{\url{https://github.com/
 \end{itemize}
 
 The second codebase is a script from a Kaggle competition about machine learning on the Titanic dataset\cite{titanic}. The script is a representation of more real-world program, is 108 lines of code extracted from a Rmarkdown notebook and uses some of the popular libraries like \texttt{ggplot2} or \texttt{dplyr}.
+
+

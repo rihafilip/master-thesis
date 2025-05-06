@@ -68,7 +68,7 @@ Constant pool:
  'expressionsIndex' int [1:41] NA..
     \end{minted}
 	\end{multicols}
-	\caption{GNU-R bytecode for listing \ref{lst:bc-example-r}}\label{lst:appendix-gnur}
+	\caption{GNU-R bytecode for listing \ref{lst:bc-example-r}, generated using \ref{lst:pp-gnur-bc}}\label{lst:appendix-gnur}
 \end{listing}
 
 \begin{listing}[p]
@@ -215,3 +215,67 @@ function (x)
 	\end{adjustwidth}
 	\caption{RIR bytecode for listing \ref{lst:bc-example-r}}\label{}
 \end{listing}
+
+\begin{listing}
+  \begin{minted}[fontsize=\footnotesize,linenos=false]{R}
+.Code <- as.symbol(".Code")
+
+cat0 <- function(...) cat(..., sep = "")
+
+pp.bytecode <- function(f, promise = FALSE) {
+  offset <- if (promise) "  " else ""
+
+  if (f[[1]] != .Code) {
+    stop("Not a code")
+  }
+
+  code <- f[[2]]
+  consts <- f[[3]]
+
+  cat0("\n", offset, "Code:")
+  for (i in 2:length(code)) {
+    c <- code[[i]]
+
+    if (is.numeric(c)) {
+      cat0(" ", as.character(c))
+    } else {
+      opc <- as.character(c)
+      opc <- substr(opc, 1, nchar(opc) - 3)
+
+      cat0(
+        "\n",
+        offset,
+        sprintf("%3i ", i - 1),
+        opc
+      )
+    }
+  }
+
+  promise_idx <- 0
+  cat0("\n", offset, "Constant pool:\n", offset)
+  for (i in seq_along(consts)) {
+    cat0(as.character(i - 1), ":", "\n", offset)
+    c <- consts[[i]]
+    if (is.list(c) && length(c) >= 1 && c[[1]] == .Code) {
+      cat0(" Promise ", as.character(promise_idx), ":")
+      pp.bytecode(c, TRUE)
+
+      promise_idx <- promise_idx + 1
+    } else {
+      w <- if (promise) 33 else 35
+      str(c, width = w, strict.width = "cut")
+      if (i != length(consts)) {
+        cat0(offset)
+      }
+    }
+  }
+
+  if (!promise) {
+    cat0("\n")
+  }
+  invisible(NULL)
+}
+  \end{minted}
+  \caption{Code used for formating disassembled GNU-R bytecode}\label{lst:pp-gnur-bc}
+\end{listing}
+
