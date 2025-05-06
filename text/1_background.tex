@@ -10,11 +10,11 @@
 \section{The R Language}
 %------------------------------------------------------------------------------------------------------------------------------
 
-\textit{R}\cite{r} is a programming language used for statistical computation and data visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language. It is part of the GNU Project, licensed as a free software under GNU GPL.
+\textit{R}\cite{r} is a programming language designed and used for statistical computation, data analysis, and graphical visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language. It is part of the GNU Project, licensed as a free software under GNU GPL.
 
-The beauty of R is that very complex operations can be expressed in very few lines of code, as demonstrated in listing \ref{lst:motivation}. It is used a lot by statistician, where a big part of them are non-programmers, and this is reflected in the design of the language. It allows for high levels of abstractions, expressive domain-specific languages and APIs and code that is very \todoadd
+The popularity of R stems from its domain-specific focus. Unlike general-purpose languages, R offers high-level abstractions for statistical operations, making complex analyses more accessible. As a consequence, many R users users are statisticians rather than traditional programmers. An example of the R expressivity is in the listing \ref{lst:motivation}.
 
-\begin{figure}[hb]
+\begin{figure}[H]
 	\centering
 	\begin{minipage}{0.45\textwidth}
 		\centering
@@ -39,7 +39,6 @@ ggplot(
 	\end{minipage}
 \end{figure}
 
-\newpage
 The language is high-level, dynamic, object-oriented, functional, interpreted, and lazy, with automatic memory management.
 
 The R syntax is very C-like, with \texttt{if} statements, \texttt{for} and \texttt{while} loops, array indexing and function calls. For assignment, the \texttt{<-} operator is used. Statements are separated by newline, optionally by semicolon if they are on the same line.
@@ -220,8 +219,7 @@ The R language is not formally specified, it only has a reference implementation
 \subsubsection*{Representation}
 %---------------------------------------------------------------
 
-\todo{the attributes}
-The GNU-R represents all code and values as \textit{symbolic expressions} (also \textit{S-expressions} or \textit{SEXPs}), a format for nested lists popularized by the Lisp languages. The type \texttt{SEXP} is a pointer to either a \texttt{SEXPREC} or \texttt{VECTOR\_SEXPREC} structure. Both of these structures contain a header of type \texttt{sxpinfo\_struct}, a pointer to the attributes of the current value, and previous and next nodes in the garbage collector. The header then contains \texttt{SEXPTYPE}, the type of the SEXP (values are defined as in \ref{tbl:sexptype}), as well as additional attributes with information about the type, garbage collection and debug information. The rest of the structure cointains the actual data. The structure of a \texttt{SEXP} value is represented in figure \ref{fig:sexp-struct}.
+The GNU-R represents all code and values as \textit{symbolic expressions} (also \textit{S-expressions} or \textit{SEXPs}), a format for nested lists popularized by the Lisp languages. The type \texttt{SEXP} is a pointer to either a \texttt{SEXPREC} or \texttt{VECTOR\_SEXPREC} structure. Both of these structures contain a header of type \texttt{sxpinfo\_struct}, a pointer to the attributes list, and previous and next nodes in the garbage collector. The \texttt{sxpinfo\_struct} then contains \texttt{SEXPTYPE}, the type of the SEXP (values are defined as in \ref{tbl:sexptype}), as well as additional information about the type, garbage collection and debug informations. The rest of the structure cointains the actual data. The structure of a \texttt{SEXP} value is represented in figure \ref{fig:sexp-struct}.
 
 \begin{figure}
 	\centering
@@ -232,7 +230,9 @@ The GNU-R represents all code and values as \textit{symbolic expressions} (also 
 \end{figure}
 
 \begin{table}[h!]
+	\centering
 	\begin{tabular}{c l l}
+		\hline
 		\textbf{no} & \textbf{SEXPTYPE} & \textbf{Description}       \\
 		\hline
 		0           & NILSXP            & NULL                       \\
@@ -259,6 +259,7 @@ The GNU-R represents all code and values as \textit{symbolic expressions} (also 
 		23          & WEAKREFSXP        & weak reference             \\
 		24          & RAWSXP            & raw vector                 \\
 		25          & OBJSXP            & objects not of simple type \\
+		\hline
 	\end{tabular}
 	\caption{The different SEXP types\cite[1.1.1 SEXPTYPEs]{rprojectInternals}}\label{tbl:sexptype}
 \end{table}
@@ -267,11 +268,11 @@ The GNU-R represents all code and values as \textit{symbolic expressions} (also 
 \subsubsection*{Interpreter}
 %---------------------------------------------------------------
 
-The GNU-R parses the code to an \textit{abstract syntaxt tree} (\textit{AST}), also represented with \texttt{SEXP}s with the \texttt{LANGSXP} type. \todo{interprets the tree}
+The GNU-R parses the code into an \textit{abstract syntaxt tree} (\textit{AST}), represented by SEXPs of the \texttt{LANGSXP} type, which is then interpreted.
 
-After the first execution of a function or by calling \texttt{compiler::cmpfun} on it, the function is passed to a \textit{bytecode compiler}, written mostly in R with few supporting functions written in C. The bytecode is stack-based with fat instructions, like specialized instructions for type checking, specialized loads for common constants like \texttt{NULL}, \texttt{TRUE} or \texttt{FALSE}, instructions for executing \texttt{for} loops or various subsetting operators. Branching is done via jumps to arbitrary bytecode. An example of the bytecode can be seen in listing \ref{lst:bc-example-gnur}.
+Included with the distribution of GNU-R is a \textit{bytecode compiler}, which can be invoked either explicitly, when a package is installed, or as a just-in-time (JIT) compiler. The compiler is written mostly in R with few supporting functions written in C, while the bytecode interpreter is written in C. The bytecode is stack-based with fat instructions, like specialized instructions for type checking, specialized loads for common constants like \texttt{NULL}, \texttt{TRUE} or \texttt{FALSE}, instructions for executing \texttt{for} loops or various subsetting operators. Branching is done via jumps to arbitrary bytecode. An example of the bytecode can be seen in listing \ref{lst:bc-example-gnur}.
 
-The bytecode employs a series of optimizations, most notably constant folding and inlining of base functions. The inlining can be set to various levels, with higher levels being more optimized while assuming that the functions in the base package and core language functions (like \texttt{if} or \texttt{`\{`}) are not shadowed. This allows the compiler to translate control flow from function calls to bytecode jumps, as well as to use bytecode instructions to perform basic arithmetic and logical operations.
+The bytecode employs a series of optimizations, most notably constant folding and inlining of base and builtin functions. The inlining can be set to various levels, with higher levels being more optimized while assuming that the functions in the base package and core language functions (like \texttt{if} or \texttt{`\{`}) are not shadowed. This allows the compiler to translate control flow from function calls to bytecode jumps, as well as to use bytecode instructions to perform basic arithmetic and logical operations.
 
 When a function is compiled, its \texttt{SEXP} is modified in-place, replacing the AST body with a bytecode. Every other call to this function is then interpreted by the bytecode interpreter, which is written in C and is also is part of the GNU-R.
 
@@ -282,7 +283,7 @@ When a function is compiled, its \texttt{SEXP} is modified in-place, replacing t
 %---------------------------------------------------------------
 R does not have primitives for managing memory, instead an automatic memory management provided by the runtime is expected. GNU-R uses a generational non-moving stop-the-world garbage collector with three generations\cite{r-gc-notes}.
 
-Next to the GC, GNU-R also has a reference counter for each object, included in the object header. This is used for optimistic mutations - when an object would be copied and mutated, but there is only one reference to it, it is instead mutated in place, avoiding an unnecesarry copy. This correctly preserves the copy-on-write behavior.
+Next to the GC, GNU-R also has a reference counter for each object, included in the object header. This is used for optimistic mutations - when an object would be copied and mutated, but there is only one reference to it, it is instead mutated in place, avoiding unnecesarry copies. This correctly preserves the copy-on-write behavior while improving performance.
 
 %---------------------------------------------------------------
 \subsubsection*{Packages}
@@ -290,7 +291,7 @@ Next to the GC, GNU-R also has a reference counter for each object, included in 
 
 A big advantage of using R is the vast library of packages, libraries and data sets. These are hosted at \textit{The Comprehensive R Archive Network}\cite{cran} package repository, wich is currated and tested by the R Core Team. They can be very simply installed by calling \texttt{install.packages} and loaded with the \texttt{library} function.
 
-The GNU-R base installation is also distributes with several packages, including, but not limited to, \texttt{base} containing the basic functions for using R, \texttt{stats} implementing statistical functions, \texttt{graphics} with base functions for manipulating graphical output, \texttt{compiler} implementing the mentioned bytecode compiler, or \texttt{Matrix} with hiearchy of dense and sparse matrix classes.
+The GNU-R base installation is also distributes with several packages, including, but not limited to, \texttt{base} containing the basic functions for using R, \texttt{stats} implementing statistical functions, \texttt{graphics} with base functions for manipulating graphical output, \texttt{compiler} implementing the mentioned bytecode compiler, or \texttt{Matrix} with definitions of dense and sparse matrix classes.
 
 %---------------------------------------------------------------
 \subsubsection*{C interface}
@@ -322,7 +323,7 @@ It is built as an extension to GNU-R, although it uses a slightly modified versi
 %-------------------------------------------------------------
 Ř uses the GNU-R \texttt{SEXP} representation and memory management. All runtime objects are embedded into the SEXP objects. This is one of the modifications that need to be applied to GNU-R, a new \texttt{SEXPTYPE} is added (\texttt{EXTERNALSXP}), along with the necessary changes to how it is garbage collected and how it references other objects.
 
-The structure of Ř runtime object can be seen in figure \ref{fig:rsh-object-struct}. It represented as the \texttt{SEXP} header, the \texttt{SEXPTYPE} alwyas set to the \texttt{EXTERNALSXP}, and then the embeded \texttt{RirRuntimeObject}. This object always starts with two \texttt{uint32\_t} numbers, the first dictates how many bytes after the start of the Ř object do start the pointers to the other \texttt{SEXP}s, and the second indicates how many pointers are there. The magic number dictates which Ř object it is.
+The structure of Ř runtime object can be seen in figure \ref{fig:rsh-object-struct}. It contains the \texttt{SEXP} header of the \texttt{EXTERNALSXP} type, and then the embeded Ř object, which always inherit from a \texttt{RirRuntimeObject} class. This object always starts with two \texttt{uint32\_t} numbers, the first dictates how many bytes after the start of the Ř object do start the pointers to the other SEXPs, and the second indicates how many pointers are there. The magic number dictates which Ř object it is.
 
 There are helpers macros to access the headers, as well as the pointers to other \texttt{SEXP}s. On the Ř side, there are functions to convert between a C++ pointer and a SEXP.
 
@@ -354,35 +355,32 @@ The \textit{feedback vector} collected from a bytecode interpretation is represe
 \subsubsection*{RIR bytecode interpreter}
 %---------------------------------------------------------------
 
-The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. It uses the GNU-R bytecode execution stack. Unlike the GNU-R bytecode, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code that in GNU-R. An example of RIR compiled code can be seen in listing \ref{lst:bc-example-rir}. Note that the example code is not complete and is only used to give impression between the size differences of the bytecodes. The full code listing is in appendix \ref{ch:appendix-bc}.
+The bytecode used by Ř is called \textit{RIR}. It is a stack-based bytecode, interpreted by a Ř interpreter. Similarly to GNU-R, RIR assume the base functions are not shadowed, allowing it to have instrucitons for arithmetic operations and control flow. Unlike GNU-R, the RIR instructions are much more granular, there are fewer of them, they are not as specialized and a single instruction represent much smaller piece of C code. An example of RIR compiled code can be seen in listing \ref{lst:bc-example-rir}. Note that the example code is not complete and is only used to give impression between the size differences of the bytecodes and the full code listing is in appendix \ref{ch:appendix-bc}.
 
 For this thesis, the important bytecode instructions are \texttt{record\_call\_}, \texttt{record\_type\_}, and \texttt{record\_test\_}. These do the recording of feedback information about calls, types and tests respectively by observing the top value on the execution stack and recording the information to the \texttt{TypeFeedback} structure on an index stored as an immediate. The instructions are printed in listings as the observed values in square brackets followed by the label \texttt{Call\#N}, \texttt{Type\#N} or \texttt{Test\#N}, where \texttt{N} is the slot index.
 
-Apart from the runtime values, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
+Apart from the feedback information, the RIR interpreter also records other informations about the running program, most notably the number of times a function has been invoked, and the number of times a loop has been executed. These are used to determine which parts of the program are executed frequently, and thus are a good candidates for compiling to native code.
 
 %---------------------------------------------------------------
 \subsubsection*{PIR compiler}
 %---------------------------------------------------------------
-When a function or a loop meets the compilation heuristics, it is compiled to \textit{PIR}, an intermediate representation used for optimizations. PIR is composed of instruciton in a \textit{static single-assignment form} (SSA), organized in basic blocks, with each block being terminated with a (conditional) jump to another basic block, or a speculation checkpoint.
+
+When a function or a loop meets the compilation heuristics, it is compiled from RIR to \textit{PIR}, an intermediate representation used for optimizations. PIR is composed of instructions in a \textit{static single-assignment form} (SSA), organized in basic blocks, with each block being terminated with a (conditional) jump to another basic block, or a speculation checkpoint.
 
 Every PIR instruction has a \textit{type} (also called a \textit{PIR type}). These consist of one or several \textit{R types} (like integer or logical) and type flags. For this thesis, the important type flags are
 \begin{itemize}
 	\item{} \textit{is scalar}, meaning the value is always a vector of size 1,
 	\item{} \textit{is not object}, which means that the value is neither of the R object models,
 	\item{} \textit{has no attributes}, where the object does not have the associated R attributes (this implies it is not an object),
-	\item{} \textit{can be missing}, where the value can be the \textit{unbound value},
+	\item{} \textit{can be missing}, where the value can be an \textit{unbound value}, raising an error if evaluated,
 	\item{} \textit{can be NA or NaN}, meaning the value can be \texttt{NA} or a not a number (NaN),
 	\item{} and \textit{maybe lazy}, where the value needs to be first evaluated before used.
 \end{itemize}
-All of these types form a complete lattice.
+All of these types form a complete lattice. There are also types which model the types internal to only the PIR code, used for the speculative optimizations.
 
-There are also types which model the types internal to only the PIR code. These are \textit{checkpoint}, \textit{frame state} and \textit{deopt reason}, used in speculative optimizations, and \textit{contex}, used for contextual dispatch \todo{true?}. There is also a \textit{void} type, used for instructions that only perform side effects.
+All of the instructions also have a \textit{effect flags}, denoting what kind of observable side effects an instruction can emit. These include \textit{deopt} (may trigger deoptimization), \textit{warn} (might print a warning messages respectively), \textit{error} (might produce an error), or \textit{reflection} (might invoke reflection). By explicitly tracking these effect the compiler is are able to perform more optimizations while still preserving the correct R semantics.
 
-All of the instructions also have a \textit{effect flags}, denoting what kind of observable side effects an instruction can emit. These include \textit{deopt} (may trigger deoptimization), \textit{warn} (might print a warning messages respectively), \textit{error} (might produce an error), or \textit{reflection} (might invoke reflection). \todo{why are there flags}
-
-If the PIR instruction is a result of compiling a RIR instruction that has a feedback slot \todo{huh}
-
-In listing \ref{lst:instruction-example}, we can see the how the PIR instructions are represented in text. It starts with the type (\texttt{real\$-}), continues with the register by which the instruciton is referred to (\texttt{\%4.2}), then the name of instruction (\texttt{Add}), followed by effect flags (\texttt{d}), arguments (\texttt{\%2.0, 2, elided}) and finally the type feedback (\texttt{<val?\_>}). When the type of instruciton is void, the register is ommited. Similarly, when the instruction does not have a feedback connected with it, it is not shown. For the rest of the thesis, we will be mostly ommiting the effect flags from the code listings, as they are not important.
+In listing \ref{lst:instruction-example}, we can see the how the PIR instructions are represented in text. It starts with the type (\texttt{real\$-}), continues with the register by which the instruciton is referred to (\texttt{\%4.2}), then the name of instruction (\texttt{Add}), followed by effect flags (\texttt{d}), arguments (\texttt{\%2.0, 2, elided}) and finally the feedback slot connected with this instruction (\texttt{<val?\_>}). When the type of instruciton is void, the register is ommited. Similarly, when the instruction does not have a feedback connected with it, it is not shown. For the rest of the thesis, we will be mostly ommiting the effect flags from the code listings, as they are not important.
 
 \begin{listing}[H]
 	\begin{minted}{\pirlexer}
@@ -415,10 +413,10 @@ For the experiments and analysis, we use two codebases.
 
 The first one is a collection of Ř benchmarks\footnote{\url{https://github.com/reactorlabs/RBenchmarking}}. This consists of four different suites of benchmarks:
 \begin{itemize}
-  \item{} \textit{Are We Fast Yet}, a collection of both micro and macro benchmarks based on the cross-language compiler benchmark suite\cite{are-we-fast-yet},
+	\item{} \textit{Are We Fast Yet}, a collection of both micro and macro benchmarks based on the cross-language compiler benchmark suite\cite{are-we-fast-yet},
 	\item{} \textit{Real Thing}, a collection of real-world programs,
-  \item{} \textit{shootout} benchmarks from a popular cross-language benchmarks game\cite{shootout},
-	\item{} and \textit{simple}, which are custom written short scripts used for microbenchmarking individual R features.
+	\item{} \textit{Shootout} benchmarks from a popular cross-language benchmarks game\cite{shootout},
+	\item{} and \textit{Simple}, which are custom written short scripts used for microbenchmarking individual R features.
 \end{itemize}
 
 The second codebase is a script from a Kaggle competition about machine learning on the Titanic dataset\cite{titanic}. The script is a representation of more real-world program, is 108 lines of code extracted from a Rmarkdown notebook and uses some of the popular libraries like \texttt{ggplot2} or \texttt{dplyr}.

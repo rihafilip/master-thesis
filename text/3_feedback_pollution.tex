@@ -12,7 +12,7 @@ This chapter is based on the paper \cite{feedback-vmil}.
 \section{Motivation}
 %---------------------------------------------------------------
 
-Let's take the example in listing \ref{lst:pollution-motive} and consider disabled contextual dispatch in Ř and no OSR compilations of loops.
+Let's take the example in listing \ref{lst:pollution-motive} and consider disabled contextual dispatch in Ř and no OSR compilations of loops. The event log of the listing is demonstrated in \ref{fig:pollution-motive-baseline}.
 
 \begin{listing}[H]
 	\begin{minted}{R}
@@ -30,43 +30,11 @@ for (x in 1:1000) sum(doubles, 0.0)
 	\caption{Motivating example for feedback pollution}\label{lst:pollution-motive}
 \end{listing}
 
-At first, the function executes with doubles, and the type feedback will reflect that. After a few executions, the function \texttt{sum} will be compiled. The resulting code will have an assumption that the arguments are of the type double (illustrated in listing \ref{lst:pollution-pir-real}). The function will speed up significantly because the rest of the function can use specialized operations on doubles.
+At first, we will execute the function \texttt{sum} with a vector of doubles. The type feedback will reflect that and after few executions, a compilation will get triggered, assuming on the types of arguments being double. This will speedup the execution significantly because the operations can be specialized for the double type.
 
-Next, when we run the function with integers, we trigger a deoptimization on the assumption of double type, and we will change the type feedback to include both integer and double. Because of this, the next compilation cannot speculate on any specific type of arguments (the instructions in listing \ref{lst:pollution-pir-val}), since we do not have specialized instructions on a number type. This significantly slows the function for all subsequent calls. The evolution of type feedback is demonstrated in figure \ref{fig:pollution-motive-baseline}.
+Next when we run the function with integers, we fail the assumption on doubles, trigger a deoptimization and fallback to the baseline interpreted version. We also update the feedback information of \texttt{sum}, now reflecting both double and integer type. Because of this, the next function compilation cannot speculate on one specific type of an argument and instead uses a very general type (the only assumption made is that the value does not have any attributes). This makes the newly compiled native function about an order of a magnitude slower.
 
 This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information; thus we specialize to a more general context and lose performance.
-
-\begin{listing}
-	\begin{sublisting}{\textwidth}
-		\begin{minted}{\pirlexer}
-# Load the first argument
-%1    = LdArg        0
-# Evaluate the promise
-%2    = Force!<lazy> %1
-# Check if its type is double (real) with no attributes (-)
-%3    = IsType       %2 isA real-
-# Assume on the type
-        Assume       %3
-    \end{minted}
-		\subcaption{Compilation with feedback \texttt{[double]}}\label{lst:pollution-pir-real}
-	\end{sublisting}
-	\par\vspace{1em}\par
-	\begin{sublisting}{\textwidth}
-		\begin{minted}{\pirlexer}
-# Load the first argument
-%1    = LdArg        0
-# Evaluate the promise
-%2    = Force!<lazy> %1
-# Check if the argument has no attributes (-), maybe missing (?),
-# but could be of any type
-%3    = IsType       %2 isA val?-
-# Assume on the type
-        Assume       %3
-    \end{minted}
-		\subcaption{Compilation with feedback \texttt{[double, integer]}}\label{lst:pollution-pir-val}
-	\end{sublisting}
-	\caption{Simplified PIR instructions with assumptions on the type of first argument for listing \ref{lst:pollution-motive}}
-\end{listing}
 
 \begin{figure}
 	\centering
@@ -76,9 +44,11 @@ This is where we say that in the second compilation the \textit{type feedback sl
 	\caption{Event log of listing \ref{lst:pollution-motive} without contextual dispatch}\label{fig:pollution-motive-baseline}
 \end{figure}
 
-If we consider contextual dispatch, the performance is better, but not ideal. At first, we observe double type, compile a native version for the context of an argument type double, and, as was the case without contextual dispatch, the resulting code is much faster.
+If we consider contextual dispatch, the performance is better, but not ideal (illustrated in \ref{fig:pollution-motive-context}). Same as without the contextual dispatch, we first observe and speculate on the type double. The final version is compiled for a context of arguments being the double type \todo{reword}.
 
-When we call with integers, we do not dispatch into the already compiled version, because the call context disjunct with the context of the compiled version. Instead, we execute the bytecode baseline version, update the type feedback to include an integer, and then later compile. This compilation has to again speculate on more general context (listing \ref{lst:pollution-pir-val}), and thus is not as fast as if we were to speculate that the arguments are of the type integer. But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it. This is demonstrated in figure \ref{fig:pollution-motive-context}.
+When we call with integers, we do not dispatch into the already compiled version, because the call context is disjunct with the context of the compiled version. Instead we run in the bytecode interpreter, updating the type feedback to also include integer. After few invocations, we compile for the second context and again we have to speculate on a more general type, resulting in a slower execution.
+
+But contrary to the non-contextual dispatch, when we call \texttt{sum} with double type, it is dispatched again to the first compiled version, and thus its execution is as fast as the first time we called it.
 
 \begin{figure}
 	\centering
@@ -92,7 +62,7 @@ When we call with integers, we do not dispatch into the already compiled version
 \section{Methodology}
 %---------------------------------------------------------------
 
-Our main goal is to quantify the pollution of the feedback vector. A pollution happens when between individual compilations the feedback vector changes, either because an interpreter has observed a new value or a native version failes on an assumption and deoptimizes. This implies that the first compilation cannot be polluted, hence we are interested in \textit{subsequent compilations} (also \textit{recompilations}).
+Our main goal is to quantify the pollution of the feedback vector. A pollution happens when between individual compilations the feedback vector changes, either because an interpreter has observed a new value or a native version fails on an assumption and deoptimizes. This implies that the first compilation cannot be polluted, hence we are interested in \textit{subsequent compilations} (or also \textit{recompilations}).
 
 Formally, we define
 \begin{itemize}
@@ -106,7 +76,7 @@ Formally, we define
 
 Since the state of the feedback cannot go to a previous state (i.e. on an update, the feedback either stays the same or it is in a never before observed state), we can simply observe the state of the feedback slots when a compilation is triggered and compare it to the previous compilation.
 
-For collecting the data, we used the recording tool introduced in the previous chapter. As an input to the experiment, we used 16 benchmarks from the Ř benchmarks collection containing nearly 1300 lines of code and a Kaggle script, both outlined in chapter \ref{ch:1-corpus}. The Ř compiler is ran with default parameters, meaning that a function is compiled after 100 invocations. Compilations triggered by loop iterations are ignored.
+For collecting the data, we used the recording tool introduced in the chapter \ref{ch:recording-tool}. As an input to the experiment, we used 16 benchmarks from the Ř benchmarks collection containing nearly 1300 lines of code and a Kaggle competition program, both outlined in chapter \ref{ch:1-corpus}. The Ř compiler is ran with default parameters, meaning that a function is compiled after 100 invocations. Compilations triggered by loop iterations are ignored.
 
 %---------------------------------------------------------------
 \section{Analysis}
@@ -114,7 +84,7 @@ For collecting the data, we used the recording tool introduced in the previous c
 
 First, we will observe the the Kaggle code. Running the script, 315 functions are compiled and 146 of them are compiled more than once. A function compilation is triggered 970 times and out of these 824 are recompilations (2.6 recompilations on average per function). Overall, we have observed 90 polluted recompilations (10.9\%), where 19 recompilations have more than half of the slots polluted and 10 have all of the slots polluted.
 
-Figure \ref{fig:kaggle-pollution} shows the function pollution in Kaggle. Each point represents a compilation, where the y-axis is showing an \textit{accumulated pollution}, i.e. the summed pollution of all subsequent compilations up to that point. On the x-axis, we show all of the functions that were compiled more than once.
+Figure \ref{fig:kaggle-pollution} shows the function pollution in Kaggle. Each point represents a compilation, where the y-axis is showing an \textit{accumulated pollution}, i.e. the summed pollution of all subsequent compilations up to that point. On the x-axis, we show the functions that were compiled more than once.
 
 \begin{figure}
 	\centering
@@ -142,11 +112,28 @@ Splitting the pollution by a feedback slot type, the observed values are taking 
 \subsubsection*{Summary}
 %---------------------------------------------------------------
 
-In table \todoadd is a summary of the feedback compilation in the benchmarks and in the Kaggle code. We can see that feedback pollution happens in both the Kaggle code as well as in the benchmarks, although the benchmarks have a lower pollution rates, mostl likely due to the stable nature of the code.
+In table \ref{tbl:pollution-summary} is a summary of the feedback compilation in the benchmarks and in the Kaggle code. We can see that feedback pollution happens in both the Kaggle code as well as in the benchmarks, although the benchmarks have a lower pollution rates, mostl likely due to the stable nature of the code.
 
 We have observed that pollution is most likely caused by polymorphic functions that are called often with different types, but other causes for pollution can be a global state.
 
 Most of the polluted slots are the observed values.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{llll}
+		\hline
+		                      & Kaggle      & Benchmarks  \\
+		\hline
+		Lines of code         & 108         & 1268        \\
+		Compilations          & 970         & 257         \\
+		Polluted compilations & 90 (10.9\%) & 21 (8.2\%)  \\
+		Compiled functions    & 315         & 139         \\
+		Polluted functions    & 66 (21\%)   & 21 (15.1\%) \\
+		\hline
+	\end{tabular}
+  \caption{Summary of the feedback pollution in the corpus\cite{feedback-vmil}}\label{tbl:pollution-summary}
+\end{table}
+
 
 The code of the analysis is freely available at GitLab\footnote{\url{https://gitlab.com/rirvm/splitfeedback-experiments/-/tree/artifact}} as part of the VMIL paper\cite{feedback-vmil} aritfact.
 
@@ -154,8 +141,8 @@ The code of the analysis is freely available at GitLab\footnote{\url{https://git
 \section{Pollution prevention}
 %---------------------------------------------------------------
 
-After observing that a feedback pollution is a real phenomenon, we want to create a way to reduce it. \todo{wtf}
+After observing that a feedback pollution is a real phenomenon, we propose a way to reduce it.
 
 One way to reduce the pollution is to split the feedback vector into multiple different ones. Since Ř already employs a contextual dispatch, the constructed dispatch could be reused by the feedback, constructing a unique vector for each call context the function is invoked with. A split feedback was implemented by Michal Štěpánek as a part of his master thesis\cite{michal2025obohaceny}. However, this solution brought new problems, as now the observed information is much sparser and needs to be merged from multiple vectors. Splitting the feedback also negativaly impacts the interpreter performance, and complicates function compilation.
 
-Another way to reduce the pollution would be to implement a \textit{feedback decay}. The idea is that the feedback information in every slot would slowly \textit{decay} as new information is observed. This will need to be finely tuned, as very quickly the JIT could be stuck in a \textit{deopt loop}, compiling a function just to trigger a deoptimization next time it is invoked.
+Another approach would be to implement a \textit{feedback decay}. The idea is that the feedback information in every slot would slowly \textit{decay} as new information is observed. This will need to be finely tuned, as very quickly the JIT could be stuck in a \textit{deopt loop}, compiling a function just to trigger a deoptimization next time it is invoked.

@@ -27,7 +27,7 @@ We say that a slot is \textit{referenced} if it is part of a function that is co
 When an assumption on a type is emited, it has a structure outlined in listing \ref{lst:assume-structure}. The value we speculate on is in the register \texttt{\%1} with a \textit{static type}, which is inferred from the call context, known types of builtins, and preceding assumptions. The instruction has also an associated \textit{feedback type}, which is the union of types observed in the interpreter. The speculated value is an input to an \texttt{IsType} instruction, which checks the actual runtime type against the \textit{assumed type}. The result of the type check is then an input to the \texttt{Assume} instruction, along with the corresponding \texttt{Checkpoint}. If the type check fails (\texttt{\%2} is false), we trigger a deoptimization and restore the frame state according to the checkpoint, otherwise we continue with the execution.
 
 \begin{listing}[H]
-  \centering
+	\centering
 	\begin{minted}[linenos=false]{\pirlexer}
 <static type>   %1    = <instruction>       args... <feedback type>
 lgl$#-          %2    = IsType              %1 isA <assumed type>
@@ -158,28 +158,26 @@ Our unit for collecting information is a \textit{closure version compilation}. T
 
 The final data is aggregated over these closure version compilations. Thus when we say that there were two used slots, we mean that over all compilations, a slot was used two times, it might even be the same slot. The reason for this was that between the individual compilations, the state of the slots can change, and there is no reasonable way to reference and quantify all slots after the program terminates.
 
-\todo{Make sure the LOC are correct}
 \begin{table}[ht]
-	\centering
-	\begin{adjustwidth}{-2cm}{-2cm}
-		\begin{tabular}{l l r r r}
+	\makebox[\linewidth]{%
+		\begin{tabular}{l l l l l}
 			\hline
-			\textbf{Program name}          & \textbf{Benchmark suite} & \textbf{Lines of code} & \textbf{Compilations} & \textbf{Referenced slots} \\
+			\textbf{Program name}   & \textbf{Benchmark suite} & \textbf{Lines of code} & \textbf{Compilations} & \textbf{Referenced slots} \\
 			\hline
-			Bounce\_nonames\_simple        & areWeFast                & 68                     & 11                    & 264                       \\
-			Mandelbrot                     & areWeFast                & 88                     & 14                    & 358                       \\
-			flexclust\_no\_s4              & RealThing                & 212                    & 144                   & 5335                      \\
-			volcano                        & RealThing                & 76                     & 23                    & 2037                      \\
-			binarytrees/binarytrees\_naive & shootout                 & 46                     & 22                    & 1070                      \\
-			fannkuch/fannkuchredux         & shootout                 & 75                     & 6                     & 251                       \\
-			fannkuch/fannkuchredux\_naive  & shootout                 & 74                     & 5                     & 244                       \\
-			fasta/fasta\_naive\_2          & shootout                 & 102                    & 17                    & 598                       \\
-			knucleotide/knucleotide        & shootout                 & 88                     & 59                    & 1493                      \\
-			pidigits/pidigits              & shootout                 & 402                    & 92                    & 5651                      \\
-			titanic                        & kaggle                   & 258                    & 2020                  & 66119                     \\
+			Bounce\_nonames\_simple & Are We Fast Yet          & 58                     & 11                    & 264                       \\
+			Mandelbrot              & Are We Fast Yet          & 65                     & 14                    & 358                       \\
+			flexclust\_no\_s4       & Real Thing               & 163                    & 144                   & 5335                      \\
+			volcano                 & Real Thing               & 63                     & 23                    & 2037                      \\
+			binarytrees\_naive      & Shootout                 & 31                     & 22                    & 1070                      \\
+			fannkuchredux           & Shootout                 & 63                     & 6                     & 251                       \\
+			fannkuchredux\_naive    & Shootout                 & 62                     & 5                     & 244                       \\
+			fasta\_naive\_2         & Shootout                 & 88                     & 17                    & 598                       \\
+			knucleotide             & Shootout                 & 72                     & 59                    & 1493                      \\
+			pidigits/pidigits       & Shootout                 & 333                    & 92                    & 5651                      \\
+			titanic                 & -                        & 108                    & 2020                  & 66119                     \\
 			\hline
 		\end{tabular}
-	\end{adjustwidth}
+	}
 	\caption{Overview of analyzed programs}\label{tbl:analysis-overview}
 \end{table}
 
@@ -264,7 +262,7 @@ Interestingly, there are very few slots that are narrowed by the static informat
 
 The main takeaway of the analysis is that a very low number of feedback slots is being used by the compiler. This leads to a time spent in the interpreter by recording observations being wasted. If we are able to detect which slots are truly redundant, we could optimize
 
-Another key point is that a polymorphism, and by extend pollution, does not impact if a slot is used in compilation, but it influences \textit{how} the feedback is used. Thus by reducing the feedback pollution we would not be significantly influencing if a slot is used, but we might improve the available optimizations by having more precise information.
+Another key point is that a polymorphism, and by extend pollution, does not impact \textit{if} a slot is used in compilation, but it influences \textit{how} the feedback is used. Thus by reducing the feedback pollution we would not be significantly influencing if a slot is used, but we might improve the available optimizations by having more precise information.
 
 \todo{bit more}
 

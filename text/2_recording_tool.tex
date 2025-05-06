@@ -1,5 +1,5 @@
 %---------------------------------------------------------------
-\chapter{Recording Tool}
+\chapter{Recording Tool}\label{ch:recording-tool}
 %---------------------------------------------------------------
 
 \begin{chapterabstract}
@@ -33,7 +33,7 @@ One of the most important things about designing the recording tool was to minim
 
 Another design goal was to not clutter the code of the compiler. Observing events is a cross-cutting concern impacting the whole codebase, similarly to logging. We do not want to have to keep around a state connected to the recording in the compiler, because this would increase the code complexity.
 
-What we ended up with is a series of \textit{hooks} that are used by the rest of the codebase. These hooks collect information in global state, but this is hidden from the caller. Since both the R and Ř code is sequential, we do not need to deal with any concurrency issues, but we still have to be careful with managing the global state. One feature that we leverage is that the C++ code is compiled without any exceptions, thus we can reliably use cleanup calls with confidence about the control flow of the program.
+What we ended up with is a series of \textit{hooks}, a very simple functions that are used by the rest of the codebase. These hooks collect information in global state, but this is hidden from the caller. Since both the R and Ř code is sequential, we do not need to deal with any concurrency issues, but we still have to be careful with managing the global state. One feature that we leverage is that the C++ code is compiled without any exceptions, thus we can reliably use cleanup calls with confidence about the control flow of the program.
 
 As an example, in the listing \ref{lst:hook-docall} in the function \texttt{doCall} we can see the logic around passing a function to the compiler when certain heuristics and conditions are met. \texttt{RecompileHeuristic} and \texttt{RecompileCondition} are pure functions, each having multiple heuristics or conditions respectively, but the information about which was triggered is not propagated anywhere. Therefore when a condition or heuristic is met, we call to a hook that captures the information in the global state (also illustrated in \ref{lst:hook-docall}, in the funciton \texttt{RecompileCondition}). If a compilation happens, we leverage this information from the global state with another hook. If a compilation does not happen, we reset the global state with the \texttt{recording::recordReasonsClear} hook.
 
@@ -42,8 +42,9 @@ This architecture of global state allowed us to make minimal changes to the code
 \begin{listing}
 	\centering
 	\begin{minted}{cpp}
-SEXP doCall(/* arg */) {
+SEXP doCall(/* args */) {
   // ...
+
   if (!isDeoptimizing() && RecompileHeuristic(/* args */)) {
       if (RecompileCondition(/* args */)) {
           if (/* OSR condition */) {
@@ -54,6 +55,7 @@ SEXP doCall(/* arg */) {
       }
   }
   REC_HOOK(recording::recordReasonsClear());
+
   // ...
 }
 
@@ -88,7 +90,7 @@ The code is merged into the main branch of Ř and it is available on GitHub\cite
 
 All of the hook functions are defined in the file \texttt{recording\_serialization.h}. This is the only file intended to be included by other parts of the compiler. Calling a hook either emits an event or adds information to the global state to be used by other hooks.
 
-All calls to the hooks are surrounded by the \texttt{REC\_HOOK} macro. This macro controls the conditional compilation of these hooks, where if the recording is not enabled, the macro does not generate the call to the hook.
+All calls to the hooks are surrounded by the \texttt{REC\_HOOK} macro, which controls the conditional compilation of these hooks, where if the recording is not enabled, the macro does not generate the call to the hook.
 
 The only instances where a recording state is managed by the hook caller is when we need to capture an information before calling the hook. These could be replaced by additonal hook calls, but capturing the state is in this case easier. For example in the listing \ref{lst:hook-observedtest}, we check if the recording to the test feedback slots has changed the actual value. All other instances of state are managed by the hooks.
 
@@ -161,21 +163,21 @@ An \texttt{Event} is an abstract class from which all other events inherit. Ever
 
 \textit{Compilation start} and \textit{compilation end} events denote the start and end of a \textit{compilation session}, a single call to the compiler during which multiple closures might be lowered to native code. These events act as brackets of sorts, everything in between these is connected to the one compilation session. They record the heuristics used for triggering the compilation, its duration, and if it at any point failed. For each of the closures we then register a \textit{compilation event}, where we reference the closure that was compiled, the type feedback it used, the PIR code that it resulted in and the LLVM bitcode to which it was lowered.
 
-Every time we invoke a function, we register an \textit{invoke event}. Due to contextual dispatch, there are multiple places where a call might be dispatched. Thus, we capture the \textit{call context} from the arguments. and if we are dispatching to a natively compiled function. There are also multiple functions inside the runtime which are doing the dispatching. This is captured in the source field.
+Every time we invoke a function, we register an \textit{invoke event}. Due to contextual dispatch, there are multiple places where a call might be dispatched. Thus, we capture the \textit{call context} from the arguments. and if we are dispatching to a natively compiled function. There are also multiple control flow paths inside the interpreter which lead to a dispatching, which is also captured \todo{omit?}.
 
-An update of the type feedback is registered as \textit{speculative context event}. We capture on which feedback slot the recording happend, what is the new infomation in it, if the information was modified, and if the change has happend because of a deoptimization.
+A recording to the feedback vector is registered as \textit{speculative context event}. We capture on which feedback slot the recording happend, what is the new infomation in it, if the recorded information is new, and if the change has happend because of a deoptimization.
 
-When a deoptimization occurs, the \textit{deopt event} is triggered. It captures the deopt reason, the function and its feedback slot it is connected with, and also the trigger, which is a closure referenced as \texttt{FunRecoding}, or a \texttt{SEXP} value.
+When a deoptimization occurs, the \textit{deopt event} is triggered. It captures the deopt reason, the function and its feedback slot it is connected with, and also the trigger, which is eitehr a closure referenced as \texttt{FunRecoding} or a \texttt{SEXP} value.
 
-There is also a definition of a \textit{custom event}, which is a user-defined message that can be emitted with the R api.
+There is also a definition of a \textit{custom event}, which is a user-defined message that can be emitted with the R API.
 
 %---------------------------------------------------------------
 \subsection{Serialization}
 %---------------------------------------------------------------
 
-In order to analyze the recorded data, we have to serialize it from the memory. For that, we transform the events into an R value as a named list with two fields, \texttt{functions} containing the recorded closures from a same-named field in the \texttt{Recorder}, and \texttt{events}, containing all of the recorded events. Each event is then a named list with the same fields as the corresponding C++ class.
+In order to observe the recorded data, we have to serialize it from the memory. For that, we transform the events into an R value as a named list with two fields, \texttt{functions} containing the recorded closures from a same-named field in the \texttt{Recorder}, and \texttt{events}, containing all of the recorded events. Each event is then a named list with the same fields as the corresponding C++ class.
 
-To analyze the event log outside of R, there is a helper script that can transform the representation into a CSV file, where one event corresponds to one line. The documentation for the CSV fields can be found in the Ř repository\cite[documentation/recording.md]{rsh-github}.
+To analyze the event log outside of R, there is a script \texttt{replayer.r} that can transform the representation into a CSV file, where one event corresponds to one line. The documentation for the CSV fields can be found in the Ř repository\cite[documentation/recording.md]{rsh-github}.
 
 The logic for serializing the event log is in file \texttt{recording\_serialization.h} under the namespace \texttt{rir::recording::serialization}. The main type definition is a an incomplete templated struct \texttt{Serializer} working as a typeclass, defined as in listing \ref{lst:record-serialize}. To specify how to serialize a type, we need to explicitly instantiate the \texttt{Serializer} with the template argument of the type we want to serialize and two methods \texttt{to\_sexp\_} and \texttt{from\_sexp\_}, as seen for the type \texttt{bool} in the listing. With this we can compose a logic for more complex types from the more basic ones. For example, the serialization for a vector is generic for any type, and is internally using the \texttt{Serializer} struct to delegate the serialization of its elements.
 
@@ -195,7 +197,7 @@ struct Serializer<bool> {
 	\caption{Definition of the \texttt{Serializer} struct and its usage for type \texttt{bool}}\label{lst:record-serialize}
 \end{listing}
 
-For serialization of more complex structures, there are helper function called \texttt{fields\_from\_vec} and \texttt{fields\_to\_vec}, with their signatures defined as in listing \ref{lst:record-serialize-fields}. The \texttt{Derived} template parameter specifies the current structure we are serializing, which needs to have two static members \texttt{className}, a C string uniquely identifiying this class, and \texttt{fieldNames}, a vector of C strings naming all of the individual fields. To use the serialization to and from fields, we need to pass in the fields into the helper functions in the same order in both calls. This can be seen in listing \ref{lst:record-serialize-fields}. Note how we only need to specify which fields to serialize, but the method of how they are serialized is resolved through template resolving.
+For serialization of more complex structures, there are helper function called \texttt{fields\_from\_vec} and \texttt{fields\_to\_vec}, with their signatures defined as in listing \ref{lst:record-serialize-fields}. The \texttt{Derived} template parameter specifies the current structure we are serializing, which needs to have two static members \texttt{className}, a C string uniquely identifiying this class, and \texttt{fieldNames}, a vector of C strings naming all of the individual fields. To use the serialization to and from fields, we need to pass in the fields into the helper functions in the same order in both calls. This can be seen in listing \ref{lst:record-serialize-compstart}. Note how we only need to specify which fields to serialize, but the method of how they are serialized is managed through template resolving.
 
 \begin{listing}
 	\begin{minted}{cpp}
@@ -210,6 +212,8 @@ void fields_from_sexp(SEXP sexp, Ts&... fields);
 
 \begin{listing}
 	\begin{minted}{cpp}
+constexpr const char* CompilationStartEvent::className = "event_compile_start";
+
 const std::vector<const char*> CompilationStartEvent::fieldNames = {
     "funIdx", "name", "compile_reason_heuristic", "compile_reason_condition",
     "compile_reason_osr"};
@@ -239,15 +243,18 @@ Currently, there are two ways to interact with the recording - environment varia
 \subsubsection*{Environment Variables}
 %---------------------------------------------------------------
 
-With the environment variables, it is possible to record the whole run of a program. This is done by setting \texttt{RIR\_RECORD} to the path where the R object with the recording data should be serialized using the RDS format, a format for serializing R objects. With the \texttt{RIR\_RECORD\_FILTER} variable, we can control which events should be considered, while ignoring the rest. The available values are \texttt{Compile}, \texttt{Deopt}, \texttt{TypeFeedback} and \texttt{Invoke} and multiple can be specified when separated by a comma. Custom events cannot be filtered out.
+With the environment variables, it is possible to record the whole run of a program. This is done by setting \texttt{RIR\_RECORD} to the path where the R object with the recording data should be serialized using the RDS serialization format for R objects\cite[1.8 Serialization Formats]{rprojectInternals}. With the \texttt{RIR\_RECORD\_FILTER} variable, we can control which events should be considered, while ignoring the rest. The available values are \texttt{Compile}, \texttt{Deopt}, \texttt{TypeFeedback} and \texttt{Invoke} and multiple can be specified when separated by a comma. Custom events cannot be filtered out.
 
 As an example, by calling
 
-\mintoneline{bash}{RIR_RECORD=output.rds RIR_RECORD_FILTER=Compile,TypeFeedback R -f test.R}
+\begin{minted}[linenos=false]{bash}
+RIR_RECORD=output.rds RIR_RECORD_FILTER=Compile,TypeFeedback \
+  R -f test.R
+\end{minted}
 
 \noindent we record all compilation and type feedback events that were generated while running the script \texttt{test.R} into the file \texttt{output.rds}.
 
-There is also a \texttt{RIR\_RECORD\_SERIALIZE} environment variable which if it is set to nonzero integer enables the serialization of closures and deopt events. Serialization is turned off by default due to a bug in the serialization of Ř objects \todo{not mention?}.
+There is also a \texttt{RIR\_RECORD\_SERIALIZE} environment variable which if it is set to nonzero integer enables the serialization of closures and deopt events.
 
 %---------------------------------------------------------------
 \subsubsection*{R API}
