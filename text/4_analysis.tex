@@ -12,9 +12,12 @@ In this chapter, we only focus on the \textit{type slots} because, as observed i
 \section{Definitions}
 %---------------------------------------------------------------
 
-First, we define an \textit{non-empty slot} as a slot that has at least one observation. An empty slot means that the observed instruction was never executed, thus it is part of a program which is not executed.
-
-We say that a slot is \textit{referenced} if it is part of a function that is compiled to native, including slots inside of inlined functions. A slot is then \textit{read} if during this compilation the information in the slot is observed. A \textit{used slot} is a type feedback slot that has an assumption connected with it in the final version of PIR (after all optimizations finished running). A used slot is always non-empty as we cannot assume a type if we have not observed any.
+\begin{itemize}
+  \item{} We define a \textit{non-empty slot} as a slot that has at least one observation. An \item{empty} slot means that the instruction was never executed.
+	\item{} We say that a slot is \textit{referenced} if it is part of a function that is compiled to native, including slots inside inlined functions.
+	\item{} A slot is then \textit{read} if during this compilation the information in the slot is observed.
+	\item{} A \textit{used slot} is a type feedback slot that has an assumption connected with it in the final version of PIR (after all optimizations finished running). A used slot is always non-empty.
+\end{itemize}
 
 %---------------------------------------------------------------
 \subsubsection*{Used Slots}
@@ -25,9 +28,9 @@ When an assumption on a type is emited, it has a structure outlined in listing \
 \begin{listing}[H]
 	\centering
 	\begin{minted}[linenos=false]{\pirlexer}
-<static type>   %1    = <instruction>       args... <feedback type>
-lgl$#-          %2    = IsType              %1 isA <assumed type>
-void                    Assume              %2, <checkpoint> (Typecheck[Type#N])
+[static type]   %1 = [instruction]   args... <feedback type>
+lgl$#-          %2 = IsType          %1 isA [assumed type]
+void                 Assume          %2, [checkpoint]
   \end{minted}
 	\caption{PIR code structure of type assumption}\label{lst:assume-structure}
 \end{listing}

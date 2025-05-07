@@ -28,11 +28,11 @@ for (x in 1:1000) sum(doubles, 0.0)
 	\caption{Motivating example for feedback pollution}\label{lst:pollution-motive}
 \end{listing}
 
-At first, we will execute the function \texttt{sum} with a vector of doubles. The type feedback will reflect that and after few executions, a compilation will get triggered, assuming on the types of arguments being double. This will speedup the execution significantly because the operations can be specialized for the double type.
+At first, we will execute the function \texttt{sum} with a vector of doubles. The type feedback will reflect that and after few executions, a compilation will get triggered, assuming on the types of arguments being double. This will speed up the execution significantly because the operations can be specialized for the double type.
 
 Next when we run the function with integers, we fail the assumption on doubles, trigger a deoptimization and fallback to the baseline interpreted version. We also update the feedback information of \texttt{sum}, now reflecting both double and integer type. Because of this, the next function compilation cannot speculate on one specific type of an argument and instead uses a very general type (the only assumption made is that the value does not have any attributes). This makes the newly compiled native function about an order of a magnitude slower.
 
-This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information; thus we specialize to a more general context and lose performance.
+This is where we say that in the second compilation the \textit{type feedback slots are polluted}. They contain too general of an information, thus we specialize for a more general context and lose performance.
 
 \begin{figure}
 	\centering

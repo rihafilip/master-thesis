@@ -14,14 +14,13 @@ The problem we observed was that the behavior of Ř is a black box. There are lo
 
 What we want is an event log that would reflect the behaviour of the compiler, like in the figure \ref{fig:motivation-events}. We want to have information about what functions were invoked and to which version was the call dispatched. When a functions is compiled, we do not know what was the reason for the compilation, as there are multiple heuristics that can be met. When a deoptimization happens, we can log the final PIR instruction than triggered the deoptimization, but not the runtime value that caused it, nor the impact it has on a feedback vector.
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\begin{adjustwidth}{-3cm}{-3cm}
 		\includediagram[0.95]{4}
 	\end{adjustwidth}
 	\caption{Idealized event log\todo{rework}}\label{fig:motivation-events}
 \end{figure}
-
 
 In reality, the behavior is more complex than the motivating figure. When a compilation is triggered (we call that a start of \textit{compilation session}), multiple closures can be lowered to their native version. At the time of compilation, the feedback vector of each function is static, but we have no idea of how we got to that state, thus we also have observe all changes to of the feedback during the execution. In the end, the event log looks more like in figure \todoadd.
 
@@ -284,7 +283,7 @@ The functions available in R are\cite[documentation/recording.md]{rsh-github}:
 
 The recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
 
-To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is acceptable for usage as an analysis tool, but for more involved debugging we would need to optimize the serialization more.
+To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is acceptable for usage as an analysis tool.
 
 When the tool is not turned compiled into the runtime, no change to the performance was observed, as expected.
 

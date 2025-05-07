@@ -12,9 +12,7 @@
 
 \textit{R}\cite{r} is a programming language designed and used for statistical computation, data analysis, and graphical visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language. It is part of the GNU Project, licensed as a free software under GNU GPL.
 
-The popularity of R stems from its domain-specific focus. Unlike general-purpose languages, R offers high-level abstractions for statistical operations, making complex analyses more accessible. As a consequence, many R users users are statisticians rather than traditional programmers. An example of the R expressivity is in the listing \ref{lst:motivation}.
-
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
 	\begin{minipage}{0.45\textwidth}
 		\centering
@@ -35,9 +33,11 @@ ggplot(
 	\begin{minipage}{0.45\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{figures/motivation-Rplots.pdf}
-		\caption{Plot of listing \ref{lst:motivation}, showing the relationship between the GDP per capita and life expectancy}
+		\caption{Plot of listing \ref{lst:motivation}}
 	\end{minipage}
 \end{figure}
+
+The popularity of R stems from its domain-specific focus. Unlike general-purpose languages, R offers high-level abstractions for statistical operations, making complex analyses more accessible. As a consequence, many R users users are statisticians rather than traditional programmers. An example of the R expressivity is in the listing \ref{lst:motivation}, where with just a few lines of code we can plot the relationship between the GDP per capita and life expectancy from the \texttt{gapminder} data set\cite{gapminder}.
 
 The language is high-level, dynamic, object-oriented, functional, interpreted, and lazy, with automatic memory management.
 

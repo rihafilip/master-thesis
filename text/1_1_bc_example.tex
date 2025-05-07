@@ -1,7 +1,7 @@
 \begin{listing}[p]
 	\centering
-		\begin{minipage}{0.33\textwidth}
-			\begin{minted}[fontsize=\small,linenos=false]{R}
+	\begin{minipage}{0.33\textwidth}
+		\begin{minted}[fontsize=\small,linenos=false]{R}
 f <- function(x) {
   for (i in 1:10) {
     if (i + 2 > 1) {
@@ -11,12 +11,12 @@ f <- function(x) {
   g(x)
 }
     \end{minted}
-			\subcaption{\centering R code}\label{lst:bc-example-r}
-		\end{minipage}
-		\hfill
-    \begin{minipage}[t]{0.61\textwidth}
-			\begin{minipage}{0.20\textwidth}
-				\begin{minted}[fontsize=\small,linenos=false]{text}
+		\subcaption{\centering R code}\label{lst:bc-example-r}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.61\textwidth}
+		\begin{minipage}{0.20\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{text}
 Code:
   1 LDCONST 1
   3 STARTFOR 4 3 30
@@ -39,11 +39,11 @@ Code:
  36 MAKEPROM 12
  38 CALL 11
  40 RETURN
-        \end{minted}
-			\end{minipage}
-			\hfill
-      \begin{minipage}{0.40\textwidth}
-				\begin{minted}[fontsize=\small,linenos=false]{text}
+      \end{minted}
+		\end{minipage}
+		\hfill
+		\begin{minipage}{0.40\textwidth}
+			\begin{minted}[fontsize=\small,linenos=false]{text}
 Constant pool:
 ...
 12:
@@ -59,10 +59,10 @@ Constant pool:
   2:
    'expressionsIndex' ...
 ...
-        \end{minted}
-			\end{minipage}
-			\subcaption{\centering GNU-R code}\label{lst:bc-example-gnur}
+      \end{minted}
 		\end{minipage}
+		\subcaption{\centering GNU-R code}\label{lst:bc-example-gnur}
+	\end{minipage}
 	\par\vspace{2mm}\par
 	\begin{minipage}{\textwidth}
 		\centering
@@ -127,6 +127,5 @@ Constant pool:
 		\end{minipage}
 		\subcaption{\centering RIR code}\label{lst:bc-example-rir}
 	\end{minipage}
-	\caption{A truncated example of generated GNU-R and RIR bytecodes, full code in appendix \ref{ch:appendix-bc}}\label{lst:bc-example}
-	% \ref{ch:appendix-bc}
+	\caption{A truncated example of generated GNU-R and RIR bytecodes, full code in appendix \ref{ch:appendix-bc} \todo{move text to top}}\label{lst:bc-example}
 \end{listing}
