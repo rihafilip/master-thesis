@@ -215,6 +215,7 @@ When we consider the unused slots shown in figure \ref{fig:graph-unused}, we can
 	\caption{Categorization of unused slots across closure compilations}\label{fig:graph-unused}
 \end{figure}
 
+\todo{exact numbers, not averages}
 When we look on the graph \ref{fig:graph-used}, we can see that more than half of the slots are used as exact match. If we split the monomorphic and polymorphic used slots, we can see an even bigger distinction. On average 81\% of used monomorphic slots are used as exact match. This means that most of the time, when a slot is not polymorphic, it contains an information precise enough to be used as it is. On the other hand, 93\% of used polymorphic slots are widened. This is to be expected, as the polymorphic slots have usually a more general type that does not pass the check for a slot to be used as it is.
 
 For the polymorphic slots used as exact match, the feedback type is either a single non-scalar R type (integer, real or logical), or any R type which might be missing. In either case, the type is always not scalar and we have observed that it is not an object or even that it does not have any attributes. The polymorphism in these cases probably come from observing both scalar and non-scalar types.
@@ -230,28 +231,22 @@ Interestingly, there are very few slots that are narrowed by the static informat
 
 \todo{For the used slots - only show the avergaes per all/monomorphic/polymorphic?}
 
-\begin{figure}
+\begin{figure}[t]
 	\centering
-	\begin{adjustwidth}{-3cm}{-3cm}
-		\includegraphics[width=1.5\textwidth]{figures/used.pdf}
-	\end{adjustwidth}
-	\caption{Categorization of used slots across closure compilations}\label{fig:graph-used}
+	\includegraphics[width=0.7\textwidth]{figures/used.pdf}
+	\caption{Categorization of used slots}\label{fig:graph-used}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t]
 	\centering
-	\begin{adjustwidth}{-3cm}{-3cm}
-		\includegraphics[width=1.5\textwidth]{figures/used_mono.pdf}
-	\end{adjustwidth}
-	\caption{Categorization of monomorphic used slots across closure compilations}\label{fig:graph-used-mono}
+	\includegraphics[width=0.7\textwidth]{figures/used_monomorphic.pdf}
+	\caption{Categorization of monomorphic used slots}\label{fig:graph-used-mono}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[t]
 	\centering
-	\begin{adjustwidth}{-3cm}{-3cm}
-		\includegraphics[width=1.5\textwidth]{figures/used_poly.pdf}
-	\end{adjustwidth}
-	\caption{Categorization of polymorphic used slots across closure compilations}\label{fig:graph-used-poly}
+	\includegraphics[width=0.7\textwidth]{figures/used_polymorphic.pdf}
+	\caption{Categorization of polymorphic used slots}\label{fig:graph-used-poly}
 \end{figure}
 
 %---------------------------------------------------------------
