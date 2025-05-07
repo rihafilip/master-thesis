@@ -2,13 +2,18 @@
 \chapter*{Conclusion}\addcontentsline{toc}{chapter}{Conclusion}\markboth{Conclusion}{Conclusion}
 %---------------------------------------------------------------
 
+The main goal of this thesis was to implement a tool for observing and analysing the Ř Just-in-Time compiler. We implemented this tool as described in chapter 2 and as of now it is part of the Ř compiler codebase. We were able to minimize the impact on the rest of the compiler to a minimum by using conditional compilation and a series of hooks, simple functions that capture the state of the compiler at various
+
+Based on this tool, we were able to perform an analysis of the feedback pollution in Ř, as outlined in the chapter 3 and VMIL paper\cite{feedback-vmil}. We observed that feedback pollution happens in approximately 19\% of compilations. We also present ways we could implement a reduction of the pollution, either by splitting the feedback vector by context, or by introducing a feedback decay.
+
+Continuing the observations about the feedback vector, we evaluated how the recorded type information is used during compilation. We observed that a very small number of recorded information is used (21\% of feedback vector slots on average). We also conclude that if a feedback vector slot is polymorphic, and by extend a polluted, it does not affect if it is going to be used, but it weakens the speculations that the compiler can assume on. Furhtermore, we identified different reasons why a feedback information is not used, namely that it contains duplicite information, or the instruction we record the feedback for is optimized away.
+
 %---------------------------------------------------------------
-\section{Future Work}
+\section*{Future Work}
 %---------------------------------------------------------------
 
-quantifying speed is a very hard problem
-
-The main question we are currently unable to answer is \textit{how much the observations impact the execution time of real programs}. This is a very hard question due to the intriquite way that running in the interpreter, recording feedback information and execution of a JIT compiled code and are interconnected\todo{rewrite}. Another factor is that a lot of R code is actually just wrapping C functions and calls.
+The main question we are currently unable to answer is \textit{how much the observations impact the execution time of real programs}. This is a very hard question to answer, as curently we do not have the profiling information. We are unable to conclude
+due to the intriquite way that running in the interpreter, recording feedback information and execution of a JIT compiled code and are interconnected\todo{rewrite}. Another factor is that a lot of R code is actually just wrapping C functions and calls.
 
 Nonetheless, the observations made as a part of this thesis unlock for us multiple ways we could advance the JIT compiler.
 
