@@ -6,6 +6,8 @@
   This chapter is based on a paper we presented at the VMIL 2024 (Virtual Machines and Intermediate Languages) conference\cite{feedback-vmil}. As one of the authors, we contributed to the research and analysis described therein. This was the first use case for the developed recording tool and in this chapter we describe the outcomes that were a direct result of using the tool. First, we introduce the trend where over time feedback vectors tend to become less precise, which we call feedback vector pollution. Next we present the analysis of feedback vector pollution on the Ř JIT compiler. Lastly we discuss ways to reduce the pollution.
 \end{chapterabstract}
 
+\todo{introduction motivation}
+
 %---------------------------------------------------------------
 \section{Motivation}
 %---------------------------------------------------------------
@@ -39,7 +41,7 @@ This is where we say that in the second compilation the \textit{type feedback sl
 	\begin{adjustwidth}{-3cm}{-3cm}
 		\includediagram{5}
 	\end{adjustwidth}
-	\caption{Event log of listing \ref{lst:pollution-motive} without contextual dispatch}\label{fig:pollution-motive-baseline}
+	\caption{Event log of listing \ref{lst:pollution-motive} without contextual dispatch \todo{argument \rightarrow\xspace call}}\label{fig:pollution-motive-baseline}
 \end{figure}
 
 If we consider contextual dispatch, the performance is better, but not ideal (illustrated in \ref{fig:pollution-motive-context}). Same as without the contextual dispatch, we first observe and speculate on the type double. The final version is compiled for a context of arguments being the double type \todo{reword}.
@@ -69,8 +71,6 @@ Formally, we define
 	\item{} \textit{polluted compilation} as a compilation, where the feedback pollution is greater than 0,
 	\item{} and \textit{function pollution} as a ratio between the polluted compilations and the total number of recompilations.
 \end{itemize}
-
-\todo{overview table}
 
 Since the state of the feedback cannot go to a previous state (i.e. on an update, the feedback either stays the same or it is in a never before observed state), we can simply observe the state of the feedback slots when a compilation is triggered and compare it to the previous compilation.
 
@@ -139,8 +139,8 @@ The code of the analysis is freely available at GitLab\footnote{\url{https://git
 \section{Pollution Prevention}
 %---------------------------------------------------------------
 
-After observing that a feedback pollution is a real phenomenon, we propose a way to reduce it.
+After observing that a feedback pollution is a real phenomenon, we might think about the ways to reduce it.
 
-One way to reduce the pollution is to split the feedback vector into multiple different ones. Since Ř already employs a contextual dispatch, the constructed dispatch could be reused by the feedback, constructing a unique vector for each call context the function is invoked with. A split feedback was implemented by Michal Štěpánek as a part of his master thesis\cite{michal2025obohaceny}. However, this solution brought new problems, as now the observed information is much sparser and needs to be merged from multiple vectors. Splitting the feedback also negativaly impacts the interpreter performance, and complicates function compilation.
+One way would be to split the feedback vector into multiple. Since Ř already employs a contextual dispatch, the constructed context could be reused by the feedback, constructing a unique vector for each call context the function is invoked with. A proof-of-concept split feedback vector was implemented by Michal Štěpánek as a part of his master thesis\cite{michal2025obohaceny}. This lead to around 30\% decrease in the number of polluted compilations and around 37\% decrease in funciton pollution. However, this solution brought new problems, as now the observed information is much sparser and needs to be merged from multiple vectors. Splitting the feedback also negativaly impacts the interpreter performance, and complicates function compilation.
 
 Another approach would be to implement a \textit{feedback decay}. The idea is that the feedback information in every slot would slowly \textit{decay} as new information is observed. This will need to be finely tuned, as very quickly the JIT could be stuck in a \textit{deopt loop}, compiling a function just to trigger a deoptimization next time it is invoked.

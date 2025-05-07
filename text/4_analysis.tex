@@ -13,9 +13,9 @@ In this chapter, we only focus on the \textit{type slots} because, as observed i
 %---------------------------------------------------------------
 
 \begin{itemize}
-  \item{} We define a \textit{non-empty slot} as a slot that has at least one observation. An \item{empty} slot means that the instruction was never executed.
+  \item{} We define a \textit{non-empty slot} as a slot that has at least one observation. An \textit{empty} slot means that the instruction was never executed.
 	\item{} We say that a slot is \textit{referenced} if it is part of a function that is compiled to native, including slots inside inlined functions.
-	\item{} A slot is then \textit{read} if during this compilation the information in the slot is observed.
+	\item{} A slot is then \textit{read} if during a compilation the information in the slot is observed.
 	\item{} A \textit{used slot} is a type feedback slot that has an assumption connected with it in the final version of PIR (after all optimizations finished running). A used slot is always non-empty.
 \end{itemize}
 
@@ -134,8 +134,6 @@ BB2   <- [1]
 		\caption{Example of type slots categories}\label{lst:unused-example}
 	\end{adjustwidth}
 \end{listing}
-
-Because we can infer that the type of the return value from the surrounding context, we might want to also detect that the last slot is dependent, even though it has a different type. However this proved to be very difficult. Due to how types in Ř are compiled, we are unable to track the origin of a type information, and thus we can only track simple dependencies. On the other hand, this definition of redundant slots might be too general in certain cases where slots have same type from different reasons, but again, we are unable to track that. \todo{move to limitations?}
 
 There are more reasons to why a slot might not be used, like the information in the feedback not being useful for speculation, the information being overriden by static information, or that the slot is too polluted. We do not categorize these further, as they do not play with slot pollution significantlly \todo{rewrite}.
 
@@ -269,6 +267,9 @@ The biggest drawback of the analysis is the analysis of inlined functions. It is
 \todo{redundant section; merge with the stuff in motivation}
 The definition of a redundant slot is very broad and might catch some slots that are not dependent, while at the same time not catch slots that are dependent, but capture a different type. Lets take an example function \texttt{function(x) x + 42}. This function has two type slots, one for the loading of argument \texttt{x} and the second is for the result of \texttt{+}. If we call this funciton with an integer, we record two different types, integer scalar in the first and a double scalar in the second (integer gets coerced into a double). Our analysis will not report any dependency, but from the argument types we truly know the result type. This would require a much more advanced instrumentation of the compiler and might be even
 
+Because we can infer that the type of the return value from the surrounding context, we might want to also detect that the last slot is dependent, even though it has a different type. However this proved to be very difficult. Due to how types in Ř are compiled, we are unable to track the origin of a type information, and thus we can only track simple dependencies. On the other hand, this definition of redundant slots might be too general in certain cases where slots have same type from different reasons, but again, we are unable to track that. \todo{move to limitations?}
+
 The analysis of usage is also quite broad, but due to the architecture of Ř we are unable to observe nor reconstruct how a paricular type of an instruction is constructed. Ideally we would like to be able to say precisely which parts of the feedback are used and in which instrucitons, but this would probably lead to a whole refactoring of the compiler.
 
 \todo{unstable benchmarks and titanic}
+characteristics is the same and the trends do not change.

@@ -147,7 +147,7 @@ struct FunRecording {
     uintptr_t address = 0;
 };
   \end{minted}
-	\caption{Simplified definition of \texttt{Record} and \texttt{FunRecording} classes \todo{remove the record methods?}}\label{lst:record-class}
+	\caption{Simplified definition of \texttt{Record} and \texttt{FunRecording} classes}\label{lst:record-class}
 \end{listing}
 
 We say that each event is connected to some closure, either a \textit{Ř dispatch table}, \textit{Ř function without a dispatch table} (when it is a top-level compilation), a \textit{GNU-R compiled code} (represented by some SEXP), or a \textit{primitive function}. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and the name of the environment it is defined in, and serialize the closure (serialization can be disabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording} by indexing with the \texttt{*\_to\_recoding\_index} fields. Events only need to hold a single index into the \texttt{functions} field.
@@ -280,6 +280,8 @@ The functions available in R are\cite[documentation/recording.md]{rsh-github}:
 %---------------------------------------------------------------
 \section{Assesment}
 %---------------------------------------------------------------
+
+\todo{velikost resultu, approx zpomaleni}
 
 The recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
 
