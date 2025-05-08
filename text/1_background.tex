@@ -414,12 +414,6 @@ When a function compilation to native is triggered, it is compiled for a specifi
 When a function is invoked, its arguments are observed and a call context is created. Based on this, the function is either dispatched to the version connected with the same context as the call context, or a less precise context which is ordered lower than the call context. If no such version is found, the call is dispatched to the baseline interpreted version.
 
 %---------------------------------------------------------------
-\section{Related work}
-%---------------------------------------------------------------
-
-\todoadd
-
-%---------------------------------------------------------------
 \section{Corpus}\label{ch:1-corpus}
 %---------------------------------------------------------------
 
@@ -435,3 +429,36 @@ The first one is a collection of Ř benchmarks\footnote{\url{https://github.com/
 
 The second codebase is a script from a Kaggle competition about machine learning on the Titanic dataset\cite{titanic}. This script was chosen as a representatn of a more more real-world program. It contains 108 lines of code extracted from a Rmarkdown notebook, and uses some of the most popular R libraries like \texttt{ggplot2} or \texttt{dplyr}.
 
+%---------------------------------------------------------------
+\section{Related Work}
+%---------------------------------------------------------------
+
+We want to compare how feedback is collected in other VMs. \todoadd
+
+It is a state of of the art JavaScript virtual machine.
+
+%---------------------------------------------------------------
+\subsubsection*{V8}
+%---------------------------------------------------------------
+
+V8\todocite is the JavaScript and WebAssembly engine developed by Google and used in the Chrome web browser.
+
+The V8 compilation is split into four different stages---a profiling bytecode compiler (Ignition), a non-optimizing profiling JIT compiler (Sparkplug) and two non-profiling optimizing JIT compilers (Maglev and TurboFan).
+
+In the profiling stages, V8 collects the information about the shapes of dynamic JavaScript objects called \textit{maps}. These describe the layout of objects like on which offset is a field stored. This information is recored in an \textit{inline cache} (\textit{IC}) for each load and store. Appart from being used as a feedback, inline caches also speed up the interpreted instructions. All inline caches are stored per function in a \textit{feedback vector}.
+
+An initialized inline cache can be in one of three states -- \textit{monomorphic} meaning only one object shape was observed, \textit{polymorphic} if multiple object shapes were observed, and \textit{megamorphic} where too many object shapes were observed and the inline cache is degraded.
+
+When optimizing, V8 speculates on these inline caches. If the IC is monomorphic, it guards that the actual object has the expected shape. If is is polymorphic, it generates an equivalent of a switch statement on the observed maps, where on failure to match it deoptimizes. V8 compilers do not speculate on megamorphic ICs.
+
+Contrary to Ř, V8 does not speculate eagerly, i.e. whenever the feedback information allows it, but only when the information is used. So for example while compiling the JavaScript function
+
+\mintoneline{js}{function f(a, b) { return a + b }}
+
+\noindent it only assumes on the arguments \texttt{a} and \texttt{b} when compiling the plus operator.
+
+%---------------------------------------------------------------
+\subsubsection*{HotSpot}
+%---------------------------------------------------------------
+
+HotSpot is a Java Virtual Machine (JVM) currently developed by Oracle. It uses five-tiered architecture.
