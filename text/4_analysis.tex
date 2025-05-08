@@ -91,19 +91,19 @@ The final data is aggregated over these closure version compilations. Thus when 
 			\hline
 			bounce\_nonames\_simple & Are We Fast Yet          & 58                     & 11                    & 264                       \\
 			mandelbrot              & Are We Fast Yet          & 65                     & 14                    & 358                       \\
-			flexclust\_no\_s4       & Real Thing               & 163                    & 144                   & 5335                      \\
+			flexclust\_no\_s4       & Real Thing               & 163                    & 144                   & 5402                      \\
 			volcano                 & Real Thing               & 63                     & 23                    & 2037                      \\
 			binarytrees\_naive      & Shootout                 & 31                     & 22                    & 1070                      \\
 			fannkuchredux           & Shootout                 & 63                     & 6                     & 251                       \\
 			fannkuchredux\_naive    & Shootout                 & 62                     & 5                     & 244                       \\
 			fasta\_naive\_2         & Shootout                 & 88                     & 17                    & 598                       \\
 			knucleotide             & Shootout                 & 72                     & 59                    & 1493                      \\
-			pidigits/pidigits       & Shootout                 & 333                    & 92                    & 5651                      \\
-			titanic                 & -                        & 108                    & 2020                  & 66119                     \\
+			pidigits/pidigits       & Shootout                 & 333                    & 93                    & 5710                      \\
+			titanic                 & -                        & 108                    & 2046                  & 67477                     \\
 			\hline
 		\end{tabular}
 	}
-  \caption{Overview of analyzed programs\todo{update numbers}}\label{tbl:analysis-overview}
+	\caption{Overview of analyzed programs}\label{tbl:analysis-overview}
 \end{table}
 
 We ran the analysis on a selection of ten benchmarks from the Ř benchmark suite and the Titanic Kaggle notebook, outlined in table \ref{tbl:analysis-overview}. We can see that the Kaggle notebook has more compilations by an order of magnitude when compared to the benchmarks and thus also many more referenced slots. All of the experiments were ran with the invocation threshold for native compilation set to 10, as this allowed us to observe more compilations, while still preserving the characteristics.
@@ -111,8 +111,6 @@ We ran the analysis on a selection of ten benchmarks from the Ř benchmark suite
 %---------------------------------------------------------------
 \section{Observations}
 %---------------------------------------------------------------
-
-\todo{correct numbers}
 
 In constrast to the pollution analysis, while categorizing the slots we have observed that the Kaggle script behaves very much in the same way as the benchmark programs do. This is interesting, because they are written in very different ways and are doing different kinds of computations. This might point to a deeper issue connected with the behavior the Ř compiler.
 
@@ -124,9 +122,9 @@ In constrast to the pollution analysis, while categorizing the slots we have obs
 	\caption{Usage of slots across closure compilations}\label{fig:graph-overview}
 \end{figure}
 
-In figure \ref{fig:graph-overview} is the categorization of used slots. We can see that most of the slots are not empty (68\% on average) and most of the non-empty slots are read (81\% on average), thus are considered for speculation. But on average only 14\% of slots are used (21\% of non-empty slots). This is surprising, as the recording of information is impacting the speed the bytecode interpreter, and yet the recorded information is used quite sparsely.
+In figure \ref{fig:graph-overview} is the categorization of used slots. We can see that most of the slots are not empty (68\% on average) and most of the non-empty slots are read (93\% on average), thus are considered for speculation. But on average only 14\% of slots are used (21\% of non-empty slots). This is surprising, as the recording of information is impacting the speed the bytecode interpreter, and yet the recorded information is used quite sparsely.
 
-A hypothesis we had was that a polymorphic slot is less likely to be used. Out of the polymorphic slots, 25\% of them are used, compared to the non-empty monomorphic slots where 21\% are used. However, it is probably due to the fact that by their nature, polymorphic slots are on the paths of the program which are executed, thus there are less reasons to not use them \todo{reword}.
+A hypothesis we had was that a polymorphic slot is less likely to be used due to having less information. Out of the polymorphic slots, 26\% of them are used, compared to the non-empty monomorphic slots where 18\% of them are used, contradicting the hypothesis. The observed numbers are probably due to the fact by their nature, polymorphic slots are on more frequently executed paths, making them more likely to not be optimized away and later speculated on.
 
 \begin{figure}[t]
 	\centering
@@ -136,11 +134,11 @@ A hypothesis we had was that a polymorphic slot is less likely to be used. Out o
 	\caption{Categorization of unused slots across closure compilations}\label{fig:graph-unused}
 \end{figure}
 
-When we consider the non-empty unused slots shown in figure \ref{fig:graph-unused}, we can see that the dominating cause for a slot not being used is redundancy, on average 59\% of all non-empty unsed slots. This is expected in the benchmarks because they usually only use one numeric type across the whole program. But the Kaggle script uses a lot of different types, yet 58\% of the unused slots are deemed redundant, which even is lower than the average. This leads us to believe that there is a deeper cause for a redundant slot in the way the information is collected in the interpreter, leaving a room for optimizations.
+When we consider the non-empty unused slots shown in figure \ref{fig:graph-unused}, we can see that the dominating cause for a slot not being used is redundancy, on average 59\% of all non-empty unsed slots. This is expected in the benchmarks because they usually only use one numeric type across the whole program. But the Kaggle script uses a lot of different types, yet 58\% of the unused slots are deemed redundant, which is under the average. This leads us to believe that there is a deeper cause for a redundant slot in the way the information is collected in the interpreter, leaving room for optimizations.
 
-Observing the slots that are optimized away, they take on average 31\% of the non-empty unused slots. Separating the monomorphic and polymorphic slots, we see that 33\% of unused monomorphic slots are optimized aways, whereas only 26\% of unused polymorphic are optimized away. This might come from the same reasons as the comparison between monomorphic and polymorphic used slots, where the polymorphic ones are more likely to be on more frequently executed paths.
+Observing the slots that are optimized away, they take on average 31\% of the non-empty unused slots. Separating the monomorphic and polymorphic slots, we see that 33\% of unused monomorphic slots are optimized aways, whereas only 27\% of unused polymorphic are optimized away. This might come from the same reasons as the comparison between monomorphic and polymorphic used slots, where the polymorphic ones are more likely to be on more frequently executed paths.
 
-28\% of all slots are neither redundant nor optimized away. This might include some actually redundant slots that are not caught by our approximate analysis, but there might also be other reasons for not using a slot and these will probably overlap with the identified reasons. These need to be further analyzed.
+29\% of all slots are neither redundant nor optimized away. This might include some actually redundant slots that are not caught by our approximate analysis, but there might also be other reasons for not using a slot, overlaping with the identified reasons. These need to be further analyzed.
 
 \begin{figure}[t]
 	\centering
@@ -148,14 +146,14 @@ Observing the slots that are optimized away, they take on average 31\% of the no
 	\caption{Categorization of used slots}\label{fig:graph-used}
 \end{figure}
 
-When we look on the graph \ref{fig:graph-used}, we can see that more than half of the slots are used as exact match. If we split the monomorphic and polymorphic used slots, we can see an even bigger distinction. 81\% of used monomorphic slots are used as exact match, meaning that most of the time when a slot is not polymorphic it contains an information precise enough to be used as it is. On the other hand, 93\% of used polymorphic slots are widened. This is to be expected, as the polymorphic slots have a more general type that gets widened before an assumption is made.
+When we look on the graph \ref{fig:graph-used}, we can see that more than half of the slots are used as exact match. If we split the monomorphic and polymorphic used slots, we can see an even bigger distinction. 73\% of used monomorphic slots are used as exact match, meaning that most of the time when a slot is not polymorphic it contains an information precise enough to be used as it is. On the other hand, 77\% of used polymorphic slots are widened. This is to be expected, as the polymorphic slots have a more general type that gets widened before an assumption is made.
 
-For the polymorphic slots used as exact match, the feedback type is either a single non-scalar R type (integer, real or logical), or any R type which might be missing. In either case, the type is always not scalar and we have observed that it is not an object or even that it does not have any attributes. The polymorphism in these cases probably come from observing both scalar and non-scalar types. \todo{rewrite}
+For the polymorphic slots used as exact match, we have observed two different types of slots. First is a single R type (integer, real or logical) which might not be a scalar and which is either not an object, or it does not have any attributes. This is a precise enough type that we can speculate on it and the polymorphism comes from observing first scalars and then non-scalar values. The second type has observed too many types and resolves to the most general R type (any R type which might be missing), but it still has a type flag either that it is not object or it does not have attributes. While we cannot speculate on the R type, the type flag is still interesting enought that Ř speculates on it. This is a showing that even with a polymorphic slot with very little information the compiler is able to salvage some information to speculate on.
 
 Interestingly, there are very few slots that are narrowed by the static information, 18 to be precise.
 
 \begin{itemize}
-	\item{} 2 of them have added information about the type not being NA. Since we do not record this information\footnote{In order to observe that a vector is not NA, we would need to inspect all elements of it and this is very costly for large vectors}, it is trivial for the static type to narrow it in this way. These are the only monomorphic slots that are narrowed.
+	\item{} 3 of them have added information about the type not being NA. Since we do not record this information\footnote{In order to observe that a vector is not NA, we would need to inspect all elements of it and this is very costly for large vectors}, it is trivial for the static type to narrow it in this way. These are the only monomorphic slots that are narrowed.
 	\item{} 4 slots are narrowed into a scalar type. This is due to the slot observing also non-scalar types, but the static type can specialize the observation.
 	\item{} 2 slots have their type narrowed to a double and the only information used from the slot is that the value does not have attributes.
 	\item{} In 9 cases, the static type removes a \enquote{might be missing} flag from the feedback type. In these cases we have observed too many values and the type feedback falls back to the most generic type, which has the flag that it might be a missing value. But this speculation is on a \texttt{Force} instruction, which when forcing a value that is missing result in an error, thus the result of \texttt{Force} is always not missing or it diverges.
@@ -167,9 +165,9 @@ Interestingly, there are very few slots that are narrowed by the static informat
 
 The main takeaway of the analysis is that a very low number of feedback slots is being used by the compiler. This leads to a time spent in the interpreter by recording observations being wasted. If we are able to detect which slots are truly redundant, we could optimize
 
-Another key point is that a polymorphism, and by extend pollution, does not impact \textit{if} a slot is used in compilation, but it influences \textit{how} the feedback is used. Since the information in a polymorphic slot is more generic, we observe that it has to be widened before it is used.
+Another key point is that a polymorphism, and by extend pollution, does not impact \textit{if} a slot is used in compilation, but it influences \textit{how} the feedback is used. Since the information in a polymorphic slot is more generic, we observe that it has to usually be widened before it is used.
 
-Finally, in our experiments we see that the leading cause for a slot not being used is because it is reduntant. This leads us to belive there is room for improvement in the way the information gets recorded.
+Finally, in our experiments we see that the leading cause for a slot not being used is because it is reduntant. This leads us to belive there is room for improvement in the way the information gets recorded, as
 
 The analysis is freely available online on GitHub \footnote{\url{https://github.com/rihafilip/masters-thesis-analysis}}.
 
@@ -179,7 +177,7 @@ The analysis is freely available online on GitHub \footnote{\url{https://github.
 
 The biggest obstacle we have encountered during the analysis is unknown origin of type information. Due to the architecture of the compiler, we are unable to precisely track how a type is constructed or how a type information is propagated. This leads to the broad definition of redundant slots, which might catch unrelated slots or miss dependent slots recording different information due to type coercions, as well as less precise analysis of the slots usage. Still, the presented results give us idea about the behaviour of individual type feedback slots.
 
-Another drawback is the tracking of inlined functions. It is not uncommon that a function is inlined more than once in a single closure compilation, and this proves to be difficult to summarize without skewing the resulting numbers, as one slot might be used differently or used in one case and not used in the other. This might lead to double counts of a slot in multiple categories or missing a usage pattern, and we are aware of that \todo{rewrite the last part of sentence}.
+Another drawback is the tracking of inlined functions. A function may be inlined multiple times within a single closure compilation, making it difficult to summarize usage without skewing the results. A given slot might be used differently across inlinings, or used in one and not the other. This can lead to double-counting across categories or missed usage patterns. We acknowledge these limitations and account for them in our interpretation.
 
 While running the experiments, we have observed multiple runs of some of the benchmarks (namely flexclust\_no\_s4 and pidigits) and the Kaggle script result in different resulting numbers. However, the final characteristics are the same and the trends do not change. Therefore the numbers presented in this chapter are from a single run of the experiments.
 
