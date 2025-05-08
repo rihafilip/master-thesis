@@ -2,7 +2,7 @@
 \chapter*{Conclusion}\addcontentsline{toc}{chapter}{Conclusion}\markboth{Conclusion}{Conclusion}
 %---------------------------------------------------------------
 
-The main goal of this thesis was to implement a tool for observing and analysing the Ř Just-in-Time compiler. We implemented this tool as described in chapter 2 and as of now it is part of the Ř compiler codebase. We were able to minimize the impact on the rest of the compiler to a minimum by using conditional compilation and a series of hooks, simple functions that capture the state of the compiler at various
+The main goal of this thesis was to implement a tool for observing and analysing the Ř Just-in-Time compiler. We implemented this tool as described in chapter 2, and as of now it is part of the Ř compiler codebase. We were able to minimize the impact on the rest of the compiler to a minimum by using conditional compilation and a series of hooks, simple functions that capture the state of the compiler at various
 
 Based on this tool, we were able to perform an analysis of the feedback pollution in Ř, as outlined in the chapter 3 and VMIL paper\cite{feedback-vmil}. We observed that feedback pollution happens in approximately 19\% of compilations. We also present ways we could implement a reduction of the pollution, either by splitting the feedback vector by context, or by introducing a feedback decay.
 
@@ -12,8 +12,7 @@ Continuing the observations about the feedback vector, we evaluated how the reco
 \section*{Future Work}
 %---------------------------------------------------------------
 
-The main question we are currently unable to answer is \textit{how much the observations impact the execution time of real programs}. This is a very hard question to answer, as curently we do not have the profiling information. We are unable to conclude
-due to the intriquite way that running in the interpreter, recording feedback information and execution of a JIT compiled code and are interconnected\todo{rewrite}. Another factor is that a lot of R code is actually just wrapping C functions and calls.
+The main question we are currently unable to answer is \textit{how much the observations impact the performance of real programs}. This is a very hard question to answer, as at this point we do not have the information about performance impacts of the various components. We are unsure of about how much time is spent in the interpreter, recording feedback information, in the JIT compiled code, in the builtin functions of GNU-R, or in the native extensions of libraries. Based on these metric, we could devise a plan to speed up the most important parts of the compiler, as well as assess the real-world impact of the observed metrics \todo{awkward sentence, keep the idea but reword}.
 
 Nonetheless, the observations made as a part of this thesis unlock for us multiple ways we could advance the JIT compiler.
 
@@ -23,7 +22,7 @@ Nonetheless, the observations made as a part of this thesis unlock for us multip
 
 In order to properly analyze how a polluted slot affects the runtime performance of JIT compiled code, we would need an \textit{oracle} that at a point of compilation would be able to correctly return an \textit{ideal feedback vector} such that the compilation produces as optimized code as possible. Since we want to observe the behavior of real-world programs, it is unfeasable to hand-write this oracle for every compilation.
 
-We could achieve at least an approximate oracle by extending the recording tool by its counterpart that would be able to \textit{replay} the recorded information, i.e. infulence a compilation based on previous observations. Iteratively, we would run the program with the trace of the previous run as an additional input from which it would deduce the ideal feedback vector.
+We could achieve at least an approximate oracle by extending the recording tool by its counterpart that would be able to \textit{replay} the recorded information, i.e. infulence a compilation based on previous observations. Iteratively, we would run the program with the trace of the previous run as an additional input from which it would approximate the ideal feedback vector.
 
 %---------------------------------------------------------------
 \subsubsection*{Reducing Recoding}
@@ -41,7 +40,7 @@ Last way we could improve the JIT is by relaxing the assumptions.
 
 The Ř compiler does \textit{eager speculations} on the observed values, meaning that it tries to assume on the information whenever possible in hopes that this unlocks some optimizations later. This is contrary to how most other JIT compiler do speculations, like the JavaScript V8 VM\todocite, where they only emit an assumption on a type at the point where the type is used. Eager speculation has an advantage in that if an optimization is based on many complex speculations, it will be applied. The disadvanatge is that we might restrict the type more than is necesarry, e.g. we might speculate on a more specific type than is needed.
 
-As an example, consider a function which has observed a double scalar type in one of its slots and based on the scalarness, it is able to do some significant optimizations, but the fact that the value is a double type is never used. Currently the compiler still emits a guard on a double scalar. This means that if the observed value changes to an integer scalar, we fail the assumption, even though the native code is still correct.
+As an example, consider a function which has observed a double scalar type in one of its slots and based on the scalarness, it is able to do some significant optimizations, but the fact that the value is a double type is never used. Currently the compiler still emits a guard on a double scalar. This means that if the observed value changes to an integer scalar, we fail the assumption, even though the native code is still correct. \todo{remove example?}
 
 By carefully observing the usage of feedback information, we would be able to relax the assumptions in the native code if not all of the information is used. This relaxation could even extend to the contextual dispatch. If we are compiling a function for a certain call context, but we never use part of the context information, we could make the context more general, leading to more invocations of the function ending up in a native version.
 

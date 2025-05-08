@@ -34,7 +34,7 @@ What we ended up with is a series of \textit{hooks}, a very simple functions tha
 
 As an example, in the listing \ref{lst:hook-docall} in the function \texttt{doCall} we can see the logic around passing a function to the compiler when certain heuristics and conditions are met. \texttt{RecompileHeuristic} and \texttt{RecompileCondition} are pure functions, each having multiple heuristics or conditions respectively, but the information about which one was triggered is not propagated anywhere. Therefore when a condition or heuristic is met, we call to a hook that captures the information in the global state (also illustrated in \ref{lst:hook-docall}, in the function \texttt{RecompileCondition}). If a compilation happens, we leverage this information from the global state with another hook. If a compilation does not happen, we reset the global state with the \texttt{recording::recordReasonsClear} hook.
 
-This architecture of global state allowed us to make minimal changes to the code base while still collecting important information during various stages of the compiler.
+This architecture of global state allowed us to make minimal changes to the codebase while still collecting important information during various stages of the compiler.
 
 \begin{listing}
 	\centering
