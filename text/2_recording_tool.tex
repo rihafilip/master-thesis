@@ -16,13 +16,11 @@ What we want is an event log that would reflect the behaviour of the compiler, l
 
 \begin{figure}[h]
 	\centering
-	\begin{adjustwidth}{-3cm}{-3cm}
-		\includediagram[0.95]{4}
-	\end{adjustwidth}
-	\caption{Idealized event log\todo{rework}}\label{fig:motivation-events}
+  \includediagram[0.95]{4}
+	\caption{Idealized event log, each point represents a function invocation}\label{fig:motivation-events}
 \end{figure}
 
-In reality, the behavior is more complex than the motivating figure. When a compilation is triggered (we call that a start of \textit{compilation session}), multiple closures can be lowered to their native version. At the time of compilation, the feedback vector of each function is static, but we have no idea of how we got to that state, thus we also have observe all changes to of the feedback during the execution. In the end, the event log looks more like in figure \todoadd.
+In reality, the behavior is more complex than the motivating figure. When a compilation is triggered (we call that a start of \textit{compilation session}), multiple closures can be lowered to their native version. At the time of compilation, the feedback vector of each function is static, but we have no idea of how we got to that state, thus we also have observe all changes to of the feedback during the execution. We want to capture all of these events in order to properly analyze the behavior of Ř.
 
 %---------------------------------------------------------------
 \section{Design}
@@ -32,9 +30,9 @@ One of the most important things about designing the recording tool was to minim
 
 Another design goal was to not clutter the code of the compiler. Observing events is a cross-cutting concern impacting the whole codebase, similarly to logging. We do not want to have to keep around a state connected to the recording in the compiler, because this would increase the code complexity.
 
-What we ended up with is a series of \textit{hooks}, a very simple functions that are used by the rest of the codebase. These hooks collect information in global state, but this is hidden from the caller. Since both the R and Ř code is sequential, we do not need to deal with any concurrency issues, but we still have to be careful with managing the global state. One feature that we leverage is that the C++ code is compiled without any exceptions, thus we can reliably use cleanup calls with confidence about the control flow of the program.
+What we ended up with is a series of \textit{hooks}, a very simple functions that are used by the rest of the codebase. These hooks are called at various points in the compiler, marking that an event has happend. Internally, invoking a hook collects the information in a global state, but this is hidden from the caller. Since both the R and Ř code is sequential, we do not need to deal with any concurrency issues, but we still have to be careful with managing the global state. One feature that we leverage is that the C++ code is compiled without any exceptions, thus we can reliably use cleanup calls with confidence about the control flow of the program.
 
-As an example, in the listing \ref{lst:hook-docall} in the function \texttt{doCall} we can see the logic around passing a function to the compiler when certain heuristics and conditions are met. \texttt{RecompileHeuristic} and \texttt{RecompileCondition} are pure functions, each having multiple heuristics or conditions respectively, but the information about which was triggered is not propagated anywhere. Therefore when a condition or heuristic is met, we call to a hook that captures the information in the global state (also illustrated in \ref{lst:hook-docall}, in the funciton \texttt{RecompileCondition}). If a compilation happens, we leverage this information from the global state with another hook. If a compilation does not happen, we reset the global state with the \texttt{recording::recordReasonsClear} hook.
+As an example, in the listing \ref{lst:hook-docall} in the function \texttt{doCall} we can see the logic around passing a function to the compiler when certain heuristics and conditions are met. \texttt{RecompileHeuristic} and \texttt{RecompileCondition} are pure functions, each having multiple heuristics or conditions respectively, but the information about which one was triggered is not propagated anywhere. Therefore when a condition or heuristic is met, we call to a hook that captures the information in the global state (also illustrated in \ref{lst:hook-docall}, in the function \texttt{RecompileCondition}). If a compilation happens, we leverage this information from the global state with another hook. If a compilation does not happen, we reset the global state with the \texttt{recording::recordReasonsClear} hook.
 
 This architecture of global state allowed us to make minimal changes to the code base while still collecting important information during various stages of the compiler.
 
@@ -81,15 +79,15 @@ bool RecompileCondition(/* args */) {
 \section{Implementation}
 %---------------------------------------------------------------
 
-The code is merged into the main branch of Ř and it is available on GitHub\cite{rsh-github}. All the implementation is in the folder \texttt{rir/src} in files \texttt{recording.\{h, cpp\}}, \texttt{recording\_hooks.\{h, cpp\}} and \texttt{recording\_serialization.h}, under the namespace \texttt{rir::recording}.
+The code is merged into the main branch of Ř and it is available on GitHub\cite{rsh-github}. All the implementation is in the folder \texttt{rir/src} in files \texttt{recording.\{h, cpp\}}, \texttt{recording\_hooks.\{h, cpp\}} and \texttt{recording\_serialization.h}, under the name\-space \texttt{rir::recording}.
 
 %---------------------------------------------------------------
 \subsection{Hooks}
 %---------------------------------------------------------------
 
-All of the hook functions are defined in the file \texttt{recording\_serialization.h}. This is the only file intended to be included by other parts of the compiler. Calling a hook either emits an event or adds information to the global state to be used by other hooks.
+All of the hook functions are defined in the file \texttt{recording\_hooks.h}. This is the only file intended to be included by other parts of the compiler. Calling a hook either emits an event or adds information to the global state to be used by other hooks.
 
-All calls to the hooks are surrounded by the \texttt{REC\_HOOK} macro, which controls the conditional compilation of these hooks, where if the recording is not enabled, the macro does not generate the call to the hook.
+All calls to the hooks are surrounded by the \texttt{REC\_HOOK} macro, which controls the conditional compilation of these hooks. If the recording is not enabled, the macro does not generate the call to the hook.
 
 The only instances where a recording state is managed by the hook caller is when we need to capture an information before calling the hook. These could be replaced by additonal hook calls, but capturing the state is in this case easier. For example in the listing \ref{lst:hook-observedtest}, we check if the recording to the test feedback slots has changed the actual value. All other instances of state are managed by the hooks.
 
@@ -150,7 +148,7 @@ struct FunRecording {
 	\caption{Simplified definition of \texttt{Record} and \texttt{FunRecording} classes}\label{lst:record-class}
 \end{listing}
 
-We say that each event is connected to some closure, either a \textit{Ř dispatch table}, \textit{Ř function without a dispatch table} (when it is a top-level compilation), a \textit{GNU-R compiled code} (represented by some SEXP), or a \textit{primitive function}. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and the name of the environment it is defined in, and serialize the closure (serialization can be disabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording} by indexing with the \texttt{*\_to\_recoding\_index} fields. Events only need to hold a single index into the \texttt{functions} field.
+We say that each event is connected to some closure, either a \textit{Ř dispatch table}, \textit{Ř function without a dispatch table} (when it is a top-level compilation), a \textit{GNU-R compiled code} (represented by some SEXP), or a \textit{primitive function}. When we first observe a closure, we create an associated \texttt{FunRecording} in the field \texttt{functions}. We try to find a name of the closure and the name of the environment it is defined in, and serialize the closure (serialization has to be enabled). Every other time we observe an event connected with the same closure, we reuse the \texttt{FunRecording} by indexing with the \texttt{*\_to\_recoding\_index} fields. Events only need to hold a single index into the \texttt{functions} field.
 
 We use thoroughly that the GNU-R garbage collector is non-moving, as we can then index by the address of the objects and we can be sure that they are valid. There is still a possibility that an object whose address we have captured gets collected by GC and in its place a new object will be placed. To prevented that, we protect the objects by calling the \texttt{R\_PreserveObject} function exported from GNU-R, marking the object as alive until it is released by a call to \texttt{R\_ReleaseObject}. A drawback of this approch is the possibility of different runtime properties of some programs.
 
@@ -162,7 +160,7 @@ An \texttt{Event} is an abstract class from which all other events inherit. Ever
 
 \textit{Compilation start} and \textit{compilation end} events denote the start and end of a \textit{compilation session}, a single call to the compiler during which multiple closures might be lowered to native code. These events act as brackets of sorts, everything in between these is connected to the one compilation session. They record the heuristics used for triggering the compilation, its duration, and if it at any point failed. For each of the closures we then register a \textit{compilation event}, where we reference the closure that was compiled, the type feedback it used, the PIR code that it resulted in and the LLVM bitcode to which it was lowered.
 
-Every time we invoke a function, we register an \textit{invoke event}. Due to contextual dispatch, there are multiple places where a call might be dispatched. Thus, we capture the \textit{call context} from the arguments. and if we are dispatching to a natively compiled function. There are also multiple control flow paths inside the interpreter which lead to a dispatching, which is also captured \todo{omit?}.
+Every time we invoke a function, we register an \textit{invoke event}. Due to contextual dispatch, there can be multiple destinations where a call can be dispatched. Thus, we capture the \textit{call context} from the arguments, and if we are dispatching to a natively compiled function. There are also multiple control flow paths inside the interpreter which lead to a dispatching, which is also captured.
 
 A recording to the feedback vector is registered as \textit{speculative context event}. We capture on which feedback slot the recording happend, what is the new infomation in it, if the recorded information is new, and if the change has happend because of a deoptimization.
 
@@ -178,7 +176,7 @@ In order to observe the recorded data, we have to serialize it from the memory. 
 
 To analyze the event log outside of R, there is a script \texttt{replayer.r} that can transform the representation into a CSV file, where one event corresponds to one line. The documentation for the CSV fields can be found in the Ř repository\cite[documentation/recording.md]{rsh-github}.
 
-The logic for serializing the event log is in file \texttt{recording\_serialization.h} under the namespace \texttt{rir::recording::serialization}. The main type definition is a an incomplete templated struct \texttt{Serializer} working as a typeclass, defined as in listing \ref{lst:record-serialize}. To specify how to serialize a type, we need to explicitly instantiate the \texttt{Serializer} with the template argument of the type we want to serialize and two methods \texttt{to\_sexp\_} and \texttt{from\_sexp\_}, as seen for the type \texttt{bool} in the listing. With this we can compose a logic for more complex types from the more basic ones. For example, the serialization for a vector is generic for any type, and is internally using the \texttt{Serializer} struct to delegate the serialization of its elements.
+The logic for serializing the event log is in file \texttt{recording\_serialization.h} under the namespace \texttt{rir::recording::serialization}. The main type definition is a an incomplete templated struct \texttt{Serializer} working as a typeclass, defined as in listing \ref{lst:record-serialize}. To specify how to serialize a type, we need to explicitly instantiate the \texttt{Serializer} with the template argument of the type we want to serialize and two methods \texttt{to\_sexp\_} and \texttt{from\_sexp\_}, as seen for the type \texttt{bool} in the listing. With this we can compose a logic for more complex types from the more basic ones. For example, the serialization of a C++ vector container is generic for any type as it is internally using the \texttt{Serializer} struct to delegate the serialization of its elements.
 
 \begin{listing}
 	\begin{minted}{cpp}
@@ -236,13 +234,13 @@ void CompilationStartEvent::fromSEXP(SEXP sexp) {
 \subsection{Interface}
 %---------------------------------------------------------------
 
-Currently, there are two ways to interact with the recording - environment variables passed to the program, and exported R functions.
+Currently, there are two ways to interact with the recording---environment variables passed to the program, and exported R functions.
 
 %---------------------------------------------------------------
 \subsubsection*{Environment Variables}
 %---------------------------------------------------------------
 
-With the environment variables, it is possible to record the whole run of a program. This is done by setting \texttt{RIR\_RECORD} to the path where the R object with the recording data should be serialized using the RDS serialization format for R objects\cite[1.8 Serialization Formats]{rprojectInternals}. With the \texttt{RIR\_RECORD\_FILTER} variable, we can control which events should be considered, while ignoring the rest. The available values are \texttt{Compile}, \texttt{Deopt}, \texttt{TypeFeedback} and \texttt{Invoke} and multiple can be specified when separated by a comma. Custom events cannot be filtered out.
+With the environment variables, it is possible to record the whole run of a program. This is done by setting \texttt{RIR\_RECORD} to the path where the recording data should be serialized to, using the RDS serialization format for R objects\cite[1.8 Serialization Formats]{rprojectInternals}. With the \texttt{RIR\_RECORD\_FILTER} variable, we can control which events should be considered, while ignoring the rest. The available values are \texttt{Compile}, \texttt{Deopt}, \texttt{TypeFeedback} and \texttt{Invoke} and multiple can be specified when separated by a comma. Custom events cannot be filtered out.
 
 As an example, by calling
 
@@ -285,7 +283,7 @@ The functions available in R are\cite[documentation/recording.md]{rsh-github}:
 
 The recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
 
-To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is acceptable for usage as an analysis tool.
+To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is still acceptable for usage as an analysis tool.
 
 When the tool is not turned compiled into the runtime, no change to the performance was observed, as expected.
 

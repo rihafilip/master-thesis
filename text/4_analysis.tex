@@ -13,7 +13,7 @@ In this chapter, we only focus on the \textit{type slots} because, as observed i
 %---------------------------------------------------------------
 
 \begin{itemize}
-  \item{} We define a \textit{non-empty slot} as a slot that has at least one observation. An \textit{empty} slot means that the instruction was never executed.
+	\item{} We define a \textit{non-empty slot} as a slot that has at least one observation. An \textit{empty} slot means that the instruction was never executed.
 	\item{} We say that a slot is \textit{referenced} if it is part of a function that is compiled to native, including slots inside inlined functions.
 	\item{} A slot is then \textit{read} if during a compilation the information in the slot is observed.
 	\item{} A \textit{used slot} is a type feedback slot that has an assumption connected with it in the final version of PIR (after all optimizations finished running). A used slot is always non-empty.
@@ -23,7 +23,7 @@ In this chapter, we only focus on the \textit{type slots} because, as observed i
 \subsubsection*{Used Slots}
 %---------------------------------------------------------------
 
-When an assumption on a type is emited, it has a structure outlined in listing \ref{lst:assume-structure}. The value we speculate on is in the register \texttt{\%1} with a \textit{static type}, which is inferred from the call context, known types of builtins, and preceding assumptions. The instruction has also an associated \textit{feedback type}, which is the union of types observed in the interpreter. The speculated value is an input to an \texttt{IsType} instruction, which checks the actual runtime type against the \textit{assumed type}. The result of the type check is then an input to the \texttt{Assume} instruction, along with the corresponding \texttt{Checkpoint}. If the type check fails (\texttt{\%2} is false), we trigger a deoptimization and restore the frame state according to the checkpoint, otherwise we continue with the execution.
+When an assumption on a type is emited, it has a structure outlined in listing \ref{lst:assume-structure}. The value we speculate on is in the register \texttt{\%1} with a \textit{static type}, which is inferred from the call context, known types of builtins, and preceding assumptions. The instruction has also an associated \textit{feedback type}, which is the union of all types observed in the interpreter. The speculated value is an input to an \texttt{IsType} instruction, which checks the actual runtime type against the \textit{assumed type}. The result of the type check is then an input to the \texttt{Assume} instruction, along with the corresponding \texttt{Checkpoint}, resulting in a deoptimization if the type check fails.
 
 \begin{listing}[H]
 	\centering
@@ -35,7 +35,7 @@ void                 Assume          %2, [checkpoint]
 	\caption{PIR code structure of type assumption}\label{lst:assume-structure}
 \end{listing}
 
-The construction of the assumed type is not as straight-forward as it might seem (illustrated in figure \ref{fig:types-venn}). First, we construct an \textit{expected type} by intersecting the static and feedback type. If this intersection is empty, no assumption is emited and the feedback type is empty, otherwise we procede to create the assumed type.
+The construction of the assumed type is not as straight-forward as it might seem. We illustrate the process in figure \ref{fig:types-venn}, where larger area means a more general type.
 
 \begin{figure}
 	\centering
@@ -43,9 +43,11 @@ The construction of the assumed type is not as straight-forward as it might seem
 	\caption{Illustration of the relationship between static, feedback, expected and assumed types}\label{fig:types-venn}
 \end{figure}
 
-It can happen that the static type is more precise than the feedback type, and the feedback type is not a subtype of the expected type (in the figure \ref{fig:types-venn}, the green area is non-empty). We call this a \textit{narrowing} of the feedback type with the static type. For example, this happens when we statically know that the value we are speculating on is a scalar, but we have observed also non-scalar values.
+First, we construct an \textit{expected type} by intersecting the static and feedback type. If this intersection is empty, no assumption is emited, otherwise we procede to create the assumed type.
 
-If the R type of the expected type is not integer, float or logical vector, we do not speculate on it as it is. The optimizations are not able to use this precise of an information, thus the compiler tries to relax the assumption first. We call this \textit{widening}, as we are widening the information of the feedback type (and also the expected type), while still staying in the bounds of the static type. This results in the final assumed type. If we cannot reasonably relax the type, we give up on assuming.
+It can happen that the static type is more precise than the feedback type (in the figure \ref{fig:types-venn}, the green area is non-empty). We call this a \textit{narrowing} of the feedback type, as the static type narrows the feedback information into a more specific one. For example, this happens when we statically know that the value we are speculating on is a scalar, but we have observed also non-scalar values.
+
+If the R type of the expected type is not integer, float or logical vector, we do not speculate on it as it is. The optimizations are not able to use this precise of an information, thus the compiler tries to relax the assumption first. We call this \textit{widening}, as we are widening the information of the feedback type (and also the expected type), while still staying in the bounds of the static type. This results in the final assumed type. If we cannot reasonably relax the type, we give up on assuming. A type can be both widened and narrowed at the same time.
 
 If the assumed type is equal to the feedback type, we say that the feedback was used as \textit{exact match}. This implies that it has not been narrowed, nor widened.
 
@@ -53,95 +55,21 @@ If the assumed type is equal to the feedback type, we say that the feedback was 
 \subsubsection*{Unused Slots}
 %---------------------------------------------------------------
 
-\todo{throw away the example?}
+For the unused slots, we want to understand what is the reason why they are not used and how does this play with the slot being polluted. We consider only non-empty slots, as empty type feedback slot cannot be speculated on.
 
-For the unused slots, we want to understand what is the reason why they are not used. For illustration, we are going to use the example in listing \ref{lst:unused-example}. When we look at the RIR code generated after at least one execution of the function \texttt{f}, we see that there are six type feedback slots. Four of them have recorded the type of integer scalar, corresponding to the two loads of global variable \texttt{G} and their addition, one slot has observed the type double as a result of the second addition and coercion of integer to double, and one slot is empty due to being in an unreachable branch. The final PIR code has a single assumption on the type of the global variable \texttt{G}.
+The first reason we have identified is that the \textit{slot is optimized away}. This happens when the instruction the type feedback is attached to is not present in the final optimized PIR code. There are many reason for removing instruction during optimizations, but the most common ones are \textit{constant folding} and \textit{dead code elimination}.
 
-In the final PIR in listing \ref{lst:unused-example-pir}, we only see three instruction with attached type feedback (lines 5, 11 and 13), corresponding to the feedback slots 0, 2 and 5. We say that the other slots are \textit{optimized away}. In our example, the instruction connected with slot 3 is removed because it is in unreachable branch, whereas the slots 1 and 4 are optimized away because the loading of variables is optimized to only use registers.
+Another reason for not using a slot is because it contains \textit{redundant information}. Formally we say that an \textit{unused slot is redundant} if its type information is equivalent to any other slot, both used or unused. This might be a broad definition, but it can still reveal to us data about the slot usage.
 
-Another reason for not using a slot is because it contains \textit{redundant information}. The slots 0, 1, 2 and 4 contain exactly the same information, because they all depend on the type of \texttt{G}. Since we assume on the slot 0, it is used, but we do not need to create any further assumptions, as the type is know statically. Formally we say that an \textit{unused slot is redundant} if its type information is equivalent to any other slot, both used or unused. Note that reduntant slots and slots that are optimized away are not disjunct categories.
+Note that reduntant slots and slots that are optimized away are not disjunct categories.
 
-\begin{listing}[p]
-	\begin{minipage}{0.47\textwidth}
-		\begin{minted}{R}
-G <- 42L
-H <- 42
-
-f <- function() {
-    x <- G + G
-    if (FALSE) {
-        return(H)
-    }
-    x + 42
-}
-    \end{minted}
-		\subcaption{R code}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{0.47\textwidth}
-		\begin{minted}{\rirlexer}
-0:
-      0   ldvar_cached_  G{1}
-      9   [ integer (s) | value ] Type#0
-     14   ldvar_cached_  G{1}
-     23   [ integer (s) | value ] Type#1
-     28   ; +(G, G)
-          add_
-     29   [ integer (s) ] Type#2
-     34   stvar_cached_  x{0}
-     43   push_  FALSE
-     48   visible_
-     49   asbool_
-     50   brtrue_  1
-     55   br_  2
-1:
-     60   ldvar_cached_  H{2}
-     69   [ <?> ] Type#3
-     74   ret_
-2:
-     75   ldvar_cached_  x{0}
-     84   [ integer (s) | value ] Type#4
-     89   push_  42
-     94   visible_
-     95   ; +(x, 42)
-          add_
-     96   [ double (s) ] Type#5
-    101   ret_
-    \end{minted}
-		\subcaption{RIR code of function \texttt{f}}
-	\end{minipage}
-	\vfill
-	\begin{adjustwidth}{-1cm}{-1cm}
-		\begin{minipage}{\textwidth}
-			\begin{minted}{\pirlexer}
-BB0
-  goto BB1
-BB1   <- [0]
-  val?^ | miss    %1.0  = LdVar              G, R_GlobalEnv
-  val?            %1.1  = Force!<value>      %1.0,    <int$->
-  lgl$#-          %1.2  = IsType             %1.1 isA int$-
-  cp              %1.3  = Checkpoint          -> BB2 (default) | BB3 (if assume failed)
-BB2   <- [1]
-  void                    Assume             %1.2, %1.3 (Typecheck[Type#0])
-  int$-           %2.1  = CastType           dn %1.1
-  int$-           %2.2  = Add                %2.1, %2.1, elided   <int$->
-  void                    Visible
-  real$-          %2.4  = Add                %2.2, 42, elided   <real$->
-  void                    Return             %2.4
-      \end{minted}
-			\subcaption{Optimized PIR code of the function \texttt{f}}\label{lst:unused-example-pir}
-		\end{minipage}
-		\caption{Example of type slots categories}\label{lst:unused-example}
-	\end{adjustwidth}
-\end{listing}
-
-There are more reasons to why a slot might not be used, like the information in the feedback not being useful for speculation, the information being overriden by static information, or that the slot is too polluted. We do not categorize these further, as they do not play with slot pollution significantlly \todo{rewrite}.
+There are more reasons to why a slot might not be used, like the information in the feedback is not useful for speculation, or the information is overriden by static information. We do not categorize these further, as this would require a much deeper analysis, possibly needing a rewrite of parts of the compiler in order to observe.
 
 %---------------------------------------------------------------
 \subsubsection*{Polymorphic Slots}
 %---------------------------------------------------------------
 
-A \textit{polymorphic slot} is slot that has observed more than one distinct type. This is a superset of the \textit{polluted slots}, because if a slot is polluted, it has to have two different non-empty values between the compilation, thus there had to be at least two recordings of different type. A non-polymorphic slot is \textit{monomorphic}.
+A \textit{polymorphic slot} is slot that has observed more than one distinct type. This is a superset of the \textit{polluted slots}, i.e. a polluted slot is always polymorphic, but a polymorphic slot is not always polluted. A non-polymorphic slot is \textit{monomorphic}.
 
 Observing polymorphic slots allows us to outline the usage of polluted slots, while also observing the behaviour of slots that have (potentially) too general of an information even before the first compilation.
 
@@ -149,13 +77,13 @@ Observing polymorphic slots allows us to outline the usage of polluted slots, wh
 \section{Methodology}
 %---------------------------------------------------------------
 
-In order to collect all the information needed, we had to directly instrument the Ř compiler. We inspect the PIR code of closures and collect information about all of the assumptions, including the corresponding type test and cast instructions. We use the rich Ř APIs for traversing code and inspecting instructions. All of the analysis code is in the main repository in the branch \texttt{feedback-in-jits}\footnote{\url{https://github.com/reactorlabs/rir/tree/0137c1ad4ddbcc8e035e86a317e5dbe6b645deb6}}.
+In order to collect all the information needed, we had to directly instrument the Ř compiler. We inspect the PIR code of closures and collect information about all of the assumptions, including the corresponding type test and cast instructions. We use the rich Ř APIs for traversing code and inspecting instructions. All of the code for collecting data is in the main repository in the branch \texttt{feedback-in-jits}\footnote{\url{https://github.com/reactorlabs/rir/tree/feedback-in-jits}}.
 
-Our unit for collecting information is a \textit{closure version compilation}. This is one lowering of a closure from PIR to native code. For each compilation, we define its \textit{universe} as the compiled closure and all of its inlinees. All counts are then in reference to this universe, so for example the number of referenced slot of one compilation is the sum of all slots in the universe. We ignore multiple inlinings of the same closure in one compilation as we have observed that in most cases the slots are used in the same way across all inlinings.
+Our unit for collecting information is a \textit{closure version compilation}, one lowering of a closure from PIR to native code. For each compilation, we define its \textit{universe} as the compiled closure and all of its inlinees. All counts are then in reference to this universe, so for example the number of referenced slot of one compilation is the sum of all slots in the universe. We ignore multiple inlinings of the same closure in one compilation as we have observed that in most cases the slots are used in the same way across all inlinings.
 
-The final data is aggregated over these closure version compilations. Thus when we say that there were two used slots, we mean that over all compilations, a slot was used two times, it might even be the same slot. The reason for this was that between the individual compilations, the state of the slots can change, and there is no reasonable way to reference and quantify all slots after the program terminates.
+The final data is aggregated over these closure version compilations. Thus when we say that there were two used slots, we mean that over all compilations a slot was used two times, it might even be the same slot. The reason for this was that between the individual compilations, the state of the slots can change, and there is no reasonable way to reference and quantify all slots after the program terminates.
 
-\begin{table}[ht]
+\begin{table}[t]
 	\makebox[\linewidth]{%
 		\begin{tabular}{l l l l l}
 			\hline
@@ -178,21 +106,17 @@ The final data is aggregated over these closure version compilations. Thus when 
 	\caption{Overview of analyzed programs}\label{tbl:analysis-overview}
 \end{table}
 
-We run the analysis on a selection of ten benchmarks from the benchmark suite and the Titanic Kaggle notebook, outlined in table \ref{tbl:analysis-overview}. We can see that the Kaggle notebook has more compilations by an order of magnitude when compared to the benchmarks and thus also many more referenced slots. All of the experiments were ran with OSR compilations turned off and with the the invocation threshold for native compilation set to 10 \todo{justify}.
+We ran the analysis on a selection of ten benchmarks from the Ř benchmark suite and the Titanic Kaggle notebook, outlined in table \ref{tbl:analysis-overview}. We can see that the Kaggle notebook has more compilations by an order of magnitude when compared to the benchmarks and thus also many more referenced slots. All of the experiments were ran with the invocation threshold for native compilation set to 10, as this allowed us to observe more compilations, while still preserving the characteristics.
 
 %---------------------------------------------------------------
 \section{Observations}
 %---------------------------------------------------------------
 
-\todo{figures labels, adjust them so they do not overflow}
+\todo{correct numbers}
 
-In constrast to the pollution analysis, while categorizing the slots we have observed that the Kaggle script behaves very much in the same way as the benchmark programs do. This is interesting, because they are written in very different ways and are doing different computations. It might point to a deeper issue, either connected with the behavior the Ř compiler.
+In constrast to the pollution analysis, while categorizing the slots we have observed that the Kaggle script behaves very much in the same way as the benchmark programs do. This is interesting, because they are written in very different ways and are doing different kinds of computations. This might point to a deeper issue connected with the behavior the Ř compiler.
 
-In figure \ref{fig:graph-overview} is the categorization of used slots. We can see that most of the slots are not empty (68\% on average) and most of the non-empty slots are read (81\% on average), thus are considered for speculation. But on average only 14\% of slots are used, (21\% of non-empty slots). This is surprising, as the recording of information is impacting the speed the bytecode interpreter, and yet the recorded information is used quite sparsely.
-
-A hypothesis we had was that a polymorphic slot is less likely to be used. Out of the polymorphic slots, 25\% of them are used, compared to the non-empty monomorphic slots where 21\% are used. This might lead to a conclusion that by a slot being polymorphic it is more likely to be used. However it is probably due to the fact that by their nature, polymorphic slots are on the paths of the program which are executed, thus there are less reasons to not use them.
-
-\begin{figure}
+\begin{figure}[t]
 	\centering
 	\begin{adjustwidth}{-3cm}{-3cm}
 		\includegraphics[width=1.5\textwidth]{figures/usage_overall.pdf}
@@ -200,13 +124,11 @@ A hypothesis we had was that a polymorphic slot is less likely to be used. Out o
 	\caption{Usage of slots across closure compilations}\label{fig:graph-overview}
 \end{figure}
 
-When we consider the unused slots shown in figure \ref{fig:graph-unused}, we can see that the dominating cause for a slot not being used is redundancy, on average 59\%. This is expected in the benchmarks because they usually only use one numeric type across the whole program. But the Kaggle script uses a lot of different types, yet 58\% of the unused slots are deemed redundant, which is lower than the average. This leads us to believe that there is a deeper cause for a redundant slot, either in the behavior of R, or in the way the information is observed in the interpreter.
+In figure \ref{fig:graph-overview} is the categorization of used slots. We can see that most of the slots are not empty (68\% on average) and most of the non-empty slots are read (81\% on average), thus are considered for speculation. But on average only 14\% of slots are used (21\% of non-empty slots). This is surprising, as the recording of information is impacting the speed the bytecode interpreter, and yet the recorded information is used quite sparsely.
 
-\todo{optimized away}
+A hypothesis we had was that a polymorphic slot is less likely to be used. Out of the polymorphic slots, 25\% of them are used, compared to the non-empty monomorphic slots where 21\% are used. However, it is probably due to the fact that by their nature, polymorphic slots are on the paths of the program which are executed, thus there are less reasons to not use them \todo{reword}.
 
-25\% of all slots are neither redundant nor optimized away. This might include some actually redundant slots that are not caught by our approximate analysis, but there might also be other reasons for not using a slot, such as the information in it being too general, and these will probably overlap with the identified reasons. These need to be further analyzed.
-
-\begin{figure}
+\begin{figure}[t]
 	\centering
 	\begin{adjustwidth}{-3cm}{-3cm}
 		\includegraphics[width=1.5\textwidth]{figures/unused.pdf}
@@ -214,10 +136,21 @@ When we consider the unused slots shown in figure \ref{fig:graph-unused}, we can
 	\caption{Categorization of unused slots across closure compilations}\label{fig:graph-unused}
 \end{figure}
 
-\todo{exact numbers, not averages}
-When we look on the graph \ref{fig:graph-used}, we can see that more than half of the slots are used as exact match. If we split the monomorphic and polymorphic used slots, we can see an even bigger distinction. On average 81\% of used monomorphic slots are used as exact match. This means that most of the time, when a slot is not polymorphic, it contains an information precise enough to be used as it is. On the other hand, 93\% of used polymorphic slots are widened. This is to be expected, as the polymorphic slots have usually a more general type that does not pass the check for a slot to be used as it is.
+When we consider the non-empty unused slots shown in figure \ref{fig:graph-unused}, we can see that the dominating cause for a slot not being used is redundancy, on average 59\% of all non-empty unsed slots. This is expected in the benchmarks because they usually only use one numeric type across the whole program. But the Kaggle script uses a lot of different types, yet 58\% of the unused slots are deemed redundant, which even is lower than the average. This leads us to believe that there is a deeper cause for a redundant slot in the way the information is collected in the interpreter, leaving a room for optimizations.
 
-For the polymorphic slots used as exact match, the feedback type is either a single non-scalar R type (integer, real or logical), or any R type which might be missing. In either case, the type is always not scalar and we have observed that it is not an object or even that it does not have any attributes. The polymorphism in these cases probably come from observing both scalar and non-scalar types.
+Observing the slots that are optimized away, they take on average 31\% of the non-empty unused slots. Separating the monomorphic and polymorphic slots, we see that 33\% of unused monomorphic slots are optimized aways, whereas only 26\% of unused polymorphic are optimized away. This might come from the same reasons as the comparison between monomorphic and polymorphic used slots, where the polymorphic ones are more likely to be on more frequently executed paths.
+
+28\% of all slots are neither redundant nor optimized away. This might include some actually redundant slots that are not caught by our approximate analysis, but there might also be other reasons for not using a slot and these will probably overlap with the identified reasons. These need to be further analyzed.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\textwidth]{figures/used_all.pdf}
+	\caption{Categorization of used slots}\label{fig:graph-used}
+\end{figure}
+
+When we look on the graph \ref{fig:graph-used}, we can see that more than half of the slots are used as exact match. If we split the monomorphic and polymorphic used slots, we can see an even bigger distinction. 81\% of used monomorphic slots are used as exact match, meaning that most of the time when a slot is not polymorphic it contains an information precise enough to be used as it is. On the other hand, 93\% of used polymorphic slots are widened. This is to be expected, as the polymorphic slots have a more general type that gets widened before an assumption is made.
+
+For the polymorphic slots used as exact match, the feedback type is either a single non-scalar R type (integer, real or logical), or any R type which might be missing. In either case, the type is always not scalar and we have observed that it is not an object or even that it does not have any attributes. The polymorphism in these cases probably come from observing both scalar and non-scalar types. \todo{rewrite}
 
 Interestingly, there are very few slots that are narrowed by the static information, 18 to be precise.
 
@@ -225,28 +158,8 @@ Interestingly, there are very few slots that are narrowed by the static informat
 	\item{} 2 of them have added information about the type not being NA. Since we do not record this information\footnote{In order to observe that a vector is not NA, we would need to inspect all elements of it and this is very costly for large vectors}, it is trivial for the static type to narrow it in this way. These are the only monomorphic slots that are narrowed.
 	\item{} 4 slots are narrowed into a scalar type. This is due to the slot observing also non-scalar types, but the static type can specialize the observation.
 	\item{} 2 slots have their type narrowed to a double and the only information used from the slot is that the value does not have attributes.
-	\item{} In 9 cases, the static type removes a \enquote{might be missing} attribute from the feedback type. In these cases we have observed too many values and the type feedback falls back to the most generic type, which has the attribute that it might be a missing value. But this speculation is on a \texttt{Force} instruction, which when forcing a value that is missing result in an error, thus the result of \texttt{Force} is always not missing or it diverges.
+	\item{} In 9 cases, the static type removes a \enquote{might be missing} flag from the feedback type. In these cases we have observed too many values and the type feedback falls back to the most generic type, which has the flag that it might be a missing value. But this speculation is on a \texttt{Force} instruction, which when forcing a value that is missing result in an error, thus the result of \texttt{Force} is always not missing or it diverges.
 \end{itemize}
-
-\todo{For the used slots - only show the avergaes per all/monomorphic/polymorphic?}
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.7\textwidth]{figures/used.pdf}
-	\caption{Categorization of used slots}\label{fig:graph-used}
-\end{figure}
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.7\textwidth]{figures/used_monomorphic.pdf}
-	\caption{Categorization of monomorphic used slots}\label{fig:graph-used-mono}
-\end{figure}
-
-\begin{figure}[t]
-	\centering
-	\includegraphics[width=0.7\textwidth]{figures/used_polymorphic.pdf}
-	\caption{Categorization of polymorphic used slots}\label{fig:graph-used-poly}
-\end{figure}
 
 %---------------------------------------------------------------
 \subsubsection*{Conclusion}
@@ -254,22 +167,19 @@ Interestingly, there are very few slots that are narrowed by the static informat
 
 The main takeaway of the analysis is that a very low number of feedback slots is being used by the compiler. This leads to a time spent in the interpreter by recording observations being wasted. If we are able to detect which slots are truly redundant, we could optimize
 
-Another key point is that a polymorphism, and by extend pollution, does not impact \textit{if} a slot is used in compilation, but it influences \textit{how} the feedback is used. Thus by reducing the feedback pollution we would not be significantly influencing if a slot is used, but we might improve the available optimizations by having more precise information.
+Another key point is that a polymorphism, and by extend pollution, does not impact \textit{if} a slot is used in compilation, but it influences \textit{how} the feedback is used. Since the information in a polymorphic slot is more generic, we observe that it has to be widened before it is used.
 
-\todo{bit more}
+Finally, in our experiments we see that the leading cause for a slot not being used is because it is reduntant. This leads us to belive there is room for improvement in the way the information gets recorded.
+
+The analysis is freely available online on GitHub \footnote{\url{https://github.com/rihafilip/masters-thesis-analysis}}.
 
 %---------------------------------------------------------------
 \section{Limitations}
 %---------------------------------------------------------------
 
-The biggest drawback of the analysis is the analysis of inlined functions. It is not uncommon that a funciton is inlined more than once in a single closure compilation, and this proves to be difficult, as one slot might be used differently or used in one case and not used in the other. At the same time, inlining a function many times is going to skew the numbers of the used slots. In our experiments, we have observed very few slots that were used differently in multiple places, thus we chose to ignore these duplications.
+The biggest obstacle we have encountered during the analysis is unknown origin of type information. Due to the architecture of the compiler, we are unable to precisely track how a type is constructed or how a type information is propagated. This leads to the broad definition of redundant slots, which might catch unrelated slots or miss dependent slots recording different information due to type coercions, as well as less precise analysis of the slots usage. Still, the presented results give us idea about the behaviour of individual type feedback slots.
 
-\todo{redundant section; merge with the stuff in motivation}
-The definition of a redundant slot is very broad and might catch some slots that are not dependent, while at the same time not catch slots that are dependent, but capture a different type. Lets take an example function \texttt{function(x) x + 42}. This function has two type slots, one for the loading of argument \texttt{x} and the second is for the result of \texttt{+}. If we call this funciton with an integer, we record two different types, integer scalar in the first and a double scalar in the second (integer gets coerced into a double). Our analysis will not report any dependency, but from the argument types we truly know the result type. This would require a much more advanced instrumentation of the compiler and might be even
+Another drawback is the tracking of inlined functions. It is not uncommon that a function is inlined more than once in a single closure compilation, and this proves to be difficult to summarize without skewing the resulting numbers, as one slot might be used differently or used in one case and not used in the other. This might lead to double counts of a slot in multiple categories or missing a usage pattern, and we are aware of that \todo{rewrite the last part of sentence}.
 
-Because we can infer that the type of the return value from the surrounding context, we might want to also detect that the last slot is dependent, even though it has a different type. However this proved to be very difficult. Due to how types in Ř are compiled, we are unable to track the origin of a type information, and thus we can only track simple dependencies. On the other hand, this definition of redundant slots might be too general in certain cases where slots have same type from different reasons, but again, we are unable to track that. \todo{move to limitations?}
+While running the experiments, we have observed multiple runs of some of the benchmarks (namely flexclust\_no\_s4 and pidigits) and the Kaggle script result in different resulting numbers. However, the final characteristics are the same and the trends do not change. Therefore the numbers presented in this chapter are from a single run of the experiments.
 
-The analysis of usage is also quite broad, but due to the architecture of Ř we are unable to observe nor reconstruct how a paricular type of an instruction is constructed. Ideally we would like to be able to say precisely which parts of the feedback are used and in which instrucitons, but this would probably lead to a whole refactoring of the compiler.
-
-\todo{unstable benchmarks and titanic}
-characteristics is the same and the trends do not change.
