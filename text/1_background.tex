@@ -3,14 +3,14 @@
 %---------------------------------------------------------------
 
 \begin{chapterabstract}
-  In this chapter, we introduce the R language and its implementation. We also outline the implementation of Ř, an extension to R which is composed of a bytecode interpreter and a speculative JIT compiler. We compare it to other JIT compilers, namely the V8 for JavaScript and JVM for Java \todo{sync with text}. Finally, we describe the R programs used for experiments and analysis throught the thesis.
+  In this chapter, we introduce the R language and its implementation. We also outline the implementation of Ř, an extension to R which is composed of a bytecode interpreter and a speculative JIT compiler. We compare how Ř collects and uses feedback information to the state of the art JIT compilers, namely the V8 for JavaScript and JVM for Java. Finally, we describe the R programs used for experiments and analysis throught the thesis.
 \end{chapterabstract}
 
 %------------------------------------------------------------------------------------------------------------------------------
 \section{The R Language}
 %------------------------------------------------------------------------------------------------------------------------------
 
-\textit{R}\cite{r} is a programming language designed and used for statistical computation, data analysis, and graphical visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an alternative to the S language. It is part of the GNU Project, licensed as a free software under GNU GPL.
+The \textit{R}\cite{r} programming language has been primarily designed and used for statistical computation, data analysis, and graphical visualization. It was developed Ross Ihaka and Robert Gentleman at the University of Auckland as an open-source alternative to the S language. It is part of the GNU Project, licensed as a free software under GNU GPL.
 
 \begin{figure}[H]
 	\centering
@@ -47,11 +47,11 @@ The R syntax is very C-like, with \texttt{if} statements, \texttt{for} and \text
 \subsubsection*{Types}
 %---------------------------------------------------------------
 
-R basic types are the \textit{numeric types} (\textit{integer}, \textit{double} or also \textit{real} and \textit{complex}), \textit{character type} (strings) and \textit{logical type} (the boolean values \texttt{TRUE} and \texttt{FALSE}). R also has \texttt{NULL}, and a constant \texttt{NA} (\textit{not available}) representing a missing value.
+R basic types are the \textit{numeric types} (\textit{integer}, \textit{double} or also \textit{real} and \textit{complex}), \textit{character type} (strings) and \textit{logical type} (the boolean values \texttt{TRUE} and \texttt{FALSE}). R also has \texttt{NULL}, and a constant \texttt{NA} (\textit{not available}) representing a missing value as related to statistical missing observation.
 
 R has no concept of scalars. Instead, all basic types are represented as \textit{vectors}. To create a vector with multiple elements, the function \texttt{c} (standing for combine) can be used. All the traditional mathematical operators are also vectorized.
 
-For storing elements of different types, a \textit{list} is used. Other commonly used types built on top of vectors and lists are \textit{matrix} (two-dimensional vector), \textit{array} (multi-dimensional vector) and \textit{data frame} (matrix-like structure whose columns can have different types).
+For storing elements of different types, a \textit{list} is used. Other commonly used types built on top of vectors and lists are \textit{matrix} (two-dimensional vector), \textit{array} (multi-dimensional vector) and \textit{data frame} (matrix-like structure whose columns can have different types). \todoadd
 
 Every type can have associated \textit{attributes}, a collection of name-value pairs. These are accessed via the \texttt{attr} or \texttt{attributes} functions.
 
@@ -73,7 +73,7 @@ These environments are also first-class values. We can create new environments, 
 \subsubsection*{Functions}
 %---------------------------------------------------------------
 
-A \textit{function}, or also a \textit{closure}, is composed of three parts - \textit{formals}, which is the list of formal arguments and their default values, \textit{body}, which is the code of the function, and \textit{environment} defining the lexical scope of the function body. New functions can be created with the \texttt{function} keyword.
+A \textit{function}, or also a \textit{closure}, is composed of three parts - \textit{formals}, which is the list of formal arguments and their optional default values, \textit{body}, which is the code of the function, and \textit{environment} defining the lexical scope of the function body. New functions can be created with the \texttt{function} keyword.
 
 Most operations that happen in R are in fact function calls. This includes the control flow statements (like \textit{if} or \textit{while}), binary operations, assignment, and even surrounding an expression with parenthesis or multiple expression with braces. This is demonstrated in listing \ref{lst:r-special-calls}. Note that built-in functions have to be surrounded with backticks in order to refer to them as identifiers.
 
@@ -110,7 +110,7 @@ a <- if (TRUE) {
 \subsubsection*{Laziness}
 %---------------------------------------------------------------
 
-R is lazy in arguments. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a \textit{promise}, a tuple of \textit{expression}, \textit{value}, and \textit{environment}. The value is at first set to the unbound value. When the promise is first accessed, the expression of the promise is evaluated within its environment (also called a \textit{force}). The result is cached in the value field, and every other access to the argument results in the cached value.
+R uses a variation of call-by-need semantics, delaying evaluation of function arguments until a value is needed. This means that when a function is called, the passed arguments are not instantly evaluated, but are instead wrapped in a \textit{promise}, a tuple of \textit{expression}, \textit{value}, and \textit{environment}. The value is at first set to the unbound value. When the promise is first accessed, the expression of the promise is evaluated within its environment (also called a \textit{force}). The result is cached in the value field, and every other access to the argument results in the cached value.
 
 This can be seen in example \ref{lst:example-lazy}. The call at line 12 first prints \enquote{Hello from g}, then the parameter \texttt{x} is accessed, the promise is forced, and the text \enquote{Hello from f} is printed. The second call to the function \texttt{h} demonstrates a second behavior - when a parameter is never accessed, the promise is not evaluated, and nothing is printed.
 
@@ -138,7 +138,7 @@ h(f(42))
 	\caption{Example of R laziness}\label{lst:example-lazy}
 \end{listing}
 
-Being lazy in the arguments allows R to have very expressive domain-specific languages for ease of manipulating the data, as well as reducing memory overhead of the programs.
+Being lazy in the arguments allows R to have very expressive domain-specific languages for ease of manipulating the data, as well as reducing memory overhead of the programs, as seen in the motivation example in listing \ref{lst:motivation}.
 
 Promises can also be created manually by calling the \texttt{delayedAssign} function or from the C API.
 
@@ -182,7 +182,7 @@ e1$x == 42
 
 As mentioned before, environments are a first-class citizen. This allows for any function to access and even modify any environment where it was created or called. Moreover, when combined with lazy arguments, a function can reflect on the environment it is being forced in and modify it, sometimes in unpredictable ways.
 
-This is demonstrated in listing \ref{lst:bad-ref}. We can see that evaluating the promise (the call to \texttt{bad}) removes a variable binding, resulting in an error.
+This is demonstrated in listing \ref{lst:bad-ref}, taken from \cite{r-melts-brains}. We can see that evaluating the promise (the call to \texttt{bad}) removes a variable binding, resulting in an error.
 
 \begin{listing}
 	\centering
@@ -204,7 +204,7 @@ good(bad())
 	\caption{Example of malicious reflection\cite{r-melts-brains}}\label{lst:bad-ref}
 \end{listing}
 
-R also has primitives for creating, manipulating, and evaluating expressions from the language itself. This allows for, among other things, evaluating a promise under a different environment, programatically creating arbitrary pieces of code, or instrumenting functions with additional calls.
+R also has primitives for creating, manipulating, and evaluating expre\-ssions from the language itself. This allows for, among other things, evaluating a promise under a different environment, programatically creating arbitrary pieces of code, or instrumenting functions with additional calls.
 
 Combining reflection, laziness and side effects makes R a very complex language to optimize.
 
@@ -414,6 +414,38 @@ When a function compilation to native is triggered, it is compiled for a specifi
 When a function is invoked, its arguments are observed and a call context is created. Based on this, the function is either dispatched to the version connected with the same context as the call context, or a less precise context which is ordered lower than the call context. If no such version is found, the call is dispatched to the baseline interpreted version.
 
 %---------------------------------------------------------------
+\section{Related Work}
+%---------------------------------------------------------------
+
+%---------------------------------------------------------------
+\subsubsection*{V8}
+%---------------------------------------------------------------
+
+V8\cite{v8} is the JavaScript and WebAssembly engine developed by Google and used in the Chrome web browser. V8 is composed of a bytecode compiler, a non-optimizing JIT compiler and two optimizing JIT compilers, gradually compiling functions with more optimizations as they get more used.
+
+V8 collects the information about the shapes of dynamic JavaScript objects called \textit{maps}. These describe the layout of objects like on which offset is a field stored. This information is recored in an \textit{inline cache} (\textit{IC}) for each load and store. Apart from being used for speculative optimizations, inline caches also speed up the interpreted instructions. All inline caches are stored per function in a \textit{feedback vector}.
+
+An initialized inline cache can be in one of three states---\textit{monomorphic} meaning only one object shape was observed, \textit{polymorphic} if multiple object shapes were observed, and \textit{megamorphic} if too many object shapes were observed and the inline cache is degraded. When optimizing, V8 speculates on the inline caches. If the IC is monomorphic, it speculates on the observed map. If is is polymorphic, it generates an equivalent of a switch statement for the observed maps, where on failure to match it deoptimizes. V8 compilers do not speculate on megamorphic ICs.\cite{v8stanton}
+
+Contrary to Ř, V8 does not speculate eagerly (i.e. whenever the feedback information allows it), but only when the information is used. So for example while compiling the JavaScript function
+
+\mintoneline{js}{function f(a, b) { return a + b }}
+
+\noindent it only assumes on the arguments \texttt{a} and \texttt{b} when compiling the plus operator, but not on the actual loading of arguments.
+
+In JavaScript, the functions are often polymorphic at the start of the program, eventually stabilizing\cite{js-analysis}. In order to prevent that, V8 only starts recording to the type feedback after the function is invoked multiple times. It also holds the observations in a weak pointer, discarding dead types and callees.
+
+%---------------------------------------------------------------
+\subsubsection*{HotSpot}
+%---------------------------------------------------------------
+
+HotSpot\cite{hotspot} is a Java Virtual Machine (JVM) currently developed by Oracle. It used two JIT compilers, C1 (split into multiple levels) and C2.
+
+Although Java is a statically typed language, Java programs often use a big class hiearchies. The main speculative optimization are performed on method calls, where virtual table lookups are substituted by direct calls, and in the case of the C2 compiler to inlining.
+
+The observations in HotSpot are either monomorphic (one observation), bimorphic (two observations) or megamorphic. When compiling a method call, the monomorphic and bimorphic observations are translated to direct link. But HotSpot speculates even on the megamorphic call sites, optimizing for the dominating targets.\cite{hotspotWinterhalter}
+
+%---------------------------------------------------------------
 \section{Corpus}\label{ch:1-corpus}
 %---------------------------------------------------------------
 
@@ -429,36 +461,3 @@ The first one is a collection of Ř benchmarks\footnote{\url{https://github.com/
 
 The second codebase is a script from a Kaggle competition about machine learning on the Titanic dataset\cite{titanic}. This script was chosen as a representatn of a more more real-world program. It contains 108 lines of code extracted from a Rmarkdown notebook, and uses some of the most popular R libraries like \texttt{ggplot2} or \texttt{dplyr}.
 
-%---------------------------------------------------------------
-\section{Related Work}
-%---------------------------------------------------------------
-
-We want to compare how feedback is collected in other VMs. \todoadd
-
-It is a state of of the art JavaScript virtual machine.
-
-%---------------------------------------------------------------
-\subsubsection*{V8}
-%---------------------------------------------------------------
-
-V8\todocite is the JavaScript and WebAssembly engine developed by Google and used in the Chrome web browser.
-
-The V8 compilation is split into four different stages---a profiling bytecode compiler (Ignition), a non-optimizing profiling JIT compiler (Sparkplug) and two non-profiling optimizing JIT compilers (Maglev and TurboFan).
-
-In the profiling stages, V8 collects the information about the shapes of dynamic JavaScript objects called \textit{maps}. These describe the layout of objects like on which offset is a field stored. This information is recored in an \textit{inline cache} (\textit{IC}) for each load and store. Appart from being used as a feedback, inline caches also speed up the interpreted instructions. All inline caches are stored per function in a \textit{feedback vector}.
-
-An initialized inline cache can be in one of three states -- \textit{monomorphic} meaning only one object shape was observed, \textit{polymorphic} if multiple object shapes were observed, and \textit{megamorphic} where too many object shapes were observed and the inline cache is degraded.
-
-When optimizing, V8 speculates on these inline caches. If the IC is monomorphic, it guards that the actual object has the expected shape. If is is polymorphic, it generates an equivalent of a switch statement on the observed maps, where on failure to match it deoptimizes. V8 compilers do not speculate on megamorphic ICs.
-
-Contrary to Ř, V8 does not speculate eagerly, i.e. whenever the feedback information allows it, but only when the information is used. So for example while compiling the JavaScript function
-
-\mintoneline{js}{function f(a, b) { return a + b }}
-
-\noindent it only assumes on the arguments \texttt{a} and \texttt{b} when compiling the plus operator.
-
-%---------------------------------------------------------------
-\subsubsection*{HotSpot}
-%---------------------------------------------------------------
-
-HotSpot is a Java Virtual Machine (JVM) currently developed by Oracle. It uses five-tiered architecture.

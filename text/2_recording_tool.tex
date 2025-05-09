@@ -279,9 +279,11 @@ The functions available in R are\cite[documentation/recording.md]{rsh-github}:
 \section{Assesment}
 %---------------------------------------------------------------
 
-\todo{velikost resultu, approx zpomaleni}
-
 The recording tool is implemented in almost 1700 lines of code, excluding blank lines and comments. Apart from the implementation files and around 40 calls to the recording hooks through the rest of the compiler, no other changes needed to be made in the compiler.
+
+While running programs with the recording tool turned on and capturing all available events, we have observed around 20\% decrease in performance. However, the final serialization of the events has increased the overall runtime by up to 40 times in programs with lots of function calls. This is still acceptable for usage as an analysis tool, as usually it is not needed to capture all of the events, but just a subset.
+
+The final serialized recording varies in size depending on the number of observed events, ranging from little over 200 kilobytes for 18 events to 2.8 gigabytes for 8.5 million of events.
 
 To evaluate the runtime performance of recording the events, we tried running the Ř suite of benchmarks with the recording turned on. When the invocation events are being filtered out, the runtime impact of the recording was negligible, excluding the serialization. When the invocation events were being recorded, the benchmarking suite did not finish and timed out after four hours. For reference, the normal run of the benchmarks takes around half an hour. This is still acceptable for usage as an analysis tool.
 
